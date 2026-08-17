@@ -1,4 +1,4 @@
-function Close-WinUtilRunspacePool {
+function Close-NoteRunspacePool {
     if ($null -eq $sync -or -not $sync.ContainsKey("runspace") -or $null -eq $sync.runspace) {
         return
     }

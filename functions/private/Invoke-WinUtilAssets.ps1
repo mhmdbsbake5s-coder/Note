@@ -1,4 +1,4 @@
-function Invoke-WinUtilAssets {
+function Invoke-NoteAssets {
   param (
       $type,
       $Size,

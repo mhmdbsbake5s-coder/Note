@@ -5,28 +5,28 @@
 BeforeAll {
     $script:repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 
-    . (Join-Path $script:repoRoot "functions\private\Save-WinUtilFile.ps1")
+    . (Join-Path $script:repoRoot "functions\private\Save-NoteFile.ps1")
     . (Join-Path $script:repoRoot "functions\public\Invoke-WPFOOSU.ps1")
 
     function Invoke-WPFRunspace {
         param($ArgumentList, $ParameterList, [scriptblock]$ScriptBlock)
     }
-    function Set-WinUtilTweaksProgressIndicator {
+    function Set-NoteTweaksProgressIndicator {
         param($Visible, $Label, $Percent)
     }
-    function Show-WinUtilMessage {
+    function Show-NoteMessage {
         param($Message, $Title, $Button, $Icon)
     }
-    function Write-WinUtilLog {
+    function Write-NoteLog {
         param($Message, $Level, $Component)
     }
 
-    function script:New-WinUtilOOSUTestContext {
+    function script:New-NoteOOSUTestContext {
         param([bool]$ProcessRunning = $false)
 
         $script:sync = [Hashtable]::Synchronized(@{
             ProcessRunning = $ProcessRunning
-            winutildir = $TestDrive
+            Notedir = $TestDrive
             Form = [pscustomobject]@{
                 Dispatcher = [pscustomobject]@{}
             }
@@ -34,7 +34,7 @@ BeforeAll {
     }
 }
 
-Describe "Save-WinUtilFile" {
+Describe "Save-NoteFile" {
     It "copies a download and reports its percentage" {
         $sourcePath = Join-Path $TestDrive "source.bin"
         $destinationPath = Join-Path $TestDrive "destination.bin"
@@ -42,7 +42,7 @@ Describe "Save-WinUtilFile" {
         [System.IO.File]::WriteAllBytes($sourcePath, $sourceBytes)
         $reportedProgress = [System.Collections.Generic.List[int]]::new()
 
-        Save-WinUtilFile -Uri ([uri]$sourcePath) -DestinationPath $destinationPath -ProgressCallback {
+        Save-NoteFile -Uri ([uri]$sourcePath) -DestinationPath $destinationPath -ProgressCallback {
             param($percent)
             $reportedProgress.Add($percent)
         }
@@ -54,7 +54,7 @@ Describe "Save-WinUtilFile" {
 
 Describe "Invoke-WPFOOSU" {
     BeforeEach {
-        New-WinUtilOOSUTestContext
+        New-NoteOOSUTestContext
         $script:capturedScriptBlock = $null
         $script:capturedParameterList = $null
 
@@ -63,9 +63,9 @@ Describe "Invoke-WPFOOSU" {
             $script:capturedParameterList = $ParameterList
             [pscustomobject]@{ MockHandle = $true }
         }
-        Mock Set-WinUtilTweaksProgressIndicator { }
-        Mock Show-WinUtilMessage { }
-        Mock Write-WinUtilLog { }
+        Mock Set-NoteTweaksProgressIndicator { }
+        Mock Show-NoteMessage { }
+        Mock Write-NoteLog { }
         Mock Start-Process { }
         Mock Write-Error { }
     }
@@ -86,13 +86,13 @@ Describe "Invoke-WPFOOSU" {
     }
 
     It "does not start while another process is running" {
-        New-WinUtilOOSUTestContext -ProcessRunning $true
+        New-NoteOOSUTestContext -ProcessRunning $true
 
         Invoke-WPFOOSU
 
-        Should -Invoke Show-WinUtilMessage -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke Show-NoteMessage -Times 1 -Exactly -ParameterFilter {
             $Message -eq "Another process is currently running." -and
-                $Title -eq "WinUtil" -and
+                $Title -eq "Note" -and
                 $Button -eq "OK" -and
                 $Icon -eq "Warning"
         }
@@ -100,7 +100,7 @@ Describe "Invoke-WPFOOSU" {
     }
 
     It "maps download progress to the window indicator and launches O&O ShutUp10++" {
-        Mock Save-WinUtilFile {
+        Mock Save-NoteFile {
             & $ProgressCallback 35
             & $ProgressCallback 100
         }
@@ -108,13 +108,13 @@ Describe "Invoke-WPFOOSU" {
         Invoke-WPFOOSU
         & $script:capturedScriptBlock -downloadPath $script:capturedParameterList[0][1]
 
-        Should -Invoke Set-WinUtilTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke Set-NoteTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
             $Visible -eq $true -and $Label -eq "Downloading O&O ShutUp10++ (0%)" -and $Percent -eq 0
         }
-        Should -Invoke Set-WinUtilTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke Set-NoteTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
             $Visible -eq $true -and $Label -eq "Downloading O&O ShutUp10++ (35%)" -and $Percent -eq 35
         }
-        Should -Invoke Set-WinUtilTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke Set-NoteTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
             $Visible -eq $true -and $Label -eq "O&O ShutUp10++ launched" -and $Percent -eq 100
         }
         Should -Invoke Start-Process -Times 1 -Exactly -ParameterFilter {
@@ -124,12 +124,12 @@ Describe "Invoke-WPFOOSU" {
     }
 
     It "shows failure progress and clears the running state when the download fails" {
-        Mock Save-WinUtilFile { throw "download failed" }
+        Mock Save-NoteFile { throw "download failed" }
 
         Invoke-WPFOOSU
         & $script:capturedScriptBlock -downloadPath $script:capturedParameterList[0][1]
 
-        Should -Invoke Set-WinUtilTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke Set-NoteTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
             $Visible -eq $true -and $Label -eq "O&O ShutUp10++ download failed" -and $Percent -eq 100
         }
         Should -Not -Invoke Start-Process

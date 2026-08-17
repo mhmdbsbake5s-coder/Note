@@ -20,7 +20,7 @@ BeforeAll {
             [string[]]$Arguments
         )
     }
-    function Write-WinUtilLog {
+    function Write-NoteLog {
         param($Message, $Level, $Component)
     }
 
@@ -38,10 +38,10 @@ BeforeAll {
     }
     function Clear-DnsClientCache { }
 
-    . (Join-Path $script:repoRoot "functions\private\Set-WinUtilDNS.ps1")
+    . (Join-Path $script:repoRoot "functions\private\Set-NoteDNS.ps1")
 }
 
-Describe "Set-WinUtilDNS" {
+Describe "Set-NoteDNS" {
     BeforeEach {
         $script:sync = [Hashtable]::Synchronized(@{
             configs = @{
@@ -84,7 +84,7 @@ Describe "Set-WinUtilDNS" {
         }
         Mock Set-DnsClientServerAddress { }
         Mock netsh { }
-        Mock Write-WinUtilLog { }
+        Mock Write-NoteLog { }
         Mock Write-Warning { }
         Mock Write-Host { }
 
@@ -106,7 +106,7 @@ Describe "Set-WinUtilDNS" {
     }
 
     It "sets IPv4 and IPv6 DNS server addresses separately and applies DoH templates" {
-        $result = Set-WinUtilDNS -DNSProvider "Cloudflare"
+        $result = Set-NoteDNS -DNSProvider "Cloudflare"
 
         $result | Should -BeTrue
         Should -Invoke -CommandName Set-DnsClientServerAddress -Times 1 -Exactly -ParameterFilter {
@@ -139,7 +139,7 @@ Describe "Set-WinUtilDNS" {
             return $null
         }
 
-        Set-WinUtilDNS -DNSProvider "Cloudflare"
+        Set-NoteDNS -DNSProvider "Cloudflare"
 
         Should -Invoke -CommandName Set-DnsClientDohServerAddress -Times 1 -Exactly -ParameterFilter {
             $ServerAddress -eq "1.1.1.1" -and
@@ -151,7 +151,7 @@ Describe "Set-WinUtilDNS" {
     }
 
     It "filters empty DNS server addresses" {
-        Set-WinUtilDNS -DNSProvider "MullvadNoSecondary"
+        Set-NoteDNS -DNSProvider "MullvadNoSecondary"
 
         Should -Invoke -CommandName Set-DnsClientServerAddress -Times 1 -Exactly -ParameterFilter {
             $InterfaceIndex -eq 7 -and
@@ -167,7 +167,7 @@ Describe "Set-WinUtilDNS" {
     }
 
     It "applies the matching DoH template to secondary resolvers" {
-        Set-WinUtilDNS -DNSProvider "Mullvad"
+        Set-NoteDNS -DNSProvider "Mullvad"
 
         Should -Invoke -CommandName Add-DnsClientDohServerAddress -Times 2 -Exactly -ParameterFilter {
             $ServerAddress -in @("194.242.2.2", "2a07:e340::2") -and
@@ -182,7 +182,7 @@ Describe "Set-WinUtilDNS" {
     It "does not apply a DoH-only provider when DoH is unsupported" {
         Mock Get-Command { return $null } -ParameterFilter { $Name -eq "Add-DnsClientDohServerAddress" }
 
-        $result = Set-WinUtilDNS -DNSProvider "Mullvad"
+        $result = Set-NoteDNS -DNSProvider "Mullvad"
 
         $result | Should -BeFalse
         Should -Invoke -CommandName Set-DnsClientServerAddress -Times 0 -Exactly
@@ -195,11 +195,11 @@ Describe "Set-WinUtilDNS" {
     It "does not change adapter DNS when DoH registration fails" {
         Mock Add-DnsClientDohServerAddress { throw "DoH registration failed" }
 
-        $result = Set-WinUtilDNS -DNSProvider "Mullvad"
+        $result = Set-NoteDNS -DNSProvider "Mullvad"
 
         $result | Should -BeFalse
         Should -Invoke -CommandName Set-DnsClientServerAddress -Times 0 -Exactly
-        Should -Invoke -CommandName Write-WinUtilLog -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Write-NoteLog -Times 1 -Exactly -ParameterFilter {
             $Level -eq "ERROR" -and
                 $Component -eq "DNS" -and
                 $Message -like "DNS provider Mullvad was not completed: *"
@@ -209,14 +209,14 @@ Describe "Set-WinUtilDNS" {
     It "falls back to plain DNS when optional DoH registration fails" {
         Mock Add-DnsClientDohServerAddress { throw "DoH registration failed" }
 
-        $result = Set-WinUtilDNS -DNSProvider "Cloudflare"
+        $result = Set-NoteDNS -DNSProvider "Cloudflare"
 
         $result | Should -BeTrue
         Should -Invoke -CommandName Set-DnsClientServerAddress -Times 2 -Exactly
         Should -Invoke -CommandName Write-Warning -Times 1 -Exactly -ParameterFilter {
             $Message -eq "DNS over HTTPS setup for provider Cloudflare failed; continuing with plain DNS."
         }
-        Should -Invoke -CommandName Write-WinUtilLog -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Write-NoteLog -Times 1 -Exactly -ParameterFilter {
             $Level -eq "WARN" -and
                 $Component -eq "DNS" -and
                 $Message -like "DNS over HTTPS setup for provider Cloudflare failed; continuing with plain DNS: *"
@@ -242,7 +242,7 @@ Describe "Set-WinUtilDNS" {
             [pscustomobject]@{ ServerAddress = $ServerAddress }
         }
         
-        Set-WinUtilDNS -DNSProvider "DHCP"
+        Set-NoteDNS -DNSProvider "DHCP"
 
         Should -Invoke -CommandName Set-DnsClientServerAddress -Times 1 -Exactly -ParameterFilter {
             $InterfaceIndex -eq 7 -and
@@ -273,10 +273,10 @@ Describe "Set-WinUtilDNS" {
     It "catches non-terminating DNS setter failures so the tweak runspace can continue" {
         Mock Set-DnsClientServerAddress { Write-Error "DNS failed" -ErrorAction $ErrorAction }
 
-        $result = Set-WinUtilDNS -DNSProvider "Cloudflare"
+        $result = Set-NoteDNS -DNSProvider "Cloudflare"
 
         $result | Should -BeFalse
-        Should -Invoke -CommandName Write-WinUtilLog -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Write-NoteLog -Times 1 -Exactly -ParameterFilter {
             $Level -eq "ERROR" -and
                 $Component -eq "DNS" -and
                 $Message -like "DNS provider Cloudflare was not completed: *"
@@ -284,7 +284,7 @@ Describe "Set-WinUtilDNS" {
     }
 
     It "returns failure for an unknown DNS provider" {
-        $result = Set-WinUtilDNS -DNSProvider "Unknown"
+        $result = Set-NoteDNS -DNSProvider "Unknown"
 
         $result | Should -BeFalse
         Should -Invoke -CommandName Set-DnsClientServerAddress -Times 0 -Exactly

@@ -1,4 +1,4 @@
-function Get-WinUtilInstalledAPPX {
+function Get-NoteInstalledAPPX {
     <#
 
     .SYNOPSIS
@@ -16,7 +16,7 @@ function Get-WinUtilInstalledAPPX {
     $packageOutput = powershell.exe -NoProfile -NonInteractive -Command $ps5Command 2>&1
     if ($LASTEXITCODE -ne 0) {
         $failureDetails = ($packageOutput | Out-String).Trim()
-        Write-WinUtilLog -Level "ERROR" -Component "AppX" -Message "Failed to get installed AppX packages: $failureDetails"
+        Write-NoteLog -Level "ERROR" -Component "AppX" -Message "Failed to get installed AppX packages: $failureDetails"
         return @()
     }
 

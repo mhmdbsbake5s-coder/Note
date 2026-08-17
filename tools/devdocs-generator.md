@@ -87,7 +87,7 @@ The Starlight sidebar picks these up automatically via `autogenerate` entries in
 
 ## How File Names Are Derived
 
-The script strips common prefixes from the JSON key names using the pattern `WPF(WinUtil|Toggle|Features?|Tweaks?|Panel|Fix(es)?)?`. For example:
+The script strips common prefixes from the JSON key names using the pattern `WPF(Note|Toggle|Features?|Tweaks?|Panel|Fix(es)?)?`. For example:
 
 | JSON Key            | Generated File |
 | ------------------- | -------------- |

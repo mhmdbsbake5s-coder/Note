@@ -4,10 +4,10 @@
 
 BeforeAll {
     $script:repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-    . (Join-Path $script:repoRoot "functions\private\Get-WinUtilToggleStatus.ps1")
+    . (Join-Path $script:repoRoot "functions\private\Get-NoteToggleStatus.ps1")
 }
 
-Describe "Get-WinUtilToggleStatus" {
+Describe "Get-NoteToggleStatus" {
     BeforeEach {
         $script:sync = [Hashtable]::Synchronized(@{
             configs = @{
@@ -15,7 +15,7 @@ Describe "Get-WinUtilToggleStatus" {
                     WPFToggleExample = [pscustomobject]@{
                         registry = @(
                             [pscustomobject]@{
-                                Path = "HKCU:\Software\WinUtilToggle"
+                                Path = "HKCU:\Software\NoteToggle"
                                 Name = "Enabled"
                                 Value = "1"
                                 OriginalValue = "0"
@@ -26,7 +26,7 @@ Describe "Get-WinUtilToggleStatus" {
                     WPFToggleDisabledByDefault = [pscustomobject]@{
                         registry = @(
                             [pscustomobject]@{
-                                Path = "HKCU:\Software\WinUtilToggle"
+                                Path = "HKCU:\Software\NoteToggle"
                                 Name = "Enabled"
                                 Value = "1"
                                 OriginalValue = "0"
@@ -50,35 +50,35 @@ Describe "Get-WinUtilToggleStatus" {
     }
 
     It "does not create missing registry paths while reading toggle state" {
-        Get-WinUtilToggleStatus "WPFToggleExample" | Should -BeTrue
+        Get-NoteToggleStatus "WPFToggleExample" | Should -BeTrue
 
         Should -Invoke -CommandName Test-Path -Times 1 -Exactly -ParameterFilter {
-            $Path -eq "HKCU:\Software\WinUtilToggle"
+            $Path -eq "HKCU:\Software\NoteToggle"
         }
         Should -Invoke -CommandName New-Item -Times 0 -Exactly
         Should -Invoke -CommandName Get-ItemProperty -Times 0 -Exactly
     }
 
     It "uses configured false default when the registry path is missing" {
-        Get-WinUtilToggleStatus "WPFToggleDisabledByDefault" | Should -BeFalse
+        Get-NoteToggleStatus "WPFToggleDisabledByDefault" | Should -BeFalse
 
         Should -Invoke -CommandName New-Item -Times 0 -Exactly
     }
 
     It "caches toggle results for repeated checks" {
-        Mock Test-Path { $true } -ParameterFilter { $Path -eq "HKCU:\Software\WinUtilToggle" }
+        Mock Test-Path { $true } -ParameterFilter { $Path -eq "HKCU:\Software\NoteToggle" }
         Mock Get-ItemProperty { [pscustomobject]@{ Enabled = "1" } } -ParameterFilter {
-            $Path -eq "HKCU:\Software\WinUtilToggle"
+            $Path -eq "HKCU:\Software\NoteToggle"
         }
 
-        Get-WinUtilToggleStatus "WPFToggleExample" | Should -BeTrue
-        Get-WinUtilToggleStatus "WPFToggleExample" | Should -BeTrue
+        Get-NoteToggleStatus "WPFToggleExample" | Should -BeTrue
+        Get-NoteToggleStatus "WPFToggleExample" | Should -BeTrue
 
         Should -Invoke -CommandName Test-Path -Times 1 -Exactly -ParameterFilter {
-            $Path -eq "HKCU:\Software\WinUtilToggle"
+            $Path -eq "HKCU:\Software\NoteToggle"
         }
         Should -Invoke -CommandName Get-ItemProperty -Times 1 -Exactly -ParameterFilter {
-            $Path -eq "HKCU:\Software\WinUtilToggle"
+            $Path -eq "HKCU:\Software\NoteToggle"
         }
     }
 }

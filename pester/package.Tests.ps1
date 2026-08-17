@@ -5,16 +5,16 @@
 BeforeAll {
     $script:repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 
-    . (Join-Path $script:repoRoot "functions\private\Get-WinUtilSelectedPackages.ps1")
-    . (Join-Path $script:repoRoot "functions\private\Test-WinUtilPackageManager.ps1")
-    . (Join-Path $script:repoRoot "functions\private\Install-WinUtilProgramWinget.ps1")
-    . (Join-Path $script:repoRoot "functions\private\Install-WinUtilProgramChoco.ps1")
+    . (Join-Path $script:repoRoot "functions\private\Get-NoteSelectedPackages.ps1")
+    . (Join-Path $script:repoRoot "functions\private\Test-NotePackageManager.ps1")
+    . (Join-Path $script:repoRoot "functions\private\Install-NoteProgramWinget.ps1")
+    . (Join-Path $script:repoRoot "functions\private\Install-NoteProgramChoco.ps1")
 
     function Invoke-WPFUIThread { }
-    function Write-WinUtilLog { }
+    function Write-NoteLog { }
 }
 
-Describe "Get-WinUtilSelectedPackages" {
+Describe "Get-NoteSelectedPackages" {
     BeforeEach {
         Mock Invoke-WPFUIThread { }
     }
@@ -25,7 +25,7 @@ Describe "Get-WinUtilSelectedPackages" {
             [pscustomobject]@{ winget = "VideoLAN.VLC"; choco = "vlc" }
         )
 
-        $result = Get-WinUtilSelectedPackages -PackageList $packages -Preference "Winget"
+        $result = Get-NoteSelectedPackages -PackageList $packages -Preference "Winget"
 
         (@($result["Winget"]) -join "|") | Should -Be "Git.Git|VideoLAN.VLC"
         @($result["Choco"]).Count | Should -Be 0
@@ -38,7 +38,7 @@ Describe "Get-WinUtilSelectedPackages" {
             [pscustomobject]@{ winget = "Mozilla.Firefox" }
         )
 
-        $result = Get-WinUtilSelectedPackages -PackageList $packages -Preference "Choco"
+        $result = Get-NoteSelectedPackages -PackageList $packages -Preference "Choco"
 
         (@($result["Choco"]) -join "|") | Should -Be "git"
         (@($result["Winget"]) -join "|") | Should -Be "VideoLAN.VLC|Mozilla.Firefox"
@@ -52,7 +52,7 @@ Describe "Get-WinUtilSelectedPackages" {
             [pscustomobject]@{ winget = "   " }
         )
 
-        $result = Get-WinUtilSelectedPackages -PackageList $packages -Preference "Winget"
+        $result = Get-NoteSelectedPackages -PackageList $packages -Preference "Winget"
 
         @($result["Winget"]).Count | Should -Be 0
         @($result["Choco"]).Count | Should -Be 0
@@ -65,21 +65,21 @@ Describe "Get-WinUtilSelectedPackages" {
             [pscustomobject]@{ winget = "VideoLAN.VLC"; choco = "vlc" }
         )
 
-        $result = Get-WinUtilSelectedPackages -PackageList $packages -Preference "Choco"
+        $result = Get-NoteSelectedPackages -PackageList $packages -Preference "Choco"
 
         (@($result["Choco"]) -join "|") | Should -Be "git|vlc"
         @($result["Winget"]).Count | Should -Be 0
     }
 
     It "returns empty package lists for an empty selection" {
-        $result = Get-WinUtilSelectedPackages -PackageList @() -Preference "Winget"
+        $result = Get-NoteSelectedPackages -PackageList @() -Preference "Winget"
 
         @($result["Winget"]).Count | Should -Be 0
         @($result["Choco"]).Count | Should -Be 0
     }
 }
 
-Describe "Test-WinUtilPackageManager" {
+Describe "Test-NotePackageManager" {
     BeforeEach {
         Mock Write-Host { }
     }
@@ -89,7 +89,7 @@ Describe "Test-WinUtilPackageManager" {
             [pscustomobject]@{ Name = "winget" }
         } -ParameterFilter { $Name -eq "winget" -and $ErrorAction -eq "SilentlyContinue" }
 
-        Test-WinUtilPackageManager -winget | Should -Be "installed"
+        Test-NotePackageManager -winget | Should -Be "installed"
 
         Should -Invoke -CommandName Get-Command -Times 1 -Exactly -ParameterFilter {
             $Name -eq "winget" -and $ErrorAction -eq "SilentlyContinue"
@@ -101,7 +101,7 @@ Describe "Test-WinUtilPackageManager" {
             $null
         } -ParameterFilter { $Name -eq "choco" -and $ErrorAction -eq "SilentlyContinue" }
 
-        Test-WinUtilPackageManager -choco | Should -Be "not-installed"
+        Test-NotePackageManager -choco | Should -Be "not-installed"
 
         Should -Invoke -CommandName Get-Command -Times 1 -Exactly -ParameterFilter {
             $Name -eq "choco" -and $ErrorAction -eq "SilentlyContinue"
@@ -109,14 +109,14 @@ Describe "Test-WinUtilPackageManager" {
     }
 }
 
-Describe "Install-WinUtilProgramWinget" {
+Describe "Install-NoteProgramWinget" {
     BeforeEach {
-        Mock Write-WinUtilLog { }
+        Mock Write-NoteLog { }
         Mock Start-Process { [pscustomobject]@{ ExitCode = 0 } }
     }
 
     It "starts winget with install arguments" {
-        Install-WinUtilProgramWinget -Action Install -Programs @("Git.Git")
+        Install-NoteProgramWinget -Action Install -Programs @("Git.Git")
 
         Should -Invoke -CommandName Start-Process -Times 1 -Exactly -ParameterFilter {
             $FilePath -eq "winget" -and
@@ -128,7 +128,7 @@ Describe "Install-WinUtilProgramWinget" {
     }
 
     It "starts winget with uninstall arguments and msstore source when requested" {
-        Install-WinUtilProgramWinget -Action Uninstall -Programs @("msstore:9NBLGGH4NNS1")
+        Install-NoteProgramWinget -Action Uninstall -Programs @("msstore:9NBLGGH4NNS1")
 
         Should -Invoke -CommandName Start-Process -Times 1 -Exactly -ParameterFilter {
             $FilePath -eq "winget" -and
@@ -137,20 +137,20 @@ Describe "Install-WinUtilProgramWinget" {
     }
 
     It "skips whitespace and na package IDs" {
-        Install-WinUtilProgramWinget -Action Install -Programs @(" ", "na")
+        Install-NoteProgramWinget -Action Install -Programs @(" ", "na")
 
         Should -Invoke -CommandName Start-Process -Times 0 -Exactly
     }
 }
 
-Describe "Install-WinUtilProgramChoco" {
+Describe "Install-NoteProgramChoco" {
     BeforeEach {
-        Mock Write-WinUtilLog { }
+        Mock Write-NoteLog { }
         Mock Start-Process { [pscustomobject]@{ ExitCode = 0 } }
     }
 
     It "starts choco with install arguments" {
-        Install-WinUtilProgramChoco -Action Install -Programs @("git", "vlc")
+        Install-NoteProgramChoco -Action Install -Programs @("git", "vlc")
 
         Should -Invoke -CommandName Start-Process -Times 1 -Exactly -ParameterFilter {
             $FilePath -eq "choco" -and
@@ -162,7 +162,7 @@ Describe "Install-WinUtilProgramChoco" {
     }
 
     It "starts choco with uninstall arguments" {
-        Install-WinUtilProgramChoco -Action Uninstall -Programs @("git")
+        Install-NoteProgramChoco -Action Uninstall -Programs @("git")
 
         Should -Invoke -CommandName Start-Process -Times 1 -Exactly -ParameterFilter {
             $FilePath -eq "choco" -and $ArgumentList -eq "uninstall git -y"

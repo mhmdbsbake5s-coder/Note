@@ -1,4 +1,4 @@
-function Invoke-WinUtilISORefreshUSBDrives {
+function Invoke-NoteISORefreshUSBDrives {
     $combo    = $sync["WPFWin11ISOUSBDriveComboBox"]
     $removable = @(Get-Disk | Where-Object { $_.BusType -eq "USB" } | Sort-Object Number)
 
@@ -8,7 +8,7 @@ function Invoke-WinUtilISORefreshUSBDrives {
         $combo.Items.Add("No USB drives detected.")
         $combo.SelectedIndex = 0
         $sync["Win11ISOUSBDisks"] = @()
-        Write-WinUtilISOLog "No USB drives detected."
+        Write-NoteISOLog "No USB drives detected."
         return
     }
 
@@ -17,11 +17,11 @@ function Invoke-WinUtilISORefreshUSBDrives {
         $combo.Items.Add("Disk $($disk.Number): $($disk.FriendlyName)  [$sizeGB GB] - $($disk.PartitionStyle)")
     }
     $combo.SelectedIndex = 0
-    Write-WinUtilISOLog "Found $($removable.Count) USB drive(s)."
+    Write-NoteISOLog "Found $($removable.Count) USB drive(s)."
     $sync["Win11ISOUSBDisks"] = $removable
 }
 
-function Invoke-WinUtilISOWriteUSB {
+function Invoke-NoteISOWriteUSB {
     $contentsDir = $sync["Win11ISOContentsDir"]
     $usbDisks    = $sync["Win11ISOUSBDisks"]
 
@@ -38,7 +38,7 @@ function Invoke-WinUtilISOWriteUSB {
         $esdSizeMB = [math]::Ceiling($esdSizeBytes / 1MB)
         if ($esdSizeBytes -ge 4GB) {
             [System.Windows.MessageBox]::Show(
-                "This ISO uses an install.esd file that is $esdSizeMB MB. WinUtil's FAT32 USB format cannot store files larger than 4 GB.`n`nExport an ISO instead or use media with install.wim.",
+                "This ISO uses an install.esd file that is $esdSizeMB MB. Note's FAT32 USB format cannot store files larger than 4 GB.`n`nExport an ISO instead or use media with install.wim.",
                 "USB Creation Not Supported", "OK", "Warning")
             return
         }
@@ -70,13 +70,13 @@ function Invoke-WinUtilISOWriteUSB {
         "Confirm USB Erase", "YesNo", "Warning")
 
     if ($confirm -ne "Yes") {
-        Write-WinUtilISOLog "USB write cancelled by user."
+        Write-NoteISOLog "USB write cancelled by user."
         return
     }
 
     $sync["WPFWin11ISOWriteUSBButton"].IsEnabled = $false
     $sync["Win11ISOProcessRunning"] = $true
-    Write-WinUtilISOLog "Starting USB write to Disk $diskNum..."
+    Write-NoteISOLog "Starting USB write to Disk $diskNum..."
 
     $runspace = [Management.Automation.Runspaces.RunspaceFactory]::CreateRunspace()
     $runspace.ApartmentState = "STA"
@@ -120,7 +120,7 @@ function Invoke-WinUtilISOWriteUSB {
             SetProgress "Formatting USB drive..." 10
 
             # Phase 1: Clean disk via diskpart (retry once if the drive is not yet ready)
-            $dpFile1 = Join-Path $env:TEMP "winutil_diskpart_$(Get-Random).txt"
+            $dpFile1 = Join-Path $env:TEMP "Note_diskpart_$(Get-Random).txt"
             "select disk $diskNum`nclean`nexit" | Set-Content -Path $dpFile1 -Encoding ASCII
             Log "Running diskpart clean on Disk $diskNum..."
             $dpCleanOut = diskpart /s $dpFile1
@@ -131,7 +131,7 @@ function Invoke-WinUtilISOWriteUSB {
                 Log "Disk $diskNum was not ready; waiting 5 seconds and retrying clean..."
                 Start-Sleep -Seconds 5
                 Update-Disk -Number $diskNum
-                $dpFile1b = Join-Path $env:TEMP "winutil_diskpart_$(Get-Random).txt"
+                $dpFile1b = Join-Path $env:TEMP "Note_diskpart_$(Get-Random).txt"
                 "select disk $diskNum`nclean`nexit" | Set-Content -Path $dpFile1b -Encoding ASCII
                 diskpart /s $dpFile1b | Where-Object { $_ -match '\S' } | ForEach-Object { Log "  diskpart: $_" }
                 Remove-Item $dpFile1b -Force
@@ -152,7 +152,7 @@ function Invoke-WinUtilISOWriteUSB {
             # Phase 3: Create FAT32 partition via diskpart, then format with Format-Volume
             # (diskpart's 'format' command can fail with "no volume selected" on fresh/never-formatted drives)
             $volLabel = "W11-" + (Get-Date).ToString('yyMMdd')
-            $dpFile2  = Join-Path $env:TEMP "winutil_diskpart2_$(Get-Random).txt"
+            $dpFile2  = Join-Path $env:TEMP "Note_diskpart2_$(Get-Random).txt"
             $maxFat32PartitionMB = 32768
             $diskSizeMB = [int][Math]::Floor((Get-Disk -Number $diskNum).Size / 1MB)
             $createPartitionCommand = "create partition primary"

@@ -5,38 +5,38 @@
 BeforeAll {
     $script:repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 
-    . (Join-Path $script:repoRoot "functions\private\Get-WinUtilPackageLogSummary.ps1")
+    . (Join-Path $script:repoRoot "functions\private\Get-NotePackageLogSummary.ps1")
     . (Join-Path $script:repoRoot "functions\public\Invoke-WPFInstall.ps1")
     . (Join-Path $script:repoRoot "functions\public\Invoke-WPFUnInstall.ps1")
 
-    function Show-WinUtilMessage {
+    function Show-NoteMessage {
         param($Message, $Title, $Button, $Icon)
     }
     function Invoke-WPFRunspace {
         param($ArgumentList, $ParameterList, [scriptblock]$ScriptBlock)
     }
-    function Get-WinUtilSelectedPackages {
+    function Get-NoteSelectedPackages {
         param($PackageList, [string]$Preference)
     }
-    function Set-WinUtilTweaksProgressIndicator {
+    function Set-NoteTweaksProgressIndicator {
         param($Visible, $Label, $Percent)
     }
-    function Install-WinUtilWinget { }
-    function Install-WinUtilChoco { }
-    function Install-WinUtilProgramWinget {
+    function Install-NoteWinget { }
+    function Install-NoteChoco { }
+    function Install-NoteProgramWinget {
         param($Action, $Programs)
     }
-    function Install-WinUtilProgramChoco {
+    function Install-NoteProgramChoco {
         param($Action, $Programs)
     }
     function Invoke-WPFUIThread {
         param([scriptblock]$ScriptBlock)
     }
-    function Write-WinUtilLog {
+    function Write-NoteLog {
         param($Message, $Level, $Component)
     }
 
-    function script:New-WinUtilPackage {
+    function script:New-NotePackage {
         param(
             [string]$Name = "Git",
             [string]$Winget = "Git.Git",
@@ -51,7 +51,7 @@ BeforeAll {
         }
     }
 
-    function script:New-WinUtilInstallTestContext {
+    function script:New-NoteInstallTestContext {
         param(
             [bool]$ProcessRunning = $false,
             [object[]]$Packages = @()
@@ -81,7 +81,7 @@ BeforeAll {
         })
     }
 
-    function script:New-WinUtilPackageSplit {
+    function script:New-NotePackageSplit {
         param(
             [string[]]$Winget = @(),
             [string[]]$Choco = @()
@@ -105,18 +105,18 @@ BeforeAll {
 
 Describe "Invoke-WPFInstall entrypoint" {
     BeforeEach {
-        $script:package = New-WinUtilPackage
-        New-WinUtilInstallTestContext -Packages @($script:package)
+        $script:package = New-NotePackage
+        New-NoteInstallTestContext -Packages @($script:package)
         $script:capturedInstallScriptBlock = $null
         $script:capturedInstallParameterList = $null
 
-        Mock Show-WinUtilMessage { "OK" }
+        Mock Show-NoteMessage { "OK" }
         Mock Invoke-WPFRunspace {
             $script:capturedInstallScriptBlock = $ScriptBlock
             $script:capturedInstallParameterList = $ParameterList
             [pscustomobject]@{ MockHandle = $true }
         }
-        Mock Write-WinUtilLog { }
+        Mock Write-NoteLog { }
     }
 
     AfterEach {
@@ -137,15 +137,15 @@ Describe "Invoke-WPFInstall entrypoint" {
                 $ParameterList[1][0] -eq "ManagerPreference" -and
                 $ParameterList[1][1] -eq "Winget"
         }
-        Should -Invoke -CommandName Show-WinUtilMessage -Times 0 -Exactly
-        Should -Invoke -CommandName Write-WinUtilLog -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Show-NoteMessage -Times 0 -Exactly
+        Should -Invoke -CommandName Write-NoteLog -Times 1 -Exactly -ParameterFilter {
             $Component -eq "Install" -and
                 $Message -eq "Install selected package(s): Git (winget: Git.Git)"
         }
     }
 
     It "queues the explicit app popup package over the selected apps" {
-        $explicitPackage = New-WinUtilPackage -Name "VLC" -Winget "VideoLAN.VLC" -Choco "vlc"
+        $explicitPackage = New-NotePackage -Name "VLC" -Winget "VideoLAN.VLC" -Choco "vlc"
 
         Invoke-WPFInstall -PackagesToInstall $explicitPackage
 
@@ -158,17 +158,17 @@ Describe "Invoke-WPFInstall entrypoint" {
                 $ParameterList[1][0] -eq "ManagerPreference" -and
                 $ParameterList[1][1] -eq "Winget"
         }
-        Should -Invoke -CommandName Show-WinUtilMessage -Times 0 -Exactly
+        Should -Invoke -CommandName Show-NoteMessage -Times 0 -Exactly
     }
 
     It "prompts and exits when no packages are selected" {
-        New-WinUtilInstallTestContext
+        New-NoteInstallTestContext
 
         Invoke-WPFInstall
 
-        Should -Invoke -CommandName Show-WinUtilMessage -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Show-NoteMessage -Times 1 -Exactly -ParameterFilter {
             $Message -eq "Please select the program(s) to install or upgrade." -and
-                $Title -eq "WinUtil" -and
+                $Title -eq "Note" -and
                 $Button -eq "OK" -and
                 $Icon -eq "Warning"
         }
@@ -176,13 +176,13 @@ Describe "Invoke-WPFInstall entrypoint" {
     }
 
     It "prompts and exits when another install process is running" {
-        New-WinUtilInstallTestContext -ProcessRunning $true -Packages @($script:package)
+        New-NoteInstallTestContext -ProcessRunning $true -Packages @($script:package)
 
         Invoke-WPFInstall
 
-        Should -Invoke -CommandName Show-WinUtilMessage -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Show-NoteMessage -Times 1 -Exactly -ParameterFilter {
             $Message -eq "[Invoke-WPFInstall] An Install process is currently running." -and
-                $Title -eq "WinUtil" -and
+                $Title -eq "Note" -and
                 $Button -eq "OK" -and
                 $Icon -eq "Warning"
         }
@@ -192,25 +192,25 @@ Describe "Invoke-WPFInstall entrypoint" {
 
 Describe "Invoke-WPFInstall runspace body" {
     BeforeEach {
-        $script:package = New-WinUtilPackage
-        New-WinUtilInstallTestContext -Packages @($script:package)
+        $script:package = New-NotePackage
+        New-NoteInstallTestContext -Packages @($script:package)
         $script:capturedInstallScriptBlock = $null
 
-        Mock Show-WinUtilMessage { "OK" }
+        Mock Show-NoteMessage { "OK" }
         Mock Invoke-WPFRunspace {
             $script:capturedInstallScriptBlock = $ScriptBlock
             [pscustomobject]@{ MockHandle = $true }
         }
-        Mock Get-WinUtilSelectedPackages {
-            New-WinUtilPackageSplit -Winget @("Git.Git") -Choco @("vlc")
+        Mock Get-NoteSelectedPackages {
+            New-NotePackageSplit -Winget @("Git.Git") -Choco @("vlc")
         }
-        Mock Set-WinUtilTweaksProgressIndicator { }
-        Mock Install-WinUtilWinget { }
-        Mock Install-WinUtilChoco { }
-        Mock Install-WinUtilProgramWinget { }
-        Mock Install-WinUtilProgramChoco { }
+        Mock Set-NoteTweaksProgressIndicator { }
+        Mock Install-NoteWinget { }
+        Mock Install-NoteChoco { }
+        Mock Install-NoteProgramWinget { }
+        Mock Install-NoteProgramChoco { }
         Mock Invoke-WPFUIThread { }
-        Mock Write-WinUtilLog { }
+        Mock Write-NoteLog { }
         Mock Write-Host { }
     }
 
@@ -224,27 +224,27 @@ Describe "Invoke-WPFInstall runspace body" {
 
         & $script:capturedInstallScriptBlock -PackagesToInstall @($script:package) -ManagerPreference "Winget"
 
-        Should -Invoke -CommandName Get-WinUtilSelectedPackages -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Get-NoteSelectedPackages -Times 1 -Exactly -ParameterFilter {
             @($PackageList).Count -eq 1 -and $Preference -eq "Winget"
         }
-        Should -Invoke -CommandName Set-WinUtilTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Set-NoteTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
             $Visible -eq $true -and $Label -eq "Preparing app install (0/2)" -and $Percent -eq 0
         }
-        Should -Invoke -CommandName Set-WinUtilTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Set-NoteTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
             $Visible -eq $true -and $Label -eq "Installed Git.Git (1/2)" -and $Percent -eq 50
         }
-        Should -Invoke -CommandName Set-WinUtilTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Set-NoteTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
             $Visible -eq $true -and $Label -eq "Installed Chocolatey packages (2/2)" -and $Percent -eq 100
         }
-        Should -Invoke -CommandName Set-WinUtilTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Set-NoteTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
             $Visible -eq $true -and $Label -eq "App install finished" -and $Percent -eq 100
         }
-        Should -Invoke -CommandName Install-WinUtilWinget -Times 1 -Exactly
-        Should -Invoke -CommandName Install-WinUtilProgramWinget -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Install-NoteWinget -Times 1 -Exactly
+        Should -Invoke -CommandName Install-NoteProgramWinget -Times 1 -Exactly -ParameterFilter {
             $Action -eq "Install" -and @($Programs)[0] -eq "Git.Git"
         }
-        Should -Invoke -CommandName Install-WinUtilChoco -Times 1 -Exactly
-        Should -Invoke -CommandName Install-WinUtilProgramChoco -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Install-NoteChoco -Times 1 -Exactly
+        Should -Invoke -CommandName Install-NoteProgramChoco -Times 1 -Exactly -ParameterFilter {
             $Action -eq "Install" -and @($Programs)[0] -eq "vlc"
         }
         Should -Invoke -CommandName Invoke-WPFUIThread -Times 1 -Exactly -ParameterFilter {
@@ -254,19 +254,19 @@ Describe "Invoke-WPFInstall runspace body" {
             $ScriptBlock.ToString() -like '*$sync.ItemsControl.IsEnabled = $true*'
         }
         Should -Invoke -CommandName Invoke-WPFUIThread -Times 1 -Exactly -ParameterFilter {
-            $ScriptBlock.ToString() -like '*Set-WinUtilTaskbaritem -state "None" -overlay "checkmark"*'
+            $ScriptBlock.ToString() -like '*Set-NoteTaskbaritem -state "None" -overlay "checkmark"*'
         }
         $script:sync.ProcessRunning | Should -BeFalse
     }
 
     It "shows failure progress, sets taskbar error state, and clears ProcessRunning on failure" {
-        Mock Install-WinUtilProgramWinget { throw "winget failed" }
+        Mock Install-NoteProgramWinget { throw "winget failed" }
 
         Invoke-WPFInstall
 
         & $script:capturedInstallScriptBlock -PackagesToInstall @($script:package) -ManagerPreference "Winget"
 
-        Should -Invoke -CommandName Set-WinUtilTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Set-NoteTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
             $Visible -eq $true -and $Label -eq "App install failed" -and $Percent -eq 100
         }
         Should -Invoke -CommandName Invoke-WPFUIThread -Times 1 -Exactly -ParameterFilter {
@@ -276,9 +276,9 @@ Describe "Invoke-WPFInstall runspace body" {
             $ScriptBlock.ToString() -like '*$sync.ItemsControl.IsEnabled = $true*'
         }
         Should -Invoke -CommandName Invoke-WPFUIThread -Times 1 -Exactly -ParameterFilter {
-            $ScriptBlock.ToString() -like '*Set-WinUtilTaskbaritem -state "Error" -overlay "warning"*'
+            $ScriptBlock.ToString() -like '*Set-NoteTaskbaritem -state "Error" -overlay "warning"*'
         }
-        Should -Invoke -CommandName Write-WinUtilLog -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Write-NoteLog -Times 1 -Exactly -ParameterFilter {
             $Level -eq "ERROR" -and $Component -eq "Install" -and $Message -like "Install workflow failed:*"
         }
         $script:sync.ProcessRunning | Should -BeFalse
@@ -287,18 +287,18 @@ Describe "Invoke-WPFInstall runspace body" {
 
 Describe "Invoke-WPFUnInstall entrypoint" {
     BeforeEach {
-        $script:package = New-WinUtilPackage
-        New-WinUtilInstallTestContext -Packages @($script:package)
+        $script:package = New-NotePackage
+        New-NoteInstallTestContext -Packages @($script:package)
         $script:capturedUninstallScriptBlock = $null
         $script:capturedUninstallParameterList = $null
 
-        Mock Show-WinUtilMessage { "Yes" }
+        Mock Show-NoteMessage { "Yes" }
         Mock Invoke-WPFRunspace {
             $script:capturedUninstallScriptBlock = $ScriptBlock
             $script:capturedUninstallParameterList = $ParameterList
             [pscustomobject]@{ MockHandle = $true }
         }
-        Mock Write-WinUtilLog { }
+        Mock Write-NoteLog { }
     }
 
     AfterEach {
@@ -310,7 +310,7 @@ Describe "Invoke-WPFUnInstall entrypoint" {
     It "confirms and queues selected packages with the configured package manager preference" {
         Invoke-WPFUnInstall -PackagesToUninstall @($script:package)
 
-        Should -Invoke -CommandName Show-WinUtilMessage -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Show-NoteMessage -Times 1 -Exactly -ParameterFilter {
             $Message -like "*This will uninstall the following applications:*" -and
                 $Message -like "*Git*" -and
                 $Title -eq "Are you sure?" -and
@@ -326,7 +326,7 @@ Describe "Invoke-WPFUnInstall entrypoint" {
                 $ParameterList[1][0] -eq "ManagerPreference" -and
                 $ParameterList[1][1] -eq "Winget"
         }
-        Should -Invoke -CommandName Write-WinUtilLog -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Write-NoteLog -Times 1 -Exactly -ParameterFilter {
             $Component -eq "Uninstall" -and
                 $Message -eq "Uninstall selected package(s): Git (winget: Git.Git)"
         }
@@ -335,9 +335,9 @@ Describe "Invoke-WPFUnInstall entrypoint" {
     It "prompts and exits when no packages are selected" {
         Invoke-WPFUnInstall -PackagesToUninstall @()
 
-        Should -Invoke -CommandName Show-WinUtilMessage -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Show-NoteMessage -Times 1 -Exactly -ParameterFilter {
             $Message -eq "Please select the program(s) to uninstall" -and
-                $Title -eq "WinUtil" -and
+                $Title -eq "Note" -and
                 $Button -eq "OK" -and
                 $Icon -eq "Warning"
         }
@@ -349,9 +349,9 @@ Describe "Invoke-WPFUnInstall entrypoint" {
 
         Invoke-WPFUnInstall -PackagesToUninstall @($script:package)
 
-        Should -Invoke -CommandName Show-WinUtilMessage -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Show-NoteMessage -Times 1 -Exactly -ParameterFilter {
             $Message -eq "[Invoke-WPFUnInstall] Install process is currently running" -and
-                $Title -eq "WinUtil" -and
+                $Title -eq "Note" -and
                 $Button -eq "OK" -and
                 $Icon -eq "Warning"
         }
@@ -359,7 +359,7 @@ Describe "Invoke-WPFUnInstall entrypoint" {
     }
 
     It "exits without queueing uninstall when confirmation is declined" {
-        Mock Show-WinUtilMessage { "No" } -ParameterFilter { $Title -eq "Are you sure?" }
+        Mock Show-NoteMessage { "No" } -ParameterFilter { $Title -eq "Are you sure?" }
 
         Invoke-WPFUnInstall -PackagesToUninstall @($script:package)
 
@@ -369,23 +369,23 @@ Describe "Invoke-WPFUnInstall entrypoint" {
 
 Describe "Invoke-WPFUnInstall runspace body" {
     BeforeEach {
-        $script:package = New-WinUtilPackage
-        New-WinUtilInstallTestContext -Packages @($script:package)
+        $script:package = New-NotePackage
+        New-NoteInstallTestContext -Packages @($script:package)
         $script:capturedUninstallScriptBlock = $null
 
-        Mock Show-WinUtilMessage { "Yes" }
+        Mock Show-NoteMessage { "Yes" }
         Mock Invoke-WPFRunspace {
             $script:capturedUninstallScriptBlock = $ScriptBlock
             [pscustomobject]@{ MockHandle = $true }
         }
-        Mock Get-WinUtilSelectedPackages {
-            New-WinUtilPackageSplit -Winget @("Git.Git") -Choco @("vlc")
+        Mock Get-NoteSelectedPackages {
+            New-NotePackageSplit -Winget @("Git.Git") -Choco @("vlc")
         }
-        Mock Set-WinUtilTweaksProgressIndicator { }
-        Mock Install-WinUtilProgramWinget { }
-        Mock Install-WinUtilProgramChoco { }
+        Mock Set-NoteTweaksProgressIndicator { }
+        Mock Install-NoteProgramWinget { }
+        Mock Install-NoteProgramChoco { }
         Mock Invoke-WPFUIThread { }
-        Mock Write-WinUtilLog { }
+        Mock Write-NoteLog { }
         Mock Write-Host { }
         Mock New-Item { }
     }
@@ -400,25 +400,25 @@ Describe "Invoke-WPFUnInstall runspace body" {
 
         & $script:capturedUninstallScriptBlock -PackagesToUninstall @($script:package) -ManagerPreference "Winget"
 
-        Should -Invoke -CommandName Get-WinUtilSelectedPackages -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Get-NoteSelectedPackages -Times 1 -Exactly -ParameterFilter {
             @($PackageList).Count -eq 1 -and $Preference -eq "Winget"
         }
-        Should -Invoke -CommandName Set-WinUtilTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Set-NoteTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
             $Visible -eq $true -and $Label -eq "Preparing app uninstall (0/2)" -and $Percent -eq 0
         }
-        Should -Invoke -CommandName Set-WinUtilTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Set-NoteTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
             $Visible -eq $true -and $Label -eq "Uninstalled Git.Git (1/2)" -and $Percent -eq 50
         }
-        Should -Invoke -CommandName Set-WinUtilTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Set-NoteTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
             $Visible -eq $true -and $Label -eq "Uninstalled Chocolatey packages (2/2)" -and $Percent -eq 100
         }
-        Should -Invoke -CommandName Set-WinUtilTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Set-NoteTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
             $Visible -eq $true -and $Label -eq "App uninstall finished" -and $Percent -eq 100
         }
-        Should -Invoke -CommandName Install-WinUtilProgramWinget -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Install-NoteProgramWinget -Times 1 -Exactly -ParameterFilter {
             $Action -eq "Uninstall" -and @($Programs)[0] -eq "Git.Git"
         }
-        Should -Invoke -CommandName Install-WinUtilProgramChoco -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Install-NoteProgramChoco -Times 1 -Exactly -ParameterFilter {
             $Action -eq "Uninstall" -and @($Programs)[0] -eq "vlc"
         }
         Should -Invoke -CommandName Invoke-WPFUIThread -Times 1 -Exactly -ParameterFilter {
@@ -428,19 +428,19 @@ Describe "Invoke-WPFUnInstall runspace body" {
             $ScriptBlock.ToString() -like '*$sync.ItemsControl.IsEnabled = $true*'
         }
         Should -Invoke -CommandName Invoke-WPFUIThread -Times 1 -Exactly -ParameterFilter {
-            $ScriptBlock.ToString() -like '*Set-WinUtilTaskbaritem -state "None" -overlay "checkmark"*'
+            $ScriptBlock.ToString() -like '*Set-NoteTaskbaritem -state "None" -overlay "checkmark"*'
         }
         $script:sync.ProcessRunning | Should -BeFalse
     }
 
     It "shows failure progress, sets taskbar error state, and clears ProcessRunning on failure" {
-        Mock Install-WinUtilProgramWinget { throw "winget failed" }
+        Mock Install-NoteProgramWinget { throw "winget failed" }
 
         Invoke-WPFUnInstall -PackagesToUninstall @($script:package)
 
         & $script:capturedUninstallScriptBlock -PackagesToUninstall @($script:package) -ManagerPreference "Winget"
 
-        Should -Invoke -CommandName Set-WinUtilTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Set-NoteTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
             $Visible -eq $true -and $Label -eq "App uninstall failed" -and $Percent -eq 100
         }
         Should -Invoke -CommandName Invoke-WPFUIThread -Times 1 -Exactly -ParameterFilter {
@@ -450,9 +450,9 @@ Describe "Invoke-WPFUnInstall runspace body" {
             $ScriptBlock.ToString() -like '*$sync.ItemsControl.IsEnabled = $true*'
         }
         Should -Invoke -CommandName Invoke-WPFUIThread -Times 1 -Exactly -ParameterFilter {
-            $ScriptBlock.ToString() -like '*Set-WinUtilTaskbaritem -state "Error" -overlay "warning"*'
+            $ScriptBlock.ToString() -like '*Set-NoteTaskbaritem -state "Error" -overlay "warning"*'
         }
-        Should -Invoke -CommandName Write-WinUtilLog -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Write-NoteLog -Times 1 -Exactly -ParameterFilter {
             $Level -eq "ERROR" -and $Component -eq "Uninstall" -and $Message -like "Uninstall workflow failed:*"
         }
         $script:sync.ProcessRunning | Should -BeFalse

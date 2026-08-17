@@ -129,20 +129,20 @@ namespace System.Windows
 "@
     }
 
-    . (Join-Path $script:repoRoot "functions\private\Invoke-WinutilThemeChange.ps1")
+    . (Join-Path $script:repoRoot "functions\private\Invoke-NoteThemeChange.ps1")
 
-    function Get-WinUtilToggleStatus {
+    function Get-NoteToggleStatus {
         param($ToggleName)
         return $false
     }
 
-    function script:New-WinUtilPreferencesTestRoot {
-        $testRoot = Join-Path ([IO.Path]::GetTempPath()) "WinUtilPreferences_$([guid]::NewGuid())"
+    function script:New-NotePreferencesTestRoot {
+        $testRoot = Join-Path ([IO.Path]::GetTempPath()) "NotePreferences_$([guid]::NewGuid())"
         New-Item -Path $testRoot -ItemType Directory -Force | Out-Null
         $testRoot
     }
 
-    function script:New-WinUtilFakeThemeForm {
+    function script:New-NoteFakeThemeForm {
         $themeButton = [pscustomobject]@{
             Content = $null
         }
@@ -164,7 +164,7 @@ namespace System.Windows
         $form
     }
 
-    function script:New-WinUtilPreferenceSync {
+    function script:New-NotePreferenceSync {
         param(
             [hashtable]$Preferences = @{}
         )
@@ -174,32 +174,32 @@ namespace System.Windows
             configs = @{
                 themes = Get-Content -Path (Join-Path $script:repoRoot "config\themes.json") -Raw | ConvertFrom-Json
             }
-            Form = New-WinUtilFakeThemeForm
+            Form = New-NoteFakeThemeForm
         })
         $global:sync = $script:sync
     }
 
-    function script:Remove-WinUtilPreferenceGlobals {
+    function script:Remove-NotePreferenceGlobals {
         Remove-Variable -Name sync -Scope Global -ErrorAction SilentlyContinue
-        Remove-Variable -Name winutildir -Scope Global -ErrorAction SilentlyContinue
+        Remove-Variable -Name Notedir -Scope Global -ErrorAction SilentlyContinue
     }
 }
 
-Describe "Invoke-WinutilThemeChange" {
+Describe "Invoke-NoteThemeChange" {
     AfterEach {
         if ($script:testRoot -and (Test-Path $script:testRoot)) {
             Remove-Item -Path $script:testRoot -Recurse -Force -ErrorAction SilentlyContinue
         }
         $script:testRoot = $null
-        Remove-WinUtilPreferenceGlobals
+        Remove-NotePreferenceGlobals
     }
 
     It "applies shared and selected theme resources, keeps the preference in memory, and updates the theme button" {
-        $script:testRoot = New-WinUtilPreferencesTestRoot
-        $global:winutildir = $script:testRoot
-        New-WinUtilPreferenceSync
+        $script:testRoot = New-NotePreferencesTestRoot
+        $global:Notedir = $script:testRoot
+        New-NotePreferenceSync
 
-        Invoke-WinutilThemeChange -theme "Dark"
+        Invoke-NoteThemeChange -theme "Dark"
 
         $script:sync.preferences.theme | Should -Be "Dark"
         $script:sync.Form.Resources.ContainsKey("FontFamily") | Should -BeTrue
@@ -212,14 +212,14 @@ Describe "Invoke-WinutilThemeChange" {
     }
 
     It "uses the system dark-mode toggle when Auto theme is selected" {
-        $script:testRoot = New-WinUtilPreferencesTestRoot
-        $global:winutildir = $script:testRoot
-        New-WinUtilPreferenceSync
-        Mock Get-WinUtilToggleStatus { return $true }
+        $script:testRoot = New-NotePreferencesTestRoot
+        $global:Notedir = $script:testRoot
+        New-NotePreferenceSync
+        Mock Get-NoteToggleStatus { return $true }
 
-        Invoke-WinutilThemeChange -theme "Auto"
+        Invoke-NoteThemeChange -theme "Auto"
 
-        Should -Invoke -CommandName Get-WinUtilToggleStatus -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Get-NoteToggleStatus -Times 1 -Exactly -ParameterFilter {
             $ToggleName -eq "WPFToggleDarkMode"
         }
         $script:sync.preferences.theme | Should -Be "Auto"

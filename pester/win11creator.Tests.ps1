@@ -5,12 +5,12 @@
 Describe "Win11 Creator setup media" {
     BeforeAll {
         $script:repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
-        $script:isoWorkflowPath = Join-Path $script:repoRoot "functions\private\Invoke-WinUtilISO.ps1"
-        $script:isoUsbWorkflowPath = Join-Path $script:repoRoot "functions\private\Invoke-WinUtilISOUSB.ps1"
-        $script:isoScriptPath = Join-Path $script:repoRoot "functions\private\Invoke-WinUtilISOScript.ps1"
+        $script:isoWorkflowPath = Join-Path $script:repoRoot "functions\private\Invoke-NoteISO.ps1"
+        $script:isoUsbWorkflowPath = Join-Path $script:repoRoot "functions\private\Invoke-NoteISOUSB.ps1"
+        $script:isoScriptPath = Join-Path $script:repoRoot "functions\private\Invoke-NoteISOScript.ps1"
         $script:autoUnattendPath = Join-Path $script:repoRoot "tools\autounattend.xml"
 
-        function Get-WinUtilFunctionText {
+        function Get-NoteFunctionText {
             param (
                 [Parameter(Mandatory)][string]$Path,
                 [Parameter(Mandatory)][string]$FunctionName
@@ -36,13 +36,13 @@ Describe "Win11 Creator setup media" {
             return $functionAst.Extent.Text
         }
 
-        $script:modifyFunction = Get-WinUtilFunctionText -Path $script:isoWorkflowPath -FunctionName "Invoke-WinUtilISOModify"
-        $script:mountAndVerifyFunction = Get-WinUtilFunctionText -Path $script:isoWorkflowPath -FunctionName "Invoke-WinUtilISOMountAndVerify"
-        $script:cleanAndResetFunction = Get-WinUtilFunctionText -Path $script:isoWorkflowPath -FunctionName "Invoke-WinUtilISOCleanAndReset"
-        $script:exportFunction = Get-WinUtilFunctionText -Path $script:isoWorkflowPath -FunctionName "Invoke-WinUtilISOExport"
-        $script:writeUsbFunction = Get-WinUtilFunctionText -Path $script:isoUsbWorkflowPath -FunctionName "Invoke-WinUtilISOWriteUSB"
-        $script:editionIdFunction = Get-WinUtilFunctionText -Path $script:isoWorkflowPath -FunctionName "Get-WinUtilEditionIdFromName"
-        $script:wimMetadataAssertionFunction = Get-WinUtilFunctionText -Path $script:isoScriptPath -FunctionName "Assert-WinUtilISOWimMetadata"
+        $script:modifyFunction = Get-NoteFunctionText -Path $script:isoWorkflowPath -FunctionName "Invoke-NoteISOModify"
+        $script:mountAndVerifyFunction = Get-NoteFunctionText -Path $script:isoWorkflowPath -FunctionName "Invoke-NoteISOMountAndVerify"
+        $script:cleanAndResetFunction = Get-NoteFunctionText -Path $script:isoWorkflowPath -FunctionName "Invoke-NoteISOCleanAndReset"
+        $script:exportFunction = Get-NoteFunctionText -Path $script:isoWorkflowPath -FunctionName "Invoke-NoteISOExport"
+        $script:writeUsbFunction = Get-NoteFunctionText -Path $script:isoUsbWorkflowPath -FunctionName "Invoke-NoteISOWriteUSB"
+        $script:editionIdFunction = Get-NoteFunctionText -Path $script:isoWorkflowPath -FunctionName "Get-NoteEditionIdFromName"
+        $script:wimMetadataAssertionFunction = Get-NoteFunctionText -Path $script:isoScriptPath -FunctionName "Assert-NoteISOWimMetadata"
     }
 
     It "autounattend template does not force a product key" {
@@ -79,7 +79,7 @@ Describe "Win11 Creator setup media" {
     }
 
     It "ISO script accepts selected edition and driver-only WIM servicing metadata" {
-        $isoScriptPath = Join-Path $PSScriptRoot "..\functions\private\Invoke-WinUtilISOScript.ps1"
+        $isoScriptPath = Join-Path $PSScriptRoot "..\functions\private\Invoke-NoteISOScript.ps1"
         $content = Get-Content -Path $isoScriptPath -Raw
 
         foreach ($pattern in @(
@@ -90,15 +90,15 @@ Describe "Win11 Creator setup media" {
             'PID\.txt'
         )) {
             if ($content -notmatch $pattern) {
-                throw "Expected Invoke-WinUtilISOScript.ps1 to match pattern: $pattern"
+                throw "Expected Invoke-NoteISOScript.ps1 to match pattern: $pattern"
             }
         }
     }
 
     It "starts each new ISO modification in a fresh working directory" {
         foreach ($expectedText in @(
-            '$workDir = Join-Path $env:TEMP "WinUtil_Win11ISO_$(Get-Date -Format ''yyyyMMdd_HHmmss'')"',
-            '$workDir = Join-Path $env:TEMP "WinUtil_Win11ISO_$(Get-Date -Format ''yyyyMMdd_HHmmss'')_$(([guid]::NewGuid()).ToString(''N'').Substring(0, 8))"'
+            '$workDir = Join-Path $env:TEMP "Note_Win11ISO_$(Get-Date -Format ''yyyyMMdd_HHmmss'')"',
+            '$workDir = Join-Path $env:TEMP "Note_Win11ISO_$(Get-Date -Format ''yyyyMMdd_HHmmss'')_$(([guid]::NewGuid()).ToString(''N'').Substring(0, 8))"'
         )) {
             $script:modifyFunction | Should -Match ([regex]::Escape($expectedText))
         }
@@ -137,7 +137,7 @@ Describe "Win11 Creator setup media" {
         $isoScriptContent | Should -Match ([regex]::Escape("Join-Path `$ContentRoot '`$WinpeDriver$'"))
         $isoScriptContent | Should -Match 'SCSIAdapter\|HDC'
         $isoScriptContent | Should -Not -Match ([regex]::Escape('sources\$OEM$\$$\Drivers'))
-        $isoScriptContent | Should -Not -Match ([regex]::Escape('WinUtil-InstallDrivers.ps1'))
+        $isoScriptContent | Should -Not -Match ([regex]::Escape('Note-InstallDrivers.ps1'))
         $isoScriptContent | Should -Not -Match ([regex]::Escape('SetupComplete.cmd'))
     }
 
@@ -150,8 +150,8 @@ Describe "Win11 Creator setup media" {
         $invalidAfter = $valid.Clone()
         $invalidAfter.ProductType = '<undefined>'
 
-        { Assert-WinUtilISOWimMetadata -Before $invalidBefore } | Should -Throw '*already invalid*'
-        { Assert-WinUtilISOWimMetadata -Before $valid -After $invalidAfter } | Should -Throw '*validation failed*'
+        { Assert-NoteISOWimMetadata -Before $invalidBefore } | Should -Throw '*already invalid*'
+        { Assert-NoteISOWimMetadata -Before $valid -After $invalidAfter } | Should -Throw '*validation failed*'
     }
 
     It "tracks every background ISO workflow with the shared busy state" {
@@ -170,7 +170,7 @@ Describe "Win11 Creator setup media" {
     It "runs ISO mount and verification outside the UI thread" {
         $script:mountAndVerifyFunction | Should -Match ([regex]::Escape("Invoke-WPFRunspace -ParameterList @(,('isoPath', `$isoPath))"))
         $script:mountAndVerifyFunction | Should -Match ([regex]::Escape('Invoke-WPFUIThread {'))
-        $script:mountAndVerifyFunction | Should -Match ([regex]::Escape('Write-WinUtilISOLog'))
+        $script:mountAndVerifyFunction | Should -Match ([regex]::Escape('Write-NoteISOLog'))
         $script:mountAndVerifyFunction | Should -Not -Match ([regex]::Escape('Write-Win11ISOLog'))
         $script:mountAndVerifyFunction | Should -Match ([regex]::Escape('$sync["WPFWin11ISOBrowseButton"].IsEnabled = $false'))
         $script:mountAndVerifyFunction | Should -Match ([regex]::Escape('$sync["WPFWin11ISOBrowseButton"].IsEnabled = $true'))
@@ -225,14 +225,14 @@ Describe "Win11 Creator setup media" {
         }
 
         foreach ($case in $cases.GetEnumerator()) {
-            Get-WinUtilEditionIdFromName -EditionName $case.Key | Should -Be $case.Value
+            Get-NoteEditionIdFromName -EditionName $case.Key | Should -Be $case.Value
         }
 
-        Get-WinUtilEditionIdFromName -EditionName "Windows 11 Unknown Edition" | Should -Be ""
+        Get-NoteEditionIdFromName -EditionName "Windows 11 Unknown Edition" | Should -Be ""
     }
 
     It "writes ei.cfg and removes stale PID.txt for the selected edition" {
-        $contentRoot = Join-Path ([IO.Path]::GetTempPath()) "WinUtilIsoConfig_$([guid]::NewGuid())"
+        $contentRoot = Join-Path ([IO.Path]::GetTempPath()) "NoteIsoConfig_$([guid]::NewGuid())"
         $sourcesDir = Join-Path $contentRoot "sources"
         $logs = [System.Collections.Generic.List[string]]::new()
         $logger = { param($message) $logs.Add([string]$message) }
@@ -243,7 +243,7 @@ Describe "Win11 Creator setup media" {
             Set-Content -Path (Join-Path $sourcesDir "ei.cfg") -Value "stale-cfg" -Encoding UTF8
 
             . $script:isoScriptPath
-            Invoke-WinUtilISOScript -ISOContentsDir $contentRoot -AutoUnattendXml (Get-Content -Path $script:autoUnattendPath -Raw) -InstallEditionId "Professional" -Log $logger
+            Invoke-NoteISOScript -ISOContentsDir $contentRoot -AutoUnattendXml (Get-Content -Path $script:autoUnattendPath -Raw) -InstallEditionId "Professional" -Log $logger
 
             Test-Path (Join-Path $sourcesDir "PID.txt") | Should -BeFalse
             Test-Path (Join-Path $sourcesDir "ei.cfg") | Should -BeTrue
@@ -256,14 +256,14 @@ Describe "Win11 Creator setup media" {
         }
     }
 
-    It "stages the complete WinUtil customization script and selected image index" {
-        $contentRoot = Join-Path ([IO.Path]::GetTempPath()) "WinUtilIsoAnswerFile_$([guid]::NewGuid())"
+    It "stages the complete Note customization script and selected image index" {
+        $contentRoot = Join-Path ([IO.Path]::GetTempPath()) "NoteIsoAnswerFile_$([guid]::NewGuid())"
         $template = Get-Content -Path $script:autoUnattendPath -Raw
 
         try {
             New-Item -Path $contentRoot -ItemType Directory -Force | Out-Null
             . $script:isoScriptPath
-            Invoke-WinUtilISOScript -ISOContentsDir $contentRoot -AutoUnattendXml $template -InstallEditionId "Core" -InstallImageIndex 6
+            Invoke-NoteISOScript -ISOContentsDir $contentRoot -AutoUnattendXml $template -InstallEditionId "Core" -InstallImageIndex 6
 
             [xml]$answerFile = Get-Content -Path (Join-Path $contentRoot "autounattend.xml") -Raw
             $nsMgr = New-Object System.Xml.XmlNamespaceManager($answerFile.NameTable)
@@ -272,17 +272,17 @@ Describe "Win11 Creator setup media" {
 
             $answerFile.SelectSingleNode('/u:unattend/u:settings[@pass="windowsPE"]/u:component[@name="Microsoft-Windows-Setup"]/u:ImageInstall/u:OSImage/u:InstallFrom/u:MetaData[u:Key="/IMAGE/INDEX"]/u:Value', $nsMgr).InnerText | Should -Be '6'
 
-            $postInstallFile = $answerFile.SelectSingleNode('//sg:File[@path="C:\Windows\Setup\Scripts\WinUtil-PostInstall.ps1"]', $nsMgr)
+            $postInstallFile = $answerFile.SelectSingleNode('//sg:File[@path="C:\Windows\Setup\Scripts\Note-PostInstall.ps1"]', $nsMgr)
             $postInstallFile | Should -Not -BeNullOrEmpty
             $postInstallFile.InnerText | Should -Match 'Remove-AppxProvisionedPackage'
             $postInstallFile.InnerText | Should -Match 'DisableWindowsConsumerFeatures'
             $postInstallFile.InnerText | Should -Match 'Microsoft Compatibility Appraiser'
             $postInstallFile.InnerText | Should -Match 'OneDriveSetup.exe'
-            $postInstallFile.InnerText | Should -Match 'function Set-WinUtilContentDeliveryManagerValues'
-            $postInstallFile.InnerText | Should -Match ([regex]::Escape('Set-WinUtilContentDeliveryManagerValues $defaultHive'))
-            $postInstallFile.InnerText | Should -Match ([regex]::Escape("Set-WinUtilContentDeliveryManagerValues 'HKCU'"))
-            $postInstallFile.InnerText | Should -Match ([regex]::Escape("Set-WinUtilRegistryValue 'HKCU\Control Panel\UnsupportedHardwareNotificationCache' 'SV1'"))
-            $postInstallFile.InnerText | Should -Match ([regex]::Escape("Set-WinUtilRegistryValue 'HKCU\Control Panel\UnsupportedHardwareNotificationCache' 'SV2'"))
+            $postInstallFile.InnerText | Should -Match 'function Set-NoteContentDeliveryManagerValues'
+            $postInstallFile.InnerText | Should -Match ([regex]::Escape('Set-NoteContentDeliveryManagerValues $defaultHive'))
+            $postInstallFile.InnerText | Should -Match ([regex]::Escape("Set-NoteContentDeliveryManagerValues 'HKCU'"))
+            $postInstallFile.InnerText | Should -Match ([regex]::Escape("Set-NoteRegistryValue 'HKCU\Control Panel\UnsupportedHardwareNotificationCache' 'SV1'"))
+            $postInstallFile.InnerText | Should -Match ([regex]::Escape("Set-NoteRegistryValue 'HKCU\Control Panel\UnsupportedHardwareNotificationCache' 'SV2'"))
             foreach ($defaultProfilePath in @(
                 '$defaultHive\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo',
                 '$defaultHive\Software\Microsoft\Windows\CurrentVersion\Privacy',
@@ -296,15 +296,15 @@ Describe "Win11 Creator setup media" {
             }
 
             $firstLogonFile = $answerFile.SelectSingleNode('//sg:File[@path="C:\Windows\Setup\Scripts\FirstLogon.ps1"]', $nsMgr)
-            $firstLogonFile.InnerText | Should -Match 'WinUtil-PostInstall.ps1'
+            $firstLogonFile.InnerText | Should -Match 'Note-PostInstall.ps1'
 
             $setupScriptsRoot = Join-Path $contentRoot 'sources\$OEM$\$$\Setup\Scripts'
             Test-Path (Join-Path $setupScriptsRoot 'Specialize.ps1') | Should -BeTrue
             Test-Path (Join-Path $setupScriptsRoot 'DefaultUser.ps1') | Should -BeTrue
             Test-Path (Join-Path $setupScriptsRoot 'FirstLogon.ps1') | Should -BeTrue
-            Test-Path (Join-Path $setupScriptsRoot 'WinUtil-PostInstall.ps1') | Should -BeTrue
-            Get-Content -Path (Join-Path $setupScriptsRoot 'FirstLogon.ps1') -Raw | Should -Match 'WinUtil-PostInstall.ps1'
-            Get-Content -Path (Join-Path $setupScriptsRoot 'WinUtil-PostInstall.ps1') -Raw | Should -Match 'Remove-AppxProvisionedPackage'
+            Test-Path (Join-Path $setupScriptsRoot 'Note-PostInstall.ps1') | Should -BeTrue
+            Get-Content -Path (Join-Path $setupScriptsRoot 'FirstLogon.ps1') -Raw | Should -Match 'Note-PostInstall.ps1'
+            Get-Content -Path (Join-Path $setupScriptsRoot 'Note-PostInstall.ps1') -Raw | Should -Match 'Remove-AppxProvisionedPackage'
 
             $tokens = $null
             $errors = $null
@@ -316,7 +316,7 @@ Describe "Win11 Creator setup media" {
     }
 
     It "stages storage drivers for WinPE and adds all drivers to one install.wim index" {
-        $contentRoot = Join-Path ([IO.Path]::GetTempPath()) "WinUtilIsoDrivers_$([guid]::NewGuid())"
+        $contentRoot = Join-Path ([IO.Path]::GetTempPath()) "NoteIsoDrivers_$([guid]::NewGuid())"
         $installWim = Join-Path $contentRoot 'sources\install.wim'
         $template = Get-Content -Path $script:autoUnattendPath -Raw
         $logs = [System.Collections.Generic.List[string]]::new()
@@ -373,7 +373,7 @@ Describe "Win11 Creator setup media" {
             New-Item -Path (Split-Path $installWim -Parent) -ItemType Directory -Force | Out-Null
             Set-Content -Path $installWim -Value 'mock-wim'
             . $script:isoScriptPath
-            Invoke-WinUtilISOScript -ISOContentsDir $contentRoot -AutoUnattendXml $template -InjectCurrentSystemDrivers $true -InstallImagePath $installWim -InstallImageIndex 6 -InstallEditionId 'Professional' -Log {
+            Invoke-NoteISOScript -ISOContentsDir $contentRoot -AutoUnattendXml $template -InjectCurrentSystemDrivers $true -InstallImagePath $installWim -InstallImageIndex 6 -InstallEditionId 'Professional' -Log {
                 param($message)
                 $logs.Add([string]$message)
             }
@@ -394,7 +394,7 @@ Describe "Win11 Creator setup media" {
             [xml]$answerFile = Get-Content -Path (Join-Path $contentRoot 'autounattend.xml') -Raw
             $nsMgr = New-Object System.Xml.XmlNamespaceManager($answerFile.NameTable)
             $nsMgr.AddNamespace('sg', 'https://schneegans.de/windows/unattend-generator/')
-            $answerFile.SelectSingleNode('//sg:File[@path="C:\Windows\Setup\Scripts\WinUtil-InstallDrivers.ps1"]', $nsMgr) | Should -BeNullOrEmpty
+            $answerFile.SelectSingleNode('//sg:File[@path="C:\Windows\Setup\Scripts\Note-InstallDrivers.ps1"]', $nsMgr) | Should -BeNullOrEmpty
             ($logs -join '|') | Should -Match 'staged 2 boot-storage packages for WinPE'
             ($logs -join '|') | Should -Match 'install.wim metadata validation passed'
             ($logs -join '|') | Should -Match 'DISM mount completed.'
@@ -406,7 +406,7 @@ Describe "Win11 Creator setup media" {
     }
 
     It "discards a partially mounted install.wim after mount failure" {
-        $contentRoot = Join-Path ([IO.Path]::GetTempPath()) "WinUtilIsoMountFailure_$([guid]::NewGuid())"
+        $contentRoot = Join-Path ([IO.Path]::GetTempPath()) "NoteIsoMountFailure_$([guid]::NewGuid())"
         $installWim = Join-Path $contentRoot 'sources\install.wim'
         $template = Get-Content -Path $script:autoUnattendPath -Raw
         $script:dismCalls = [System.Collections.Generic.List[string]]::new()
@@ -449,7 +449,7 @@ Describe "Win11 Creator setup media" {
             Set-Content -Path $installWim -Value 'mock-wim'
             . $script:isoScriptPath
 
-            { Invoke-WinUtilISOScript -ISOContentsDir $contentRoot -AutoUnattendXml $template -InjectCurrentSystemDrivers $true -InstallImagePath $installWim -InstallImageIndex 6 -InstallEditionId 'Professional' } |
+            { Invoke-NoteISOScript -ISOContentsDir $contentRoot -AutoUnattendXml $template -InjectCurrentSystemDrivers $true -InstallImagePath $installWim -InstallImageIndex 6 -InstallEditionId 'Professional' } |
                 Should -Throw '*DISM mount failed*'
 
             @($script:dismCalls | Where-Object { $_ -match '/Get-MountedImageInfo' }).Count | Should -Be 1
@@ -461,30 +461,30 @@ Describe "Win11 Creator setup media" {
     }
 
     It "does not add driver setup artifacts when injection is disabled" {
-        $contentRoot = Join-Path ([IO.Path]::GetTempPath()) "WinUtilIsoNoDrivers_$([guid]::NewGuid())"
+        $contentRoot = Join-Path ([IO.Path]::GetTempPath()) "NoteIsoNoDrivers_$([guid]::NewGuid())"
 
         try {
             New-Item -Path $contentRoot -ItemType Directory -Force | Out-Null
             . $script:isoScriptPath
-            Invoke-WinUtilISOScript -ISOContentsDir $contentRoot -AutoUnattendXml (Get-Content -Path $script:autoUnattendPath -Raw) -InjectCurrentSystemDrivers $false -InstallEditionId 'Core'
+            Invoke-NoteISOScript -ISOContentsDir $contentRoot -AutoUnattendXml (Get-Content -Path $script:autoUnattendPath -Raw) -InjectCurrentSystemDrivers $false -InstallEditionId 'Core'
 
             Test-Path (Join-Path $contentRoot '$WinpeDriver$') | Should -BeFalse
             [xml]$answerFile = Get-Content -Path (Join-Path $contentRoot 'autounattend.xml') -Raw
             $nsMgr = New-Object System.Xml.XmlNamespaceManager($answerFile.NameTable)
             $nsMgr.AddNamespace('sg', 'https://schneegans.de/windows/unattend-generator/')
-            $answerFile.SelectSingleNode('//sg:File[@path="C:\Windows\Setup\Scripts\WinUtil-InstallDrivers.ps1"]', $nsMgr) | Should -BeNullOrEmpty
+            $answerFile.SelectSingleNode('//sg:File[@path="C:\Windows\Setup\Scripts\Note-InstallDrivers.ps1"]', $nsMgr) | Should -BeNullOrEmpty
         } finally {
             Remove-Item -Path $contentRoot -Recurse -Force -ErrorAction SilentlyContinue
         }
     }
 
     It "enables configuration-set fallback when staging OEM setup scripts" {
-        $contentRoot = Join-Path ([IO.Path]::GetTempPath()) "WinUtilIsoFallback_$([guid]::NewGuid())"
+        $contentRoot = Join-Path ([IO.Path]::GetTempPath()) "NoteIsoFallback_$([guid]::NewGuid())"
 
         try {
             New-Item -Path $contentRoot -ItemType Directory -Force | Out-Null
             . $script:isoScriptPath
-            Invoke-WinUtilISOScript -ISOContentsDir $contentRoot -AutoUnattendXml (Get-Content -Path $script:autoUnattendPath -Raw) -InstallEditionId 'Core'
+            Invoke-NoteISOScript -ISOContentsDir $contentRoot -AutoUnattendXml (Get-Content -Path $script:autoUnattendPath -Raw) -InstallEditionId 'Core'
 
             [xml]$answerFile = Get-Content -Path (Join-Path $contentRoot 'autounattend.xml') -Raw
             $nsMgr = New-Object System.Xml.XmlNamespaceManager($answerFile.NameTable)
@@ -503,7 +503,7 @@ Describe "Win11 Creator setup media" {
 
         foreach ($expectedText in @(
             'oscdimg.exe not found. Attempting to install via winget...',
-            'Install-WinUtilWinget',
+            'Install-NoteWinget',
             'Get-Command winget',
             'install -e --id Microsoft.OSCDIMG --accept-package-agreements --accept-source-agreements',
             'oscdimg.exe still not found after install attempt.',

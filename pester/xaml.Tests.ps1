@@ -15,19 +15,19 @@ BeforeAll {
     $script:xamlNamespace = New-Object System.Xml.XmlNamespaceManager -ArgumentList $script:xaml.NameTable
     $script:xamlNamespace.AddNamespace("x", "http://schemas.microsoft.com/winfx/2006/xaml")
 
-    function script:Get-WinUtilConfigObject {
+    function script:Get-NoteConfigObject {
         param([string]$Name)
 
         Get-Content -Path (Join-Path $script:configRoot "$Name.json") -Raw | ConvertFrom-Json
     }
 
-    function script:Get-WinUtilSourceText {
+    function script:Get-NoteSourceText {
         Get-ChildItem -Path @($script:functionRoot, $script:scriptsRoot) -Filter *.ps1 -Recurse |
             ForEach-Object { Get-Content -Path $_.FullName -Raw } |
             Out-String
     }
 
-    function script:Get-WinUtilTopLevelFunctionNames {
+    function script:Get-NoteTopLevelFunctionNames {
         Get-ChildItem -Path $script:functionRoot -Filter *.ps1 -Recurse | ForEach-Object {
             $tokens = $null
             $syntaxErrors = $null
@@ -42,7 +42,7 @@ BeforeAll {
         } | Sort-Object -Unique
     }
 
-    function script:Get-WinUtilXamlNamedControls {
+    function script:Get-NoteXamlNamedControls {
         $nodes = $script:xaml.SelectNodes("//*[@Name or @x:Name]", $script:xamlNamespace)
         foreach ($node in $nodes) {
             $controlName = $node.GetAttribute("Name")
@@ -57,7 +57,7 @@ BeforeAll {
         }
     }
 
-    function script:Get-WinUtilXamlRuntimeNamedControls {
+    function script:Get-NoteXamlRuntimeNamedControls {
         $nodes = $script:xaml.SelectNodes("//*[@Name]")
         foreach ($node in $nodes) {
             [pscustomobject]@{
@@ -67,16 +67,16 @@ BeforeAll {
         }
     }
 
-    function script:Get-WinUtilGeneratedControlNames {
+    function script:Get-NoteGeneratedControlNames {
         $names = New-Object System.Collections.Generic.List[string]
         foreach ($configName in @("appnavigation", "tweaks", "feature", "appx")) {
-            $config = Get-WinUtilConfigObject -Name $configName
+            $config = Get-NoteConfigObject -Name $configName
             foreach ($entry in $config.PSObject.Properties.Name) {
                 $names.Add($entry)
             }
         }
 
-        $applications = Get-WinUtilConfigObject -Name "applications"
+        $applications = Get-NoteConfigObject -Name "applications"
         foreach ($entry in $applications.PSObject.Properties.Name) {
             $names.Add($entry)
             $names.Add(($entry -replace "-", "_"))
@@ -85,14 +85,14 @@ BeforeAll {
         $names | Sort-Object -Unique
     }
 
-    function script:Get-WinUtilButtonSwitchNames {
+    function script:Get-NoteButtonSwitchNames {
         $buttonSource = Get-Content -Path $script:buttonScriptPath -Raw
         [regex]::Matches($buttonSource, '"(WPF[A-Za-z0-9_]+)"\s*\{') |
             ForEach-Object { $_.Groups[1].Value } |
             Sort-Object -Unique
     }
 
-    function script:Test-WinUtilNameInSet {
+    function script:Test-NoteNameInSet {
         param(
             [Parameter(Mandatory)]
             [string]$Name,
@@ -117,7 +117,7 @@ Describe "XAML document" {
     }
 
     It "contains expected core controls" {
-        $xamlNames = @(Get-WinUtilXamlRuntimeNamedControls | ForEach-Object { $_.Name })
+        $xamlNames = @(Get-NoteXamlRuntimeNamedControls | ForEach-Object { $_.Name })
         $requiredControls = @(
             "WPFMainGrid",
             "NavDockPanel",
@@ -174,7 +174,7 @@ Describe "XAML document" {
             "WPFRemoveSelectedAppx"
         )
 
-        $missingControls = @($requiredControls | Where-Object { -not (Test-WinUtilNameInSet -Name $_ -Set $xamlNames) })
+        $missingControls = @($requiredControls | Where-Object { -not (Test-NoteNameInSet -Name $_ -Set $xamlNames) })
         if ($missingControls.Count -gt 0) {
             throw ($missingControls -join "`n")
         }
@@ -183,9 +183,9 @@ Describe "XAML document" {
     It "wires the Document search chip to an existing Document category" {
         $mainScript = Get-Content -Path $script:mainScriptPath -Raw
         $mainScript | Should -Match '@\{ Name = "WPFSearchChipDocument";\s+Category = "Document" \}'
-        $mainScript | Should -Match '\$sync\["WPFSearchChipDocument"\]\.Add_Click\(\{ Invoke-WinUtilAppCategoryChip -Chip \$this \}\)'
+        $mainScript | Should -Match '\$sync\["WPFSearchChipDocument"\]\.Add_Click\(\{ Invoke-NoteAppCategoryChip -Chip \$this \}\)'
 
-        $applications = Get-WinUtilConfigObject -Name "applications"
+        $applications = Get-NoteConfigObject -Name "applications"
         $categories = @($applications.PSObject.Properties | ForEach-Object { $_.Value.category } | Sort-Object -Unique)
         $categories | Should -Contain "Document"
     }
@@ -208,7 +208,7 @@ Describe "XAML document" {
     }
 
     It "contains Win11 Creator controls used by the ISO workflow" {
-        $xamlNames = @(Get-WinUtilXamlRuntimeNamedControls | ForEach-Object { $_.Name })
+        $xamlNames = @(Get-NoteXamlRuntimeNamedControls | ForEach-Object { $_.Name })
         $requiredControls = @(
             "Win11ISOPanel",
             "WPFWin11ISOSelectSection",
@@ -236,7 +236,7 @@ Describe "XAML document" {
             "WPFWin11ISOStatusLog"
         )
 
-        $missingControls = @($requiredControls | Where-Object { -not (Test-WinUtilNameInSet -Name $_ -Set $xamlNames) })
+        $missingControls = @($requiredControls | Where-Object { -not (Test-NoteNameInSet -Name $_ -Set $xamlNames) })
         if ($missingControls.Count -gt 0) {
             throw ($missingControls -join "`n")
         }
@@ -358,7 +358,7 @@ Describe "XAML document" {
     }
 
     It "uses state-aware maximize and restore icons" {
-        $themes = Get-WinUtilConfigObject -Name "themes"
+        $themes = Get-NoteConfigObject -Name "themes"
         $minimizeButton = $script:xaml.SelectSingleNode('//*[local-name()="Button"][@Name="WPFMinimizeButton"]')
         $maximizeButton = $script:xaml.SelectSingleNode('//*[local-name()="Button"][@Name="WPFMaximizeButton"]')
         $closeButton = $script:xaml.SelectSingleNode('//*[local-name()="Button"][@Name="WPFCloseButton"]')
@@ -384,7 +384,7 @@ Describe "XAML document" {
 
 Describe "XAML and sync wiring" {
     It "wires generated config panels to existing target grids" {
-        $xamlNames = @(Get-WinUtilXamlRuntimeNamedControls | ForEach-Object { $_.Name })
+        $xamlNames = @(Get-NoteXamlRuntimeNamedControls | ForEach-Object { $_.Name })
         $mainLines = Get-Content -Path $script:mainScriptPath
         $invalidTargets = New-Object System.Collections.Generic.List[string]
 
@@ -407,7 +407,7 @@ Describe "XAML and sync wiring" {
                 $invalidTargets.Add("$configName references missing config file")
             }
 
-            if (-not (Test-WinUtilNameInSet -Name $targetGridName -Set $xamlNames)) {
+            if (-not (Test-NoteNameInSet -Name $targetGridName -Set $xamlNames)) {
                 $invalidTargets.Add("$configName target grid '$targetGridName' was not found in XAML")
             }
         }
@@ -418,9 +418,9 @@ Describe "XAML and sync wiring" {
     }
 
     It "references only XAML, generated, or intentionally dynamic sync members" {
-        $sourceText = Get-WinUtilSourceText
-        $xamlNames = @(Get-WinUtilXamlRuntimeNamedControls | ForEach-Object { $_.Name })
-        $generatedNames = @(Get-WinUtilGeneratedControlNames)
+        $sourceText = Get-NoteSourceText
+        $xamlNames = @(Get-NoteXamlRuntimeNamedControls | ForEach-Object { $_.Name })
+        $generatedNames = @(Get-NoteGeneratedControlNames)
         $dynamicStateNames = @(
             "Form",
             "configs",
@@ -429,7 +429,7 @@ Describe "XAML and sync wiring" {
             "Buttons",
             "PSScriptRoot",
             "version",
-            "winutildir",
+            "Notedir",
             "logPath",
             "transcriptPath",
             "ProcessRunning",
@@ -486,7 +486,7 @@ Describe "XAML and sync wiring" {
         $literalReferences = @($bracketReferences + $dotReferences) | Sort-Object -Unique
 
         $invalidReferences = @(
-            $literalReferences | Where-Object { -not (Test-WinUtilNameInSet -Name $_ -Set $allowedNames) }
+            $literalReferences | Where-Object { -not (Test-NoteNameInSet -Name $_ -Set $allowedNames) }
         )
         if ($invalidReferences.Count -gt 0) {
             throw ($invalidReferences -join "`n")
@@ -496,10 +496,10 @@ Describe "XAML and sync wiring" {
 
 Describe "WPF handler wiring" {
     It "calls only defined Invoke-WPF functions" {
-        $sourceText = Get-WinUtilSourceText
-        $functionNames = @(Get-WinUtilTopLevelFunctionNames)
+        $sourceText = Get-NoteSourceText
+        $functionNames = @(Get-NoteTopLevelFunctionNames)
         $featureFunctions = @(
-            (Get-WinUtilConfigObject -Name "feature").PSObject.Properties |
+            (Get-NoteConfigObject -Name "feature").PSObject.Properties |
                 Where-Object { $_.Value.function -and $_.Value.function -like "Invoke-WPF*" } |
                 ForEach-Object { $_.Value.function }
         )
@@ -510,7 +510,7 @@ Describe "WPF handler wiring" {
         ) | Sort-Object -Unique
 
         $missingFunctions = @(
-            $invokedFunctions | Where-Object { -not (Test-WinUtilNameInSet -Name $_ -Set $functionNames) }
+            $invokedFunctions | Where-Object { -not (Test-NoteNameInSet -Name $_ -Set $functionNames) }
         )
         if ($missingFunctions.Count -gt 0) {
             throw ($missingFunctions -join "`n")
@@ -518,19 +518,19 @@ Describe "WPF handler wiring" {
     }
 
     It "routes static WPF buttons through Invoke-WPFButton or explicit handlers" {
-        $runtimeControls = @(Get-WinUtilXamlRuntimeNamedControls)
+        $runtimeControls = @(Get-NoteXamlRuntimeNamedControls)
         $buttonControls = @(
             $runtimeControls |
                 Where-Object { $_.Name -like "WPF*" -and $_.Type -in @("Button", "ToggleButton") }
         )
-        $buttonSwitchNames = @(Get-WinUtilButtonSwitchNames)
-        $featureNames = @((Get-WinUtilConfigObject -Name "feature").PSObject.Properties.Name)
+        $buttonSwitchNames = @(Get-NoteButtonSwitchNames)
+        $featureNames = @((Get-NoteConfigObject -Name "feature").PSObject.Properties.Name)
         $mainScript = Get-Content -Path $script:mainScriptPath -Raw
         $unhandledButtons = New-Object System.Collections.Generic.List[string]
 
         foreach ($button in $buttonControls) {
-            $hasSwitchHandler = (Test-WinUtilNameInSet -Name $button.Name -Set $buttonSwitchNames) -or $button.Name -like "WPFTab?BT"
-            $hasFeatureHandler = Test-WinUtilNameInSet -Name $button.Name -Set $featureNames
+            $hasSwitchHandler = (Test-NoteNameInSet -Name $button.Name -Set $buttonSwitchNames) -or $button.Name -like "WPFTab?BT"
+            $hasFeatureHandler = Test-NoteNameInSet -Name $button.Name -Set $featureNames
             $escapedName = [regex]::Escape($button.Name)
             $explicitHandlerPattern = '\$sync\s*(?:\[\s*["'']' + $escapedName + '["'']\s*\]|\.' + $escapedName + ')\.Add_Click'
             $hasExplicitHandler = $mainScript -imatch $explicitHandlerPattern
@@ -546,9 +546,9 @@ Describe "WPF handler wiring" {
     }
 
     It "invokes existing WPF button names" {
-        $sourceText = Get-WinUtilSourceText
-        $xamlNames = @(Get-WinUtilXamlRuntimeNamedControls | ForEach-Object { $_.Name })
-        $generatedNames = @(Get-WinUtilGeneratedControlNames)
+        $sourceText = Get-NoteSourceText
+        $xamlNames = @(Get-NoteXamlRuntimeNamedControls | ForEach-Object { $_.Name })
+        $generatedNames = @(Get-NoteGeneratedControlNames)
         $validButtonNames = @($xamlNames + $generatedNames) | Sort-Object -Unique
         $buttonNames = @(
             [regex]::Matches($sourceText, 'Invoke-WPFButton\s+["'']([^"'']+)["'']') |
@@ -556,7 +556,7 @@ Describe "WPF handler wiring" {
         ) | Sort-Object -Unique
 
         $missingButtons = @(
-            $buttonNames | Where-Object { -not (Test-WinUtilNameInSet -Name $_ -Set $validButtonNames) }
+            $buttonNames | Where-Object { -not (Test-NoteNameInSet -Name $_ -Set $validButtonNames) }
         )
         if ($missingButtons.Count -gt 0) {
             throw ($missingButtons -join "`n")

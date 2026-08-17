@@ -1,4 +1,4 @@
-function Set-WinUtilAppCategoryFilter {
+function Set-NoteAppCategoryFilter {
     <#
         .SYNOPSIS
             Applies the Install tab category filter and syncs the chip states to it
@@ -45,6 +45,6 @@ function Set-WinUtilAppCategoryFilter {
         $selected.Add($Category)
     }
 
-    Update-WinUtilAppCategoryChip
+    Update-NoteAppCategoryChip
     Find-AppsByNameOrDescription -SearchString $sync.SearchBar.Text -Categories $selected.ToArray()
 }

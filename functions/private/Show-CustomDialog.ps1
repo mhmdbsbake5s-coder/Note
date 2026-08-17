@@ -46,7 +46,7 @@ function Show-CustomDialog {
     The Color used when creating the Drop-down Shadow effect for dialog window.
 
     .PARAMETER LogoColor
-    The Color of WinUtil Text found next to WinUtil's Logo inside dialog window.
+    The Color of Note Text found next to Note's Logo inside dialog window.
 
     .PARAMETER LinkForegroundColor
     The Foreground Color for Links inside dialog window.
@@ -173,15 +173,15 @@ function Show-CustomDialog {
     [Windows.Controls.Grid]::SetRow($stackPanel, 0)  # Set the row to the second row (0-based index)
 
     # Add SVG path to the stack panel
-    $stackPanel.Children.Add((Invoke-WinUtilAssets -Type "logo" -Size $LogoSize))
+    $stackPanel.Children.Add((Invoke-NoteAssets -Type "logo" -Size $LogoSize))
 
-    # Add "Winutil" text
-    $winutilTextBlock = New-Object Windows.Controls.TextBlock
-    $winutilTextBlock.Text = "WinUtil"
-    $winutilTextBlock.FontSize = $HeaderFontSize
-    $winutilTextBlock.Foreground = $LogoColor
-    $winutilTextBlock.Margin = New-Object Windows.Thickness(10, 10, 10, 5)  # Add margins around the text block
-    $stackPanel.Children.Add($winutilTextBlock)
+    # Add "Note" text
+    $NoteTextBlock = New-Object Windows.Controls.TextBlock
+    $NoteTextBlock.Text = "Note"
+    $NoteTextBlock.FontSize = $HeaderFontSize
+    $NoteTextBlock.Foreground = $LogoColor
+    $NoteTextBlock.Margin = New-Object Windows.Thickness(10, 10, 10, 5)  # Add margins around the text block
+    $stackPanel.Children.Add($NoteTextBlock)
     # Add TextBlock for information with text wrapping and margins
     $messageTextBlock = New-Object Windows.Controls.TextBlock
     $messageTextBlock.FontSize = $FontSize

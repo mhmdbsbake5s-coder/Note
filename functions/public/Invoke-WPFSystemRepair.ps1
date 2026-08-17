@@ -15,5 +15,5 @@ function Invoke-WPFSystemRepair {
     Start-Process cmd.exe -ArgumentList "/c dism /online /cleanup-image /restorehealth" -NoNewWindow -Wait
 
     Write-Host "==> Finished System Repair"
-    Set-WinUtilTaskbaritem -state "None" -overlay "checkmark"
+    Set-NoteTaskbaritem -state "None" -overlay "checkmark"
 }

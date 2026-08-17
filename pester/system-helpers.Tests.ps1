@@ -6,9 +6,9 @@ $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 
 BeforeAll {
     $script:repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-    . (Join-Path $script:repoRoot "functions\private\Invoke-WinUtilCurrentSystem.ps1")
-    . (Join-Path $script:repoRoot "functions\private\Set-WinUtilRegistry.ps1")
-    . (Join-Path $script:repoRoot "functions\private\Set-WinUtilService.ps1")
+    . (Join-Path $script:repoRoot "functions\private\Invoke-NoteCurrentSystem.ps1")
+    . (Join-Path $script:repoRoot "functions\private\Set-NoteRegistry.ps1")
+    . (Join-Path $script:repoRoot "functions\private\Set-NoteService.ps1")
 
     function winget {
         param([Parameter(ValueFromRemainingArguments = $true)]$Arguments)
@@ -16,10 +16,10 @@ BeforeAll {
     function choco {
         param([Parameter(ValueFromRemainingArguments = $true)]$Arguments)
     }
-    function Write-WinUtilLog { }
+    function Write-NoteLog { }
 }
 
-Describe "Invoke-WinUtilCurrentSystem installed apps" {
+Describe "Invoke-NoteCurrentSystem installed apps" {
     BeforeEach {
         $script:sync = [Hashtable]::Synchronized(@{
             configs = [pscustomobject]@{
@@ -54,7 +54,7 @@ Describe "Invoke-WinUtilCurrentSystem installed apps" {
     }
 
     It "matches single standard and Microsoft Store package IDs" {
-        $result = @(Invoke-WinUtilCurrentSystem -CheckBox "winget")
+        $result = @(Invoke-NoteCurrentSystem -CheckBox "winget")
 
         $result | Should -HaveCount 2
         $result | Should -Contain "WPFInstallGit"
@@ -70,11 +70,11 @@ Describe "Invoke-WinUtilCurrentSystem installed apps" {
             "winget failed"
         }
 
-        { Invoke-WinUtilCurrentSystem -CheckBox "winget" } | Should -Throw "winget list failed with exit code 1."
+        { Invoke-NoteCurrentSystem -CheckBox "winget" } | Should -Throw "winget list failed with exit code 1."
     }
 
     It "matches the primary Chocolatey package ID in one list call" {
-        $result = @(Invoke-WinUtilCurrentSystem -CheckBox "choco")
+        $result = @(Invoke-NoteCurrentSystem -CheckBox "choco")
 
         $result | Should -Be @("WPFInstallGit")
         Should -Invoke -CommandName choco -Times 1 -Exactly
@@ -82,13 +82,13 @@ Describe "Invoke-WinUtilCurrentSystem installed apps" {
     }
 }
 
-Describe "Set-WinUtilRegistry" {
+Describe "Set-NoteRegistry" {
     BeforeEach {
         $script:testPathResults = @{}
 
         Mock Write-Host { }
         Mock Write-Warning { }
-        Mock Write-WinUtilLog { }
+        Mock Write-NoteLog { }
         Mock Test-Path {
             param([string]$Path)
 
@@ -105,11 +105,11 @@ Describe "Set-WinUtilRegistry" {
     }
 
     It "creates a missing registry path before setting a value" {
-        $registryPath = "HKCU:\Software\WinUtilTest"
+        $registryPath = "HKCU:\Software\NoteTest"
         $script:testPathResults["HKU:\"] = $true
         $script:testPathResults[$registryPath] = $false
 
-        Set-WinUtilRegistry -Path $registryPath -Name "Enabled" -Type "DWord" -Value "1"
+        Set-NoteRegistry -Path $registryPath -Name "Enabled" -Type "DWord" -Value "1"
 
         Should -Invoke -CommandName New-PSDrive -Times 0 -Exactly
         Should -Invoke -CommandName New-Item -Times 1 -Exactly -ParameterFilter {
@@ -127,11 +127,11 @@ Describe "Set-WinUtilRegistry" {
     }
 
     It "creates the HKU PSDrive when it is missing" {
-        $registryPath = "HKCU:\Software\WinUtilTest"
+        $registryPath = "HKCU:\Software\NoteTest"
         $script:testPathResults["HKU:\"] = $false
         $script:testPathResults[$registryPath] = $true
 
-        Set-WinUtilRegistry -Path $registryPath -Name "Enabled" -Type "DWord" -Value "1"
+        Set-NoteRegistry -Path $registryPath -Name "Enabled" -Type "DWord" -Value "1"
 
         Should -Invoke -CommandName New-PSDrive -Times 1 -Exactly -ParameterFilter {
             $PSProvider -eq "Registry" -and
@@ -145,10 +145,10 @@ Describe "Set-WinUtilRegistry" {
     }
 
     It "removes a registry value when requested" {
-        $registryPath = "HKLM:\Software\WinUtilTest"
+        $registryPath = "HKLM:\Software\NoteTest"
         $script:testPathResults["HKU:\"] = $true
         $script:testPathResults[$registryPath] = $true
-        Set-WinUtilRegistry -Path $registryPath -Name "ObsoleteValue" -Type "String" -Value "<RemoveEntry>"
+        Set-NoteRegistry -Path $registryPath -Name "ObsoleteValue" -Type "String" -Value "<RemoveEntry>"
 
         Should -Invoke -CommandName Set-ItemProperty -Times 0 -Exactly
         Should -Invoke -CommandName Remove-ItemProperty -Times 1 -Exactly -ParameterFilter {
@@ -161,11 +161,11 @@ Describe "Set-WinUtilRegistry" {
 
 }
 
-Describe "Set-WinUtilService" {
+Describe "Set-NoteService" {
     BeforeEach {
         Mock Write-Host { }
         Mock Write-Warning { }
-        Mock Write-WinUtilLog { }
+        Mock Write-NoteLog { }
         Mock Get-Service { }
         Mock Set-Service { }
     }
@@ -178,7 +178,7 @@ Describe "Set-WinUtilService" {
             }
         } -ParameterFilter { $Name -eq "DiagTrack" -and $ErrorAction -eq "Stop" }
 
-        Set-WinUtilService -Name "DiagTrack" -StartupType "Disabled"
+        Set-NoteService -Name "DiagTrack" -StartupType "Disabled"
 
         Should -Invoke -CommandName Get-Service -Times 1 -Exactly -ParameterFilter {
             $Name -eq "DiagTrack" -and $ErrorAction -eq "Stop"
@@ -196,7 +196,7 @@ Describe "Set-WinUtilService" {
             }
         } -ParameterFilter { $Name -eq "DiagTrack" -and $ErrorAction -eq "Stop" }
 
-        Set-WinUtilService -Name "DiagTrack" -StartupType "Disabled"
+        Set-NoteService -Name "DiagTrack" -StartupType "Disabled"
 
         Should -Invoke -CommandName Get-Service -Times 1 -Exactly
         Should -Invoke -CommandName Set-Service -Times 0 -Exactly
@@ -214,7 +214,7 @@ Describe "Set-WinUtilService" {
             throw $errorRecord
         } -ParameterFilter { $Name -eq "MissingService" -and $ErrorAction -eq "Stop" }
 
-        Set-WinUtilService -Name "MissingService" -StartupType "Disabled"
+        Set-NoteService -Name "MissingService" -StartupType "Disabled"
 
         Should -Invoke -CommandName Get-Service -Times 1 -Exactly -ParameterFilter {
             $Name -eq "MissingService" -and $ErrorAction -eq "Stop"

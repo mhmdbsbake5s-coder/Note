@@ -35,12 +35,12 @@ $xaml = Get-Content -Path xaml\inputXML.xaml -Raw
 $script += "`$inputXML = @'`r`n$xaml`r`n'@"
 
 $autounattendXml = Get-Content -Path tools\autounattend.xml -Raw
-$script += "`$WinUtilAutounattendXml = @'`r`n$autounattendXml`r`n'@"
+$script += "`$NoteAutounattendXml = @'`r`n$autounattendXml`r`n'@"
 
 $script += Get-Content -Path scripts\main.ps1 -Raw
 
-Set-Content -Path winutil.ps1 -Value $script
+Set-Content -Path Note.ps1 -Value $script
 
 if ($Run) {
-    .\Winutil.ps1
+    .\Note.ps1
 }

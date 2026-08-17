@@ -35,30 +35,30 @@ $sync.preferences.theme = "Auto"
 $sync.preferences.packagemanager = "Winget"
 
 if ($Preset) {
-    Initialize-WinUtilRunspacePool | Out-Null
+    Initialize-NoteRunspacePool | Out-Null
 
     # Selects the tweaks from $Preset varible
-    Update-WinUtilSelections -flatJson $sync.configs.preset.$Preset
+    Update-NoteSelections -flatJson $sync.configs.preset.$Preset
 
-    # Run tweaks that were selected by Update-WinUtilSelections
-    Invoke-WinUtilAutoRun
+    # Run tweaks that were selected by Update-NoteSelections
+    Invoke-NoteAutoRun
 
     # Cleanup and exit
-    Close-WinUtilRunspacePool
+    Close-NoteRunspacePool
     [System.GC]::Collect()
     Stop-Transcript
     return
 }
 
 if ($Config) {
-    Initialize-WinUtilRunspacePool | Out-Null
+    Initialize-NoteRunspacePool | Out-Null
 
     Invoke-WPFImpex -type "import" -Config $Config
 
-    Invoke-WinUtilAutoRun
+    Invoke-NoteAutoRun
 
     # Cleanup and exit
-    Close-WinUtilRunspacePool
+    Close-NoteRunspacePool
     [System.GC]::Collect()
     Stop-Transcript
     return
@@ -86,13 +86,13 @@ try {
 
 if (-NOT ($readerOperationSuccessful)) {
     Write-Host "Failed to parse xaml content using Windows.Markup.XamlReader's Load Method." -ForegroundColor Red
-    Write-Host "Quitting WinUtil..." -ForegroundColor Red
-    Close-WinUtilRunspacePool
+    Write-Host "Quitting Note..." -ForegroundColor Red
+    Close-NoteRunspacePool
     [System.GC]::Collect()
     exit 1
 }
 
-# Setup the Window to follow listen for windows Theme Change events and update the winutil theme
+# Setup the Window to follow listen for windows Theme Change events and update the Note theme
 # throttle logic needed, because windows seems to send more than one theme change event per change
 $lastThemeChangeTime = [datetime]::MinValue
 $debounceInterval = [timespan]::FromSeconds(2)
@@ -112,7 +112,7 @@ $sync.Form.Add_Loaded({
         if (($msg -eq 0x001A) -and $sync.ThemeButton.Content -eq [char]0xF08C) {
             $currentTime = [datetime]::Now
             if ($currentTime - $lastThemeChangeTime -gt $debounceInterval) {
-                Invoke-WinutilThemeChange -theme "Auto"
+                Invoke-NoteThemeChange -theme "Auto"
                 $script:lastThemeChangeTime = $currentTime
                 $handled = $true
             }
@@ -121,12 +121,12 @@ $sync.Form.Add_Loaded({
     })
 })
 
-Invoke-WinutilThemeChange -theme $sync.preferences.theme
+Invoke-NoteThemeChange -theme $sync.preferences.theme
 
 
 # Build only the default tab before first paint; other tabs initialize on first activation.
 $sync.InitializedTabs = @{}
-Initialize-WinUtilTabContent -TabName "Install"
+Initialize-NoteTabContent -TabName "Install"
 
 #===========================================================================
 # Store Form Objects In PowerShell
@@ -175,15 +175,15 @@ $sync.keys | ForEach-Object {
 # Setup and Show the Form
 #===========================================================================
 
-# Progress bar in taskbaritem > Set-WinUtilProgressbar
+# Progress bar in taskbaritem > Set-NoteProgressbar
 $sync["Form"].TaskbarItemInfo = New-Object System.Windows.Shell.TaskbarItemInfo
-Set-WinUtilTaskbaritem -state "None"
+Set-NoteTaskbaritem -state "None"
 
 # Set the titlebar
 $sync["Form"].title = $sync["Form"].title + " " + $sync.version
 # Set the commands that will run when the form is closed
 $sync["Form"].Add_Closing({
-    Close-WinUtilRunspacePool
+    Close-NoteRunspacePool
     [System.GC]::Collect()
 })
 
@@ -198,7 +198,7 @@ $sync.SearchBarClearButton.Add_Click({
 })
 
 # add some shortcuts for people that don't like clicking
-function Invoke-WinUtilFontScaleStep([double]$Step) { $sync.FontScalingSlider.Value = [math]::Max(0.75, [math]::Min(2.0, $sync.FontScalingSlider.Value + $Step)); Invoke-WinUtilFontScaling -ScaleFactor $sync.FontScalingSlider.Value }
+function Invoke-NoteFontScaleStep([double]$Step) { $sync.FontScalingSlider.Value = [math]::Max(0.75, [math]::Min(2.0, $sync.FontScalingSlider.Value + $Step)); Invoke-NoteFontScaling -ScaleFactor $sync.FontScalingSlider.Value }
 
 $commonKeyEvents = {
     # Prevent shortcuts from executing if a process is already running
@@ -233,14 +233,14 @@ $commonKeyEvents = {
     if ($_.KeyboardDevice.Modifiers -eq "Ctrl" -or $_.KeyboardDevice.Modifiers -eq $ctrlShiftModifiers) {
         $keyEventArgs = $_
         switch ($_.Key) {
-            { $_ -in "OemPlus", "Add" } { Invoke-WinUtilFontScaleStep 0.05; $keyEventArgs.Handled = $true }
-            { $_ -in "OemMinus", "Subtract" } { Invoke-WinUtilFontScaleStep -0.05; $keyEventArgs.Handled = $true }
+            { $_ -in "OemPlus", "Add" } { Invoke-NoteFontScaleStep 0.05; $keyEventArgs.Handled = $true }
+            { $_ -in "OemMinus", "Subtract" } { Invoke-NoteFontScaleStep -0.05; $keyEventArgs.Handled = $true }
         }
     }
 }
 $sync["Form"].Add_PreViewKeyDown($commonKeyEvents)
 $sync["Form"].Add_PreviewMouseWheel({
-    if ([Windows.Input.Keyboard]::Modifiers -eq "Ctrl") { Invoke-WinUtilFontScaleStep $(if ($_.Delta -gt 0) { 0.05 } else { -0.05 }); $_.Handled = $true }
+    if ([Windows.Input.Keyboard]::Modifiers -eq "Ctrl") { Invoke-NoteFontScaleStep $(if ($_.Delta -gt 0) { 0.05 } else { -0.05 }); $_.Handled = $true }
 })
 
 $sync["Form"].Add_MouseLeftButtonDown({
@@ -314,8 +314,8 @@ $sync["Form"].Add_ContentRendered({
     }
 
     $sync["Form"].Focus()
-    $sync["Form"].Dispatcher.BeginInvoke([System.Windows.Threading.DispatcherPriority]::Background, [action]{ Initialize-WinUtilRunspacePool | Out-Null }) | Out-Null
-    $sync["Form"].Dispatcher.BeginInvoke([System.Windows.Threading.DispatcherPriority]::Background, [action]{ Initialize-WinUtilTaskbarOverlayAssets -IncludeLogo $false -IncludeStatusAssets $true }) | Out-Null
+    $sync["Form"].Dispatcher.BeginInvoke([System.Windows.Threading.DispatcherPriority]::Background, [action]{ Initialize-NoteRunspacePool | Out-Null }) | Out-Null
+    $sync["Form"].Dispatcher.BeginInvoke([System.Windows.Threading.DispatcherPriority]::Background, [action]{ Initialize-NoteTaskbarOverlayAssets -IncludeLogo $false -IncludeStatusAssets $true }) | Out-Null
 })
 
 # The SearchBarTimer is used to delay the search operation until the user has stopped typing for a short period
@@ -374,17 +374,17 @@ foreach ($appCategoryChip in $sync.AppCategoryChips) {
     $sync[$appCategoryChip.Name].Tag = $appCategoryChip.Category
 }
 
-$sync["WPFSearchChipAll"].Add_Click({ Invoke-WinUtilAppCategoryChip -Chip $this })
-$sync["WPFSearchChipBrowsers"].Add_Click({ Invoke-WinUtilAppCategoryChip -Chip $this })
-$sync["WPFSearchChipCommunications"].Add_Click({ Invoke-WinUtilAppCategoryChip -Chip $this })
-$sync["WPFSearchChipDevelopment"].Add_Click({ Invoke-WinUtilAppCategoryChip -Chip $this })
-$sync["WPFSearchChipDocument"].Add_Click({ Invoke-WinUtilAppCategoryChip -Chip $this })
-$sync["WPFSearchChipGames"].Add_Click({ Invoke-WinUtilAppCategoryChip -Chip $this })
-$sync["WPFSearchChipMicrosoftTools"].Add_Click({ Invoke-WinUtilAppCategoryChip -Chip $this })
-$sync["WPFSearchChipMultimediaTools"].Add_Click({ Invoke-WinUtilAppCategoryChip -Chip $this })
-$sync["WPFSearchChipProTools"].Add_Click({ Invoke-WinUtilAppCategoryChip -Chip $this })
-$sync["WPFSearchChipSelfhostedTools"].Add_Click({ Invoke-WinUtilAppCategoryChip -Chip $this })
-$sync["WPFSearchChipUtilities"].Add_Click({ Invoke-WinUtilAppCategoryChip -Chip $this })
+$sync["WPFSearchChipAll"].Add_Click({ Invoke-NoteAppCategoryChip -Chip $this })
+$sync["WPFSearchChipBrowsers"].Add_Click({ Invoke-NoteAppCategoryChip -Chip $this })
+$sync["WPFSearchChipCommunications"].Add_Click({ Invoke-NoteAppCategoryChip -Chip $this })
+$sync["WPFSearchChipDevelopment"].Add_Click({ Invoke-NoteAppCategoryChip -Chip $this })
+$sync["WPFSearchChipDocument"].Add_Click({ Invoke-NoteAppCategoryChip -Chip $this })
+$sync["WPFSearchChipGames"].Add_Click({ Invoke-NoteAppCategoryChip -Chip $this })
+$sync["WPFSearchChipMicrosoftTools"].Add_Click({ Invoke-NoteAppCategoryChip -Chip $this })
+$sync["WPFSearchChipMultimediaTools"].Add_Click({ Invoke-NoteAppCategoryChip -Chip $this })
+$sync["WPFSearchChipProTools"].Add_Click({ Invoke-NoteAppCategoryChip -Chip $this })
+$sync["WPFSearchChipSelfhostedTools"].Add_Click({ Invoke-NoteAppCategoryChip -Chip $this })
+$sync["WPFSearchChipUtilities"].Add_Click({ Invoke-NoteAppCategoryChip -Chip $this })
 
 $sync["Form"].Add_Loaded({
     param($e)
@@ -395,13 +395,13 @@ $sync["Form"].Add_Loaded({
 })
 
 $NavLogoPanel = $sync["Form"].FindName("NavLogoPanel")
-$NavLogoPanel.Children.Add((Invoke-WinUtilAssets -Type "logo" -Size 25)) | Out-Null
-Initialize-WinUtilTaskbarOverlayAssets -IncludeLogo $true -IncludeStatusAssets $false
+$NavLogoPanel.Children.Add((Invoke-NoteAssets -Type "logo" -Size 25)) | Out-Null
+Initialize-NoteTaskbarOverlayAssets -IncludeLogo $true -IncludeStatusAssets $false
 
-Set-WinUtilTaskbaritem -overlay "logo"
+Set-NoteTaskbaritem -overlay "logo"
 
 $sync["Form"].Add_Activated({
-    Set-WinUtilTaskbaritem -overlay "logo"
+    Set-NoteTaskbaritem -overlay "logo"
 })
 
 $sync["ThemeButton"].Add_Click({
@@ -409,15 +409,15 @@ $sync["ThemeButton"].Add_Click({
 })
 $sync["AutoThemeMenuItem"].Add_Click({
     Invoke-WPFPopup -Action "Hide" -Popups @("Theme")
-    Invoke-WinutilThemeChange -theme "Auto"
+    Invoke-NoteThemeChange -theme "Auto"
 })
 $sync["DarkThemeMenuItem"].Add_Click({
     Invoke-WPFPopup -Action "Hide" -Popups @("Theme")
-    Invoke-WinutilThemeChange -theme "Dark"
+    Invoke-NoteThemeChange -theme "Dark"
 })
 $sync["LightThemeMenuItem"].Add_Click({
     Invoke-WPFPopup -Action "Hide" -Popups @("Theme")
-    Invoke-WinutilThemeChange -theme "Light"
+    Invoke-NoteThemeChange -theme "Light"
 })
 
 $sync["SettingsButton"].Add_Click({
@@ -438,14 +438,14 @@ $sync["AboutMenuItem"].Add_Click({
 Author   : <a href="https://github.com/ChrisTitusTech">@ChrisTitusTech</a>
 UI       : <a href="https://github.com/MyDrift-user">@MyDrift-user</a>, <a href="https://github.com/Marterich">@Marterich</a>
 Runspace : <a href="https://github.com/DeveloperDurp">@DeveloperDurp</a>, <a href="https://github.com/Marterich">@Marterich</a>
-GitHub   : <a href="https://github.com/ChrisTitusTech/winutil">ChrisTitusTech/winutil</a>
-Version  : <a href="https://github.com/ChrisTitusTech/winutil/releases/tag/$($sync.version)">$($sync.version)</a>
+GitHub   : <a href="https://github.com/ChrisTitusTech/Note">ChrisTitusTech/Note</a>
+Version  : <a href="https://github.com/ChrisTitusTech/Note/releases/tag/$($sync.version)">$($sync.version)</a>
 "@
     Show-CustomDialog -Title "About" -Message $authorInfo
 })
 $sync["DocumentationMenuItem"].Add_Click({
     Invoke-WPFPopup -Action "Hide" -Popups @("Settings")
-    Start-Process "https://winutil.christitus.com/"
+    Start-Process "https://Note.christitus.com/"
 })
 $sync["SponsorMenuItem"].Add_Click({
     Invoke-WPFPopup -Action "Hide" -Popups @("Settings")
@@ -455,7 +455,7 @@ $sync["SponsorMenuItem"].Add_Click({
 "@
     $authorInfo += "`n"
     try {
-        $sponsors = Invoke-WinUtilSponsors
+        $sponsors = Invoke-NoteSponsors
         foreach ($sponsor in $sponsors) {
             $authorInfo += "<a href=`"https://github.com/sponsors/ChrisTitusTech`">$sponsor</a>`n"
         }
@@ -483,14 +483,14 @@ $sync["FontScalingResetButton"].Add_Click({
 
 $sync["FontScalingApplyButton"].Add_Click({
     $scaleFactor = $sync.FontScalingSlider.Value
-    Invoke-WinUtilFontScaling -ScaleFactor $scaleFactor
+    Invoke-NoteFontScaling -ScaleFactor $scaleFactor
     Invoke-WPFPopup -Action "Hide" -Popups @("FontScaling")
 })
 
 # ── Win11ISO Tab button handlers ──────────────────────────────────────────────
 
 $sync["WPFWin11ISOBrowseButton"].Add_Click({
-    Invoke-WinUtilISOBrowse
+    Invoke-NoteISOBrowse
 })
 
 $sync["WPFWin11ISODownloadLink"].Add_Click({
@@ -498,44 +498,44 @@ $sync["WPFWin11ISODownloadLink"].Add_Click({
 })
 
 $sync["WPFWin11ISOMountButton"].Add_Click({
-    Invoke-WinUtilISOMountAndVerify
+    Invoke-NoteISOMountAndVerify
 })
 
 $sync["WPFWin11ISOModifyButton"].Add_Click({
-    Invoke-WinUtilISOModify
+    Invoke-NoteISOModify
 })
 
 $sync["WPFWin11ISOChooseISOButton"].Add_Click({
     $sync["WPFWin11ISOOptionUSB"].Visibility = "Collapsed"
-    Invoke-WinUtilISOExport
+    Invoke-NoteISOExport
 })
 
 $sync["WPFWin11ISOChooseUSBButton"].Add_Click({
     $sync["WPFWin11ISOOptionUSB"].Visibility = "Visible"
-    Invoke-WinUtilISORefreshUSBDrives
+    Invoke-NoteISORefreshUSBDrives
 })
 
 $sync["WPFWin11ISORefreshUSBButton"].Add_Click({
-    Invoke-WinUtilISORefreshUSBDrives
+    Invoke-NoteISORefreshUSBDrives
 })
 
 $sync["WPFWin11ISOWriteUSBButton"].Add_Click({
-    Invoke-WinUtilISOWriteUSB
+    Invoke-NoteISOWriteUSB
 })
 
 $sync["WPFWin11ISOCleanResetButton"].Add_Click({
-    Invoke-WinUtilISOCleanAndReset
+    Invoke-NoteISOCleanAndReset
 })
 
-function Remove-WinUtilTempScript {
+function Remove-NoteTempScript {
     <#
     .SYNOPSIS
         Removes the temporary script downloaded by windev.ps1.
 
     .DESCRIPTION
-        Deletes the current script only when it is a winutil-*.ps1 file in
+        Deletes the current script only when it is a Note-*.ps1 file in
         the system temporary directory. This preserves normal file-backed
-        and in-memory WinUtil launches.
+        and in-memory Note launches.
     #>
 
     $scriptPath = $PSCommandPath
@@ -544,7 +544,7 @@ function Remove-WinUtilTempScript {
     if (
         $scriptPath -and
         [IO.Path]::GetDirectoryName($scriptPath) -eq $tempPath -and
-        [IO.Path]::GetFileName($scriptPath) -like 'winutil-*.ps1'
+        [IO.Path]::GetFileName($scriptPath) -like 'Note-*.ps1'
     ) {
         Remove-Item -LiteralPath $scriptPath -Force -ErrorAction SilentlyContinue
     }
@@ -553,5 +553,5 @@ function Remove-WinUtilTempScript {
 # ──────────────────────────────────────────────────────────────────────────────
 
 $sync["Form"].ShowDialog() | out-null
-Remove-WinUtilTempScript
+Remove-NoteTempScript
 Stop-Transcript

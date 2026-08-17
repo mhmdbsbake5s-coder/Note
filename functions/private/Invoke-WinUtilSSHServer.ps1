@@ -1,4 +1,4 @@
-function Invoke-WinUtilSSHServer {
+function Invoke-NoteSSHServer {
     <#
     .SYNOPSIS
         Enables OpenSSH server to remote into your windows device
@@ -27,7 +27,7 @@ function Invoke-WinUtilSSHServer {
 
     # An SSH logon for a member of the administrators group gets a full token
     # with no UAC prompt, so sshd reads administrator keys from a machine-wide
-    # file that only Administrators and SYSTEM may write. WinUtil always runs
+    # file that only Administrators and SYSTEM may write. Note always runs
     # elevated, so the account being set up here is always an administrator.
     $sshProgramDataPath = Join-Path $env:ProgramData "ssh"
     $sshdConfigPath = Join-Path $sshProgramDataPath "sshd_config"
@@ -38,7 +38,7 @@ function Invoke-WinUtilSSHServer {
         New-Item -Path $sshProgramDataPath -ItemType Directory -Force | Out-Null
     }
 
-    # Earlier WinUtil versions commented out the administrators block in
+    # Earlier Note versions commented out the administrators block in
     # sshd_config. Detect that state before restoring it, so administrator keys
     # already in use are carried over instead of silently stopping working.
     $configContent = if (Test-Path -Path $sshdConfigPath) { [string](Get-Content -Path $sshdConfigPath -Raw) } else { "" }

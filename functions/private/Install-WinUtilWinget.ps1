@@ -1,4 +1,4 @@
-function Install-WinUtilWinget {
+function Install-NoteWinget {
     <#
 
     .SYNOPSIS
@@ -7,7 +7,7 @@ function Install-WinUtilWinget {
     .DESCRIPTION
         installs winGet if needed
     #>
-    if ((Test-WinUtilPackageManager -winget) -eq "installed") {
+    if ((Test-NotePackageManager -winget) -eq "installed") {
         return
     }
 

@@ -8,10 +8,10 @@ BeforeAll {
     . (Join-Path $script:repoRoot "functions\public\Invoke-WPFUpdatesdefault.ps1")
     . (Join-Path $script:repoRoot "functions\public\Invoke-WPFUpdatessecurity.ps1")
 
-    function Write-WinUtilLog {
+    function Write-NoteLog {
         param($Message, $Level, $Component)
     }
-    function Show-WinUtilMessage {
+    function Show-NoteMessage {
         param($Message, $Title, $Button, $Icon)
     }
     function Get-ScheduledTask {
@@ -53,8 +53,8 @@ BeforeAll {
 Describe "Invoke-WPFUpdatesdisable" {
     BeforeEach {
         Mock Write-Host { }
-        Mock Write-WinUtilLog { }
-        Mock Show-WinUtilMessage { "Yes" }
+        Mock Write-NoteLog { }
+        Mock Show-NoteMessage { "Yes" }
         Mock New-Item { }
         Mock Set-ItemProperty { }
         Mock Set-Service { }
@@ -132,11 +132,11 @@ Describe "Invoke-WPFUpdatesdisable" {
     }
 
     It "requires confirmation before disabling updates" {
-        Mock Show-WinUtilMessage { "No" }
+        Mock Show-NoteMessage { "No" }
 
         Invoke-WPFUpdatesdisable
 
-        Should -Invoke Show-WinUtilMessage -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke Show-NoteMessage -Times 1 -Exactly -ParameterFilter {
             $Title -eq "Disable Windows Update?" -and
                 $Button -eq "YesNo" -and
                 $Icon -eq "Warning"
@@ -150,7 +150,7 @@ Describe "Invoke-WPFUpdatesdisable" {
 Describe "Invoke-WPFUpdatesdefault" {
     BeforeEach {
         Mock Write-Host { }
-        Mock Write-WinUtilLog { }
+        Mock Write-NoteLog { }
         Mock Remove-Item { }
         Mock Remove-ItemProperty { }
         Mock Get-ItemProperty {
@@ -169,7 +169,7 @@ Describe "Invoke-WPFUpdatesdefault" {
         Mock secedit { }
     }
 
-    It "removes only registry values managed by WinUtil" {
+    It "removes only registry values managed by Note" {
         Invoke-WPFUpdatesdefault
 
         $expectedRegistryValues = @(
@@ -249,7 +249,7 @@ Describe "Invoke-WPFUpdatesdefault" {
 Describe "Invoke-WPFUpdatessecurity" {
     BeforeEach {
         Mock Write-Host { }
-        Mock Write-WinUtilLog { }
+        Mock Write-NoteLog { }
         Mock New-Item { }
         Mock Set-ItemProperty { }
         Mock Remove-ItemProperty { }
@@ -380,7 +380,7 @@ Describe "Invoke-WPFUpdatessecurity" {
         }
     }
 
-    It "removes legacy WinUtil deferral values from the unsupported UX settings path" {
+    It "removes legacy Note deferral values from the unsupported UX settings path" {
         Invoke-WPFUpdatessecurity
 
         foreach ($expectedValueName in @("BranchReadinessLevel", "DeferFeatureUpdatesPeriodInDays", "DeferQualityUpdatesPeriodInDays")) {

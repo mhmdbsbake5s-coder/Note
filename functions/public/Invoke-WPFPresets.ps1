@@ -2,7 +2,7 @@ function Invoke-WPFPresets {
     <#
 
     .SYNOPSIS
-        Sets the checkboxes in winutil to the given preset
+        Sets the checkboxes in Note to the given preset
 
     .PARAMETER preset
         The preset to set the checkboxes to
@@ -44,7 +44,7 @@ function Invoke-WPFPresets {
     }
 
     if ($preset) {
-        Update-WinUtilSelections -flatJson $CheckBoxesToCheck
+        Update-NoteSelections -flatJson $CheckBoxesToCheck
     }
 
     Reset-WPFCheckBoxes -doToggles $false -checkboxfilterpattern $checkboxfilterpattern

@@ -8,7 +8,7 @@ function Invoke-WPFtweaksbutton {
 
   if($sync.ProcessRunning) {
     $msg = "[Invoke-WPFtweaksbutton] Install process is currently running."
-    [System.Windows.MessageBox]::Show($msg, "Winutil", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Warning)
+    [System.Windows.MessageBox]::Show($msg, "Note", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Warning)
     return
   }
 
@@ -22,11 +22,11 @@ function Invoke-WPFtweaksbutton {
   $tweaksToRun = @($Tweaks | Where-Object { $_ -ne $restorePointTweak })
   $totalSteps = [Math]::Max($Tweaks.Count, 1)
   $completedSteps = 0
-  Write-WinUtilLog -Component "Tweaks" -Message "Tweaks requested: $(@($Tweaks).Count) selected tweak(s), DNS provider: $dnsProvider"
+  Write-NoteLog -Component "Tweaks" -Message "Tweaks requested: $(@($Tweaks).Count) selected tweak(s), DNS provider: $dnsProvider"
 
   if ($tweaks.count -eq 0 -and $dnsProvider -eq "Default") {
     $msg = "Please check the tweaks you wish to perform."
-    [System.Windows.MessageBox]::Show($msg, "Winutil", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Warning)
+    [System.Windows.MessageBox]::Show($msg, "Note", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Warning)
     return
   }
 
@@ -34,24 +34,24 @@ function Invoke-WPFtweaksbutton {
     $sync.ProcessRunning = $true
 
     if ($Tweaks.Count -eq 1) {
-        Invoke-WPFUIThread -ScriptBlock { Set-WinUtilTaskbaritem -state "Indeterminate" -value 0.01 -overlay "logo" }
+        Invoke-WPFUIThread -ScriptBlock { Set-NoteTaskbaritem -state "Indeterminate" -value 0.01 -overlay "logo" }
     } else {
-        Invoke-WPFUIThread -ScriptBlock { Set-WinUtilTaskbaritem -state "Normal" -value 0.01 -overlay "logo" }
+        Invoke-WPFUIThread -ScriptBlock { Set-NoteTaskbaritem -state "Normal" -value 0.01 -overlay "logo" }
     }
 
-    Set-WinUtilTweaksProgressIndicator -Visible $true -Label "Creating restore point" -Percent 0
-    Write-WinUtilLog -Component "Tweaks" -Message "Creating restore point before applying selected tweaks."
-    Invoke-WinUtilTweaks $restorePointTweak
+    Set-NoteTweaksProgressIndicator -Visible $true -Label "Creating restore point" -Percent 0
+    Write-NoteLog -Component "Tweaks" -Message "Creating restore point before applying selected tweaks."
+    Invoke-NoteTweaks $restorePointTweak
     $completedSteps = 1
 
     if ($tweaksToRun.Count -eq 0 -and $dnsProvider -eq "Default") {
-      Set-WinUtilTweaksProgressIndicator -Visible $true -Label "Tweaks finished" -Percent 100
+      Set-NoteTweaksProgressIndicator -Visible $true -Label "Tweaks finished" -Percent 100
       $sync.ProcessRunning = $false
-      Invoke-WPFUIThread -ScriptBlock { Set-WinUtilTaskbaritem -state "None" -overlay "checkmark" }
+      Invoke-WPFUIThread -ScriptBlock { Set-NoteTaskbaritem -state "None" -overlay "checkmark" }
       Write-Host "================================="
       Write-Host "--     Tweaks are Finished    ---"
       Write-Host "================================="
-      Write-WinUtilLog -Component "Tweaks" -Message "Tweaks workflow completed after restore point."
+      Write-NoteLog -Component "Tweaks" -Message "Tweaks workflow completed after restore point."
       return
     }
   }
@@ -64,36 +64,36 @@ function Invoke-WPFtweaksbutton {
 
     if ($completedSteps -eq 0) {
       if ($Tweaks.count -eq 1) {
-        Invoke-WPFUIThread -ScriptBlock { Set-WinUtilTaskbaritem -state "Indeterminate" -value 0.01 -overlay "logo" }
+        Invoke-WPFUIThread -ScriptBlock { Set-NoteTaskbaritem -state "Indeterminate" -value 0.01 -overlay "logo" }
       } else {
-        Invoke-WPFUIThread -ScriptBlock{ Set-WinUtilTaskbaritem -state "Normal" -value 0.01 -overlay "logo" }
+        Invoke-WPFUIThread -ScriptBlock{ Set-NoteTaskbaritem -state "Normal" -value 0.01 -overlay "logo" }
       }
     }
 
     if ($dnsProvider -ne "Default") {
-      $dnsResult = @(Set-WinUtilDNS -DNSProvider $dnsProvider)
+      $dnsResult = @(Set-NoteDNS -DNSProvider $dnsProvider)
       if ($dnsResult[-1] -ne $true) {
-        Set-WinUtilTweaksProgressIndicator -Visible $true -Label "DNS change failed" -Percent 100
+        Set-NoteTweaksProgressIndicator -Visible $true -Label "DNS change failed" -Percent 100
         $sync.ProcessRunning = $false
-        Invoke-WPFUIThread -ScriptBlock { Set-WinUtilTaskbaritem -state "Error" -overlay "warning" }
-        Write-WinUtilLog -Level "ERROR" -Component "Tweaks" -Message "Tweaks workflow stopped because the DNS change failed."
+        Invoke-WPFUIThread -ScriptBlock { Set-NoteTaskbaritem -state "Error" -overlay "warning" }
+        Write-NoteLog -Level "ERROR" -Component "Tweaks" -Message "Tweaks workflow stopped because the DNS change failed."
         return
       }
     }
 
     for ($i = 0; $i -lt $tweaks.Count; $i++) {
-      Set-WinUtilTweaksProgressIndicator -Visible $true -Label "Applying $($tweaks[$i]) ($($completedSteps + 1)/$totalSteps)" -Percent ($completedSteps / $totalSteps * 100)
-      Invoke-WinUtilTweaks $tweaks[$i]
+      Set-NoteTweaksProgressIndicator -Visible $true -Label "Applying $($tweaks[$i]) ($($completedSteps + 1)/$totalSteps)" -Percent ($completedSteps / $totalSteps * 100)
+      Invoke-NoteTweaks $tweaks[$i]
       $completedSteps++
       $progress = $completedSteps / $totalSteps
-      Invoke-WPFUIThread -ScriptBlock { Set-WinUtilTaskbaritem -value $progress }
+      Invoke-WPFUIThread -ScriptBlock { Set-NoteTaskbaritem -value $progress }
     }
-    Set-WinUtilTweaksProgressIndicator -Visible $true -Label "Tweaks finished" -Percent 100
+    Set-NoteTweaksProgressIndicator -Visible $true -Label "Tweaks finished" -Percent 100
     $sync.ProcessRunning = $false
-    Invoke-WPFUIThread -ScriptBlock { Set-WinUtilTaskbaritem -state "None" -overlay "checkmark" }
+    Invoke-WPFUIThread -ScriptBlock { Set-NoteTaskbaritem -state "None" -overlay "checkmark" }
     Write-Host "================================="
     Write-Host "--     Tweaks are Finished    ---"
     Write-Host "================================="
-    Write-WinUtilLog -Component "Tweaks" -Message "Tweaks workflow completed."
+    Write-NoteLog -Component "Tweaks" -Message "Tweaks workflow completed."
   } | Out-Null
 }

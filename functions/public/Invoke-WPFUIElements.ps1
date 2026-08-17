@@ -1,7 +1,7 @@
 function Invoke-WPFUIElements {
     <#
     .SYNOPSIS
-        Adds UI elements to a specified Grid in the WinUtil GUI based on a JSON configuration.
+        Adds UI elements to a specified Grid in the Note GUI based on a JSON configuration.
     .PARAMETER configVariable
         The variable/link containing the JSON configuration.
     .PARAMETER targetGridName
@@ -199,14 +199,14 @@ function Invoke-WPFUIElements {
                         $stackPanelContainer.Children.Add($dockPanel) | Out-Null
 
                         $sync[$entryInfo.Name] = $checkBox
-                        $sync[$entryInfo.Name].IsChecked = (Get-WinUtilToggleStatus $entryInfo.Name)
+                        $sync[$entryInfo.Name].IsChecked = (Get-NoteToggleStatus $entryInfo.Name)
 
                         $sync[$entryInfo.Name].Add_Checked({
                             [System.Object]$Sender = $args[0]
                             Invoke-WPFSelectedCheckboxesUpdate -type "Add" -checkboxName $Sender.name
                             # Skip applying tweaks while an import is restoring toggle states
                             if (-not $sync.ImportInProgress) {
-                                Invoke-WinUtilTweaks $Sender.name
+                                Invoke-NoteTweaks $Sender.name
                             }
                         })
 
@@ -215,7 +215,7 @@ function Invoke-WPFUIElements {
                             Invoke-WPFSelectedCheckboxesUpdate -type "Remove" -checkboxName $Sender.name
                             # Skip undoing tweaks while an import is restoring toggle states
                             if (-not $sync.ImportInProgress) {
-                                Invoke-WinUtiltweaks $Sender.name -undo $true
+                                Invoke-Notetweaks $Sender.name -undo $true
                             }
                         })
                     }
@@ -318,7 +318,7 @@ function Invoke-WPFUIElements {
 
                         if ($entryInfo.Registry -and @($entryInfo.Registry)[0].Values) {
                             try {
-                                $comboBox.Tag.State = Get-WinUtilRegistryComboState -Registry $entryInfo.Registry
+                                $comboBox.Tag.State = Get-NoteRegistryComboState -Registry $entryInfo.Registry
                                 $comboBox.SelectedIndex = @($comboBox.Items.Content).IndexOf([string]$comboBox.Tag.State)
                             } catch {
                                 $unknownStateItem = New-Object Windows.Controls.ComboBoxItem
@@ -348,7 +348,7 @@ function Invoke-WPFUIElements {
                                 $registry = $this.Tag.Registry
                                 if ($registry -and $selectedItem.IsEnabled -and $selectedItem.Content -ne $this.Tag.State) {
                                     try {
-                                        Set-WinUtilRegistryComboState -Registry $registry -State $selectedItem.Content
+                                        Set-NoteRegistryComboState -Registry $registry -State $selectedItem.Content
                                         $this.Tag.State = $selectedItem.Content
                                         $this.ToolTip = $null
                                         $unknownStateItem = @($this.Items) | Where-Object Content -EQ "Custom / Unknown - select a state" | Select-Object -First 1
@@ -364,7 +364,7 @@ function Invoke-WPFUIElements {
                                         $this.SelectedItem = @($this.Items) | Where-Object Content -EQ $previousState | Select-Object -First 1
                                         [System.Windows.MessageBox]::Show(
                                             $applyError,
-                                            "WinUtil",
+                                            "Note",
                                             [System.Windows.MessageBoxButton]::OK,
                                             [System.Windows.MessageBoxImage]::Warning
                                         ) | Out-Null
@@ -467,7 +467,7 @@ function Invoke-WPFUIElements {
                         $textBlock.Margin = "5,5,5,5"
                         $textBlock.UseLayoutRounding = $true
 
-                        $bulletBadge = [Windows.Documents.InlineUIContainer]::new((New-WinUtilFossBadge -Size 18 -Round))
+                        $bulletBadge = [Windows.Documents.InlineUIContainer]::new((New-NoteFossBadge -Size 18 -Round))
                         $bulletBadge.BaselineAlignment = [Windows.BaselineAlignment]::Center
 
                         $textRun = New-Object Windows.Documents.Run

@@ -4,17 +4,17 @@
 
 BeforeAll {
     $script:repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-    . (Join-Path $script:repoRoot "functions\private\Get-WinUtilInstalledAPPX.ps1")
-    . (Join-Path $script:repoRoot "functions\private\Install-WinUtilAPPX.ps1")
-    . (Join-Path $script:repoRoot "functions\private\Remove-WinUtilAPPX.ps1")
-    . (Join-Path $script:repoRoot "functions\private\Remove-WinUtilProvisionedAPPX.ps1")
+    . (Join-Path $script:repoRoot "functions\private\Get-NoteInstalledAPPX.ps1")
+    . (Join-Path $script:repoRoot "functions\private\Install-NoteAPPX.ps1")
+    . (Join-Path $script:repoRoot "functions\private\Remove-NoteAPPX.ps1")
+    . (Join-Path $script:repoRoot "functions\private\Remove-NoteProvisionedAPPX.ps1")
     . (Join-Path $script:repoRoot "functions\public\Invoke-WPFAppxInstall.ps1")
     . (Join-Path $script:repoRoot "functions\public\Invoke-WPFAppxRemoval.ps1")
     . (Join-Path $script:repoRoot "functions\public\Invoke-WPFButton.ps1")
 
     $tokens = $null
     $parseErrors = $null
-    $provisionedSourcePath = Join-Path $script:repoRoot "functions\private\Remove-WinUtilProvisionedAPPX.ps1"
+    $provisionedSourcePath = Join-Path $script:repoRoot "functions\private\Remove-NoteProvisionedAPPX.ps1"
     $provisionedSourceAst = [System.Management.Automation.Language.Parser]::ParseFile($provisionedSourcePath, [ref]$tokens, [ref]$parseErrors)
     $ps5CommandAssignment = $provisionedSourceAst.Find({
         param($node)
@@ -24,7 +24,7 @@ BeforeAll {
     }, $true)
     $script:provisionedRemovalScriptBlock = $ps5CommandAssignment.Right.Expression.ScriptBlock.GetScriptBlock()
 
-    $installSourcePath = Join-Path $script:repoRoot "functions\private\Install-WinUtilAPPX.ps1"
+    $installSourcePath = Join-Path $script:repoRoot "functions\private\Install-NoteAPPX.ps1"
     $installSourceAst = [System.Management.Automation.Language.Parser]::ParseFile($installSourcePath, [ref]$tokens, [ref]$parseErrors)
     $installCommandAssignment = $installSourceAst.Find({
         param($node)
@@ -34,10 +34,10 @@ BeforeAll {
     }, $true)
     $script:appxInstallScriptBlock = $installCommandAssignment.Right.Expression.ScriptBlock.GetScriptBlock()
 
-    function Write-WinUtilLog {
+    function Write-NoteLog {
         param($Message, $Level, $Component)
     }
-    function Show-WinUtilMessage {
+    function Show-NoteMessage {
         param($Message, $Title, $Button, $Icon)
     }
     function Invoke-WPFRunspace {
@@ -46,7 +46,7 @@ BeforeAll {
     function Invoke-WPFUIThread {
         param([scriptblock]$ScriptBlock)
     }
-    function Set-WinUtilTweaksProgressIndicator {
+    function Set-NoteTweaksProgressIndicator {
         param($Visible, $Label, $Percent)
     }
     function powershell.exe { }
@@ -56,8 +56,8 @@ BeforeAll {
     function Add-AppxPackage {
         param($Register, [switch]$DisableDevelopmentMode, $ErrorAction)
     }
-    function Install-WinUtilWinget { }
-    function Install-WinUtilProgramWinget {
+    function Install-NoteWinget { }
+    function Install-NoteProgramWinget {
         param($Action, $Programs)
     }
     function Remove-AppxPackage {
@@ -70,7 +70,7 @@ BeforeAll {
         )
         process { }
     }
-    function Remove-WinUtilProvisionedAPPX {
+    function Remove-NoteProvisionedAPPX {
         param($PackageList)
     }
     function Get-AppxProvisionedPackage {
@@ -101,9 +101,9 @@ BeforeAll {
     }
 }
 
-Describe "Get-WinUtilInstalledAPPX" {
+Describe "Get-NoteInstalledAPPX" {
     BeforeEach {
-        Mock Write-WinUtilLog { }
+        Mock Write-NoteLog { }
         Mock powershell.exe {
             $global:LASTEXITCODE = 0
             @("Example.One", "Example.Two")
@@ -111,11 +111,11 @@ Describe "Get-WinUtilInstalledAPPX" {
     }
 
     It "queries installed package names through Windows PowerShell" {
-        $result = Get-WinUtilInstalledAPPX
+        $result = Get-NoteInstalledAPPX
 
         $result | Should -Be @("Example.One", "Example.Two")
         Should -Invoke -CommandName powershell.exe -Times 1 -Exactly
-        Should -Invoke -CommandName Write-WinUtilLog -Times 0 -Exactly
+        Should -Invoke -CommandName Write-NoteLog -Times 0 -Exactly
     }
 
     It "logs query failures and returns no package names" {
@@ -124,10 +124,10 @@ Describe "Get-WinUtilInstalledAPPX" {
             "AppX query failed"
         }
 
-        $result = @(Get-WinUtilInstalledAPPX)
+        $result = @(Get-NoteInstalledAPPX)
 
         $result | Should -HaveCount 0
-        Should -Invoke -CommandName Write-WinUtilLog -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Write-NoteLog -Times 1 -Exactly -ParameterFilter {
             $Level -eq "ERROR" -and
                 $Component -eq "AppX" -and
                 $Message -eq "Failed to get installed AppX packages: AppX query failed"
@@ -135,11 +135,11 @@ Describe "Get-WinUtilInstalledAPPX" {
     }
 }
 
-Describe "Install-WinUtilAPPX" {
+Describe "Install-NoteAPPX" {
     BeforeEach {
-        Mock Write-WinUtilLog { }
-        Mock Install-WinUtilWinget { }
-        Mock Install-WinUtilProgramWinget { }
+        Mock Write-NoteLog { }
+        Mock Install-NoteWinget { }
+        Mock Install-NoteProgramWinget { }
         Mock powershell.exe {
             $global:LASTEXITCODE = 0
             "C:\Program Files\WindowsApps\Example.Package\AppxManifest.xml"
@@ -147,11 +147,11 @@ Describe "Install-WinUtilAPPX" {
     }
 
     It "uses a local manifest without contacting the Microsoft Store" {
-        Install-WinUtilAPPX -Name "Example.Package" -StoreId "9EXAMPLE1234"
+        Install-NoteAPPX -Name "Example.Package" -StoreId "9EXAMPLE1234"
 
-        Should -Invoke -CommandName Install-WinUtilWinget -Times 0 -Exactly
-        Should -Invoke -CommandName Install-WinUtilProgramWinget -Times 0 -Exactly
-        Should -Invoke -CommandName Write-WinUtilLog -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Install-NoteWinget -Times 0 -Exactly
+        Should -Invoke -CommandName Install-NoteProgramWinget -Times 0 -Exactly
+        Should -Invoke -CommandName Write-NoteLog -Times 1 -Exactly -ParameterFilter {
             $Component -eq "AppX" -and
                 $Message -like "Registered local AppX manifest for Example.Package*"
         }
@@ -160,10 +160,10 @@ Describe "Install-WinUtilAPPX" {
     It "falls back to the Microsoft Store when no local manifest is available" {
         Mock powershell.exe { $global:LASTEXITCODE = 0 }
 
-        Install-WinUtilAPPX -Name "Example.Package" -StoreId "9EXAMPLE1234"
+        Install-NoteAPPX -Name "Example.Package" -StoreId "9EXAMPLE1234"
 
-        Should -Invoke -CommandName Install-WinUtilWinget -Times 1 -Exactly
-        Should -Invoke -CommandName Install-WinUtilProgramWinget -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Install-NoteWinget -Times 1 -Exactly
+        Should -Invoke -CommandName Install-NoteProgramWinget -Times 1 -Exactly -ParameterFilter {
             $Action -eq "Install" -and $Programs.Count -eq 1 -and $Programs[0] -eq "msstore:9EXAMPLE1234"
         }
     }
@@ -174,24 +174,24 @@ Describe "Install-WinUtilAPPX" {
             "Registration failed"
         }
 
-        Install-WinUtilAPPX -Name "Example.Package" -StoreId "9EXAMPLE1234"
+        Install-NoteAPPX -Name "Example.Package" -StoreId "9EXAMPLE1234"
 
-        Should -Invoke -CommandName Write-WinUtilLog -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Write-NoteLog -Times 1 -Exactly -ParameterFilter {
             $Level -eq "WARN" -and
                 $Component -eq "AppX" -and
                 $Message -eq "Local AppX registration failed for Example.Package: Registration failed"
         }
-        Should -Invoke -CommandName Install-WinUtilProgramWinget -Times 1 -Exactly
+        Should -Invoke -CommandName Install-NoteProgramWinget -Times 1 -Exactly
     }
 
     It "throws after logging an error when neither install method is available" {
         Mock powershell.exe { $global:LASTEXITCODE = 0 }
 
-        { Install-WinUtilAPPX -Name "Example.Package" } |
+        { Install-NoteAPPX -Name "Example.Package" } |
             Should -Throw "Unable to install Example.Package because no local manifest or Microsoft Store ID is available."
 
-        Should -Invoke -CommandName Install-WinUtilProgramWinget -Times 0 -Exactly
-        Should -Invoke -CommandName Write-WinUtilLog -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Install-NoteProgramWinget -Times 0 -Exactly
+        Should -Invoke -CommandName Write-NoteLog -Times 1 -Exactly -ParameterFilter {
             $Level -eq "ERROR" -and
                 $Component -eq "AppX" -and
                 $Message -eq "Unable to install Example.Package because no local manifest or Microsoft Store ID is available."
@@ -232,8 +232,8 @@ Describe "Get installed AppX selection" {
             WPFAppxMissing = [pscustomobject]@{ IsChecked = $false }
         })
 
-        Mock Set-WinUtilTweaksProgressIndicator { }
-        Mock Get-WinUtilInstalledAPPX { @("Example.Package") }
+        Mock Set-NoteTweaksProgressIndicator { }
+        Mock Get-NoteInstalledAPPX { @("Example.Package") }
         Mock Invoke-WPFAppxInstall { }
     }
 
@@ -244,7 +244,7 @@ Describe "Get installed AppX selection" {
     It "selects configured packages returned by the compatibility-safe query" {
         Invoke-WPFButton -Button "WPFGetInstalledAppx"
 
-        Should -Invoke -CommandName Get-WinUtilInstalledAPPX -Times 1 -Exactly
+        Should -Invoke -CommandName Get-NoteInstalledAPPX -Times 1 -Exactly
         $script:sync.WPFAppxExample.IsChecked | Should -BeTrue
         $script:sync.WPFAppxMissing.IsChecked | Should -BeFalse
     }
@@ -256,10 +256,10 @@ Describe "Get installed AppX selection" {
     }
 }
 
-Describe "Remove-WinUtilAPPX" {
+Describe "Remove-NoteAPPX" {
     BeforeEach {
         Mock Write-Host { }
-        Mock Write-WinUtilLog { }
+        Mock Write-NoteLog { }
         Mock Get-AppxPackage {
             @(
                 [pscustomobject]@{
@@ -276,7 +276,7 @@ Describe "Remove-WinUtilAPPX" {
     }
 
     It "removes matching installed AppX packages" {
-        Remove-WinUtilAPPX -Name "Microsoft.Xbox*"
+        Remove-NoteAPPX -Name "Microsoft.Xbox*"
 
         Should -Invoke -CommandName Get-AppxPackage -Times 1 -Exactly -ParameterFilter {
             $Name -eq "*Microsoft.Xbox**" -and $AllUsers -eq $true
@@ -291,9 +291,9 @@ Describe "Remove-WinUtilAPPX" {
     It "logs installed AppX removal failures" {
         Mock Remove-AppxPackage { throw "Removal failed" }
 
-        { Remove-WinUtilAPPX -Name "Example.Package" } | Should -Not -Throw
+        { Remove-NoteAPPX -Name "Example.Package" } | Should -Not -Throw
 
-        Should -Invoke -CommandName Write-WinUtilLog -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Write-NoteLog -Times 1 -Exactly -ParameterFilter {
             $Level -eq "ERROR" -and
                 $Component -eq "AppX" -and
                 $Message -eq "Failed to remove AppX package *Example.Package*.FullName: Removal failed"
@@ -301,7 +301,7 @@ Describe "Remove-WinUtilAPPX" {
     }
 }
 
-Describe "Remove-WinUtilProvisionedAPPX" {
+Describe "Remove-NoteProvisionedAPPX" {
     BeforeEach {
         Mock Get-AppxProvisionedPackage {
             @(
@@ -342,7 +342,7 @@ Describe "Remove-WinUtilProvisionedAPPX" {
         $source = Get-Content -Path $provisionedSourcePath -Raw
 
         $source | Should -Match '\$removalOutput = powershell\.exe .* 2>&1'
-        $source | Should -Match 'Write-WinUtilLog -Level "ERROR" -Component "AppX" -Message \$errorMessage'
+        $source | Should -Match 'Write-NoteLog -Level "ERROR" -Component "AppX" -Message \$errorMessage'
         $source | Should -Match '(?s)AppX provisioned package removal failed:.*throw \$errorMessage.*AppX provisioned package removal completed\.'
     }
 }
@@ -367,12 +367,12 @@ Describe "Invoke-WPFAppxInstall" {
         $script:capturedAppxInstallParameterList = $null
         $script:appxInstallProcessRunningAtLaunch = $null
 
-        Mock Show-WinUtilMessage { "OK" }
+        Mock Show-NoteMessage { "OK" }
         Mock Write-Host { }
-        Mock Write-WinUtilLog { }
-        Mock Set-WinUtilTweaksProgressIndicator { }
+        Mock Write-NoteLog { }
+        Mock Set-NoteTweaksProgressIndicator { }
         Mock Invoke-WPFUIThread { }
-        Mock Install-WinUtilAPPX { }
+        Mock Install-NoteAPPX { }
         Mock Invoke-WPFRunspace {
             $script:appxInstallProcessRunningAtLaunch = $script:sync.ProcessRunning
             $script:capturedAppxInstallScriptBlock = $ScriptBlock
@@ -391,7 +391,7 @@ Describe "Invoke-WPFAppxInstall" {
     It "prompts and exits when no AppX packages are selected for install" {
         Invoke-WPFAppxInstall
 
-        Should -Invoke -CommandName Show-WinUtilMessage -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Show-NoteMessage -Times 1 -Exactly -ParameterFilter {
             $Message -eq "No AppX Package selected" -and
                 $Title -eq "Error" -and
                 $Button -eq "OK" -and
@@ -406,9 +406,9 @@ Describe "Invoke-WPFAppxInstall" {
 
         Invoke-WPFAppxInstall
 
-        Should -Invoke -CommandName Show-WinUtilMessage -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Show-NoteMessage -Times 1 -Exactly -ParameterFilter {
             $Message -eq "An AppX process is currently running." -and
-                $Title -eq "WinUtil" -and
+                $Title -eq "Note" -and
                 $Button -eq "OK" -and
                 $Icon -eq "Warning"
         }
@@ -423,36 +423,36 @@ Describe "Invoke-WPFAppxInstall" {
         & $script:capturedAppxInstallScriptBlock -selected @("WPFAppxExample") -apps $script:sync.configs.appxHashtable
 
         $script:capturedAppxInstallParameterList[0][1][0] | Should -Be "WPFAppxExample"
-        Should -Invoke -CommandName Install-WinUtilAPPX -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Install-NoteAPPX -Times 1 -Exactly -ParameterFilter {
             $Name -eq "Example.Package" -and $StoreId -eq "9EXAMPLE1234"
         }
-        Should -Invoke -CommandName Set-WinUtilTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Set-NoteTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
             $Visible -eq $true -and $Label -eq "Installing Example App (1/1)" -and $Percent -eq 0
         }
-        Should -Invoke -CommandName Set-WinUtilTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Set-NoteTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
             $Visible -eq $true -and $Label -eq "Installed Example App (1/1)" -and $Percent -eq 100
         }
-        Should -Invoke -CommandName Set-WinUtilTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Set-NoteTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
             $Visible -eq $true -and $Label -eq "AppX install finished" -and $Percent -eq 100
         }
         Should -Invoke -CommandName Invoke-WPFUIThread -Times 1 -Exactly -ParameterFilter {
-            $ScriptBlock.ToString() -like '*Set-WinUtilTaskbaritem -state "None" -overlay "checkmark"*'
+            $ScriptBlock.ToString() -like '*Set-NoteTaskbaritem -state "None" -overlay "checkmark"*'
         }
         $script:sync.ProcessRunning | Should -BeFalse
     }
 
     It "shows failure feedback and clears ProcessRunning when install fails" {
         $script:sync.selectedAppx.Add("WPFAppxExample")
-        Mock Install-WinUtilAPPX { throw "Install failed" }
+        Mock Install-NoteAPPX { throw "Install failed" }
 
         Invoke-WPFAppxInstall
         & $script:capturedAppxInstallScriptBlock -selected @("WPFAppxExample") -apps $script:sync.configs.appxHashtable
 
-        Should -Invoke -CommandName Set-WinUtilTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Set-NoteTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
             $Visible -eq $true -and $Label -eq "AppX install failed" -and $Percent -eq 100
         }
         Should -Invoke -CommandName Invoke-WPFUIThread -Times 1 -Exactly -ParameterFilter {
-            $ScriptBlock.ToString() -like '*Set-WinUtilTaskbaritem -state "Error" -overlay "warning"*'
+            $ScriptBlock.ToString() -like '*Set-NoteTaskbaritem -state "Error" -overlay "warning"*'
         }
         $script:sync.ProcessRunning | Should -BeFalse
     }
@@ -471,7 +471,7 @@ Describe "Invoke-WPFAppxRemoval entrypoint" {
         $script:capturedAppxParameterList = $null
         $script:appxRemovalProcessRunningAtLaunch = $null
 
-        Mock Show-WinUtilMessage { "OK" }
+        Mock Show-NoteMessage { "OK" }
         Mock Invoke-WPFRunspace {
             $script:appxRemovalProcessRunningAtLaunch = $script:sync.ProcessRunning
             $script:capturedAppxScriptBlock = $ScriptBlock
@@ -490,7 +490,7 @@ Describe "Invoke-WPFAppxRemoval entrypoint" {
     It "prompts and exits when no AppX packages are selected" {
         Invoke-WPFAppxRemoval
 
-        Should -Invoke -CommandName Show-WinUtilMessage -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Show-NoteMessage -Times 1 -Exactly -ParameterFilter {
             $Message -eq "No AppX Package selected" -and
                 $Title -eq "Error" -and
                 $Button -eq "OK" -and
@@ -505,9 +505,9 @@ Describe "Invoke-WPFAppxRemoval entrypoint" {
 
         Invoke-WPFAppxRemoval
 
-        Should -Invoke -CommandName Show-WinUtilMessage -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Show-NoteMessage -Times 1 -Exactly -ParameterFilter {
             $Message -eq "An AppX process is currently running." -and
-                $Title -eq "WinUtil" -and
+                $Title -eq "Note" -and
                 $Button -eq "OK" -and
                 $Icon -eq "Warning"
         }
@@ -526,7 +526,7 @@ Describe "Invoke-WPFAppxRemoval entrypoint" {
 
         $script:appxRemovalProcessRunningAtLaunch | Should -BeTrue
         $script:capturedAppxParameterList[0][1] | Should -HaveCount 1
-        Should -Invoke -CommandName Show-WinUtilMessage -Times 0 -Exactly
+        Should -Invoke -CommandName Show-NoteMessage -Times 0 -Exactly
         Should -Invoke -CommandName Invoke-WPFRunspace -Times 1 -Exactly -ParameterFilter {
             $ScriptBlock -is [scriptblock] -and
                 $ParameterList.Count -eq 2 -and
@@ -572,10 +572,10 @@ Describe "Invoke-WPFAppxRemoval runspace body" {
             $script:capturedAppxScriptBlock = $ScriptBlock
             [pscustomobject]@{ MockHandle = $true }
         }
-        Mock Show-WinUtilMessage { "OK" }
+        Mock Show-NoteMessage { "OK" }
         Mock Write-Host { }
-        Mock Write-WinUtilLog { }
-        Mock Set-WinUtilTweaksProgressIndicator { }
+        Mock Write-NoteLog { }
+        Mock Set-NoteTweaksProgressIndicator { }
         Mock Invoke-WPFUIThread { }
         Mock Stop-Process { }
         Mock Set-ItemProperty { }
@@ -586,7 +586,7 @@ Describe "Invoke-WPFAppxRemoval runspace body" {
             }
         }
         Mock Remove-AppxPackage { }
-        Mock Remove-WinUtilProvisionedAPPX { }
+        Mock Remove-NoteProvisionedAPPX { }
         Mock Get-Package {
             [pscustomobject]@{
                 Name = "Microsoft Teams Meeting Add-in"
@@ -615,20 +615,20 @@ Describe "Invoke-WPFAppxRemoval runspace body" {
         Should -Invoke -CommandName Remove-AppxPackage -Times 1 -Exactly -ParameterFilter {
             $Package -eq "*Example.Package*.FullName"
         }
-        Should -Invoke -CommandName Remove-WinUtilProvisionedAPPX -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Remove-NoteProvisionedAPPX -Times 1 -Exactly -ParameterFilter {
             $PackageList.Count -eq 1 -and $PackageList[0] -eq "Example.Package"
         }
-        Should -Invoke -CommandName Set-WinUtilTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Set-NoteTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
             $Visible -eq $true -and $Label -eq "Removing Example App (1/1)" -and $Percent -eq 0
         }
-        Should -Invoke -CommandName Set-WinUtilTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Set-NoteTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
             $Visible -eq $true -and $Label -eq "Removed Example App (1/1)" -and $Percent -eq 90
         }
-        Should -Invoke -CommandName Set-WinUtilTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Set-NoteTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
             $Visible -eq $true -and $Label -eq "AppX removal finished" -and $Percent -eq 100
         }
         Should -Invoke -CommandName Invoke-WPFUIThread -Times 1 -Exactly -ParameterFilter {
-            $ScriptBlock.ToString() -like '*Set-WinUtilTaskbaritem -state "None" -overlay "checkmark"*'
+            $ScriptBlock.ToString() -like '*Set-NoteTaskbaritem -state "None" -overlay "checkmark"*'
         }
         $script:sync.ProcessRunning | Should -BeFalse
     }
@@ -637,18 +637,18 @@ Describe "Invoke-WPFAppxRemoval runspace body" {
         $selected = @("WPFAppxExample")
         $script:sync.selectedAppx.Add("WPFAppxExample")
         $script:sync.configs.appxHashtable = $script:apps
-        Mock Remove-WinUtilAPPX { throw "Removal failed" }
+        Mock Remove-NoteAPPX { throw "Removal failed" }
 
         Invoke-WPFAppxRemoval
         & $script:capturedAppxScriptBlock -selected $selected -apps $script:apps
 
-        Should -Invoke -CommandName Set-WinUtilTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Set-NoteTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
             $Visible -eq $true -and $Label -eq "AppX removal failed" -and $Percent -eq 100
         }
         Should -Invoke -CommandName Invoke-WPFUIThread -Times 1 -Exactly -ParameterFilter {
-            $ScriptBlock.ToString() -like '*Set-WinUtilTaskbaritem -state "Error" -overlay "warning"*'
+            $ScriptBlock.ToString() -like '*Set-NoteTaskbaritem -state "Error" -overlay "warning"*'
         }
-        Should -Invoke -CommandName Remove-WinUtilProvisionedAPPX -Times 0 -Exactly
+        Should -Invoke -CommandName Remove-NoteProvisionedAPPX -Times 0 -Exactly
         $script:sync.ProcessRunning | Should -BeFalse
     }
 
@@ -662,8 +662,8 @@ Describe "Invoke-WPFAppxRemoval runspace body" {
         & $script:capturedAppxScriptBlock -selected $selected -apps $script:apps
 
         Should -Invoke -CommandName Remove-AppxPackage -Times 1 -Exactly
-        Should -Invoke -CommandName Remove-WinUtilProvisionedAPPX -Times 1 -Exactly
-        Should -Invoke -CommandName Set-WinUtilTweaksProgressIndicator -Times 0 -Exactly
+        Should -Invoke -CommandName Remove-NoteProvisionedAPPX -Times 1 -Exactly
+        Should -Invoke -CommandName Set-NoteTweaksProgressIndicator -Times 0 -Exactly
         Should -Invoke -CommandName Invoke-WPFUIThread -Times 0 -Exactly
         $script:sync.ProcessRunning | Should -BeFalse
     }
@@ -672,22 +672,22 @@ Describe "Invoke-WPFAppxRemoval runspace body" {
         $selected = @("WPFAppxExample")
         $script:sync.selectedAppx.Add("WPFAppxExample")
         $script:sync.configs.appxHashtable = $script:apps
-        Mock Remove-WinUtilProvisionedAPPX { throw "Provisioned removal failed" }
+        Mock Remove-NoteProvisionedAPPX { throw "Provisioned removal failed" }
 
         Invoke-WPFAppxRemoval
         & $script:capturedAppxScriptBlock -selected $selected -apps $script:apps
 
-        Should -Invoke -CommandName Set-WinUtilTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Set-NoteTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
             $Visible -eq $true -and $Label -eq "AppX removal failed" -and $Percent -eq 100
         }
-        Should -Invoke -CommandName Set-WinUtilTweaksProgressIndicator -Times 0 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Set-NoteTweaksProgressIndicator -Times 0 -Exactly -ParameterFilter {
             $Label -eq "AppX removal finished"
         }
         Should -Invoke -CommandName Invoke-WPFUIThread -Times 1 -Exactly -ParameterFilter {
-            $ScriptBlock.ToString() -like '*Set-WinUtilTaskbaritem -state "Error" -overlay "warning"*'
+            $ScriptBlock.ToString() -like '*Set-NoteTaskbaritem -state "Error" -overlay "warning"*'
         }
         Should -Invoke -CommandName Invoke-WPFUIThread -Times 0 -Exactly -ParameterFilter {
-            $ScriptBlock.ToString() -like '*Set-WinUtilTaskbaritem -state "None" -overlay "checkmark"*'
+            $ScriptBlock.ToString() -like '*Set-NoteTaskbaritem -state "None" -overlay "checkmark"*'
         }
         $script:sync.ProcessRunning | Should -BeFalse
     }
@@ -730,7 +730,7 @@ Describe "Invoke-WPFAppxRemoval runspace body" {
             $InputObject.Name -eq "Microsoft Teams Meeting Add-in" -and $Force -eq $true
         }
         Should -Invoke -CommandName Remove-AppxPackage -Times 3 -Exactly
-        Should -Invoke -CommandName Remove-WinUtilProvisionedAPPX -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Remove-NoteProvisionedAPPX -Times 1 -Exactly -ParameterFilter {
             $PackageList.Count -eq 3 -and
             $PackageList[0] -eq "Microsoft.XboxGamingOverlay" -and
             $PackageList[1] -eq "Microsoft.WindowsNotepad" -and

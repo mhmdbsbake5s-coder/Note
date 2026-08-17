@@ -1,4 +1,4 @@
-function Update-WinUtilAppCategoryChip {
+function Update-NoteAppCategoryChip {
     <#
         .SYNOPSIS
             Pushes the current category selection onto the Install tab filter chips

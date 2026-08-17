@@ -1,4 +1,4 @@
-function Invoke-WinUtilTweaks {
+function Invoke-NoteTweaks {
     <#
 
     .SYNOPSIS
@@ -11,7 +11,7 @@ function Invoke-WinUtilTweaks {
         Indicates whether to undo the operation contained in the checkbox
 
     .PARAMETER KeepServiceStartup
-        Indicates whether to override the startup of a service with the one given from WinUtil,
+        Indicates whether to override the startup of a service with the one given from Note,
         or to keep the startup of said service, if it was changed by the user, or another program, from its default value.
     #>
 
@@ -22,7 +22,7 @@ function Invoke-WinUtilTweaks {
     )
 
     $action = if ($undo) { "Undo" } else { "Apply" }
-    Write-WinUtilLog -Component "Tweaks" -Message "$action tweak: $CheckBox"
+    Write-NoteLog -Component "Tweaks" -Message "$action tweak: $CheckBox"
 
     if ($undo) {
         $Values = @{
@@ -57,29 +57,29 @@ function Invoke-WinUtilTweaks {
             }
 
             if ($changeservice) {
-                Set-WinUtilService -Name $psitem.Name -StartupType $psitem.$($values.Service)
+                Set-NoteService -Name $psitem.Name -StartupType $psitem.$($values.Service)
             }
         }
     }
     if ($sync.configs.tweaks.$CheckBox.registry) {
         $sync.configs.tweaks.$CheckBox.registry | Where-Object { -not $psitem.Values } | ForEach-Object {
-            Set-WinUtilRegistry -Name $psitem.Name -Path $psitem.Path -Type $psitem.Type -Value $psitem.$($values.registry)
+            Set-NoteRegistry -Name $psitem.Name -Path $psitem.Path -Type $psitem.Type -Value $psitem.$($values.registry)
         }
     }
     if ($sync.configs.tweaks.$CheckBox.$($values.ScriptType)) {
         $sync.configs.tweaks.$CheckBox.$($values.ScriptType) | ForEach-Object {
             $Scriptblock = [scriptblock]::Create($psitem)
-            Invoke-WinUtilScript -ScriptBlock $scriptblock -Name $CheckBox
+            Invoke-NoteScript -ScriptBlock $scriptblock -Name $CheckBox
         }
     }
 
     if (!$undo) {
         if($sync.configs.tweaks.$CheckBox.appx) {
             $sync.configs.tweaks.$CheckBox.appx | ForEach-Object {
-                Remove-WinUtilAPPX -Name $psitem
+                Remove-NoteAPPX -Name $psitem
             }
-            Remove-WinUtilProvisionedAPPX -PackageList $sync.configs.tweaks.$CheckBox.appx
+            Remove-NoteProvisionedAPPX -PackageList $sync.configs.tweaks.$CheckBox.appx
         }
     }
-    Write-WinUtilLog -Component "Tweaks" -Message "$action tweak completed: $CheckBox"
+    Write-NoteLog -Component "Tweaks" -Message "$action tweak completed: $CheckBox"
 }

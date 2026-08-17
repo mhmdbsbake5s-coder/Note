@@ -1,4 +1,4 @@
-function Initialize-WinUtilTabContent {
+function Initialize-NoteTabContent {
     param(
         [Parameter(Mandatory = $true)]
         [string]$TabName
@@ -30,7 +30,7 @@ function Initialize-WinUtilTabContent {
         }
         "Win11ISO" {
             if ($sync.Form -and $sync.Form.Dispatcher) {
-                $sync.Form.Dispatcher.BeginInvoke([System.Windows.Threading.DispatcherPriority]::Background, [action]{ Invoke-WinUtilISOCheckExistingWork }) | Out-Null
+                $sync.Form.Dispatcher.BeginInvoke([System.Windows.Threading.DispatcherPriority]::Background, [action]{ Invoke-NoteISOCheckExistingWork }) | Out-Null
             }
         }
     }

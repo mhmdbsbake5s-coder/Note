@@ -1,8 +1,8 @@
-# WinUtil Docs
+# Note Docs
 
 [![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
 
-Documentation site for [WinUtil](https://github.com/ChrisTitusTech/winutil), built with [Astro](https://astro.build) and [Starlight](https://starlight.astro.build). Served at [winutil.christitus.com](https://winutil.christitus.com/).
+Documentation site for [Note](https://github.com/ChrisTitusTech/Note), built with [Astro](https://astro.build) and [Starlight](https://starlight.astro.build). Served at [Note.christitus.com](https://Note.christitus.com/).
 
 ## 🚀 Project Structure
 
@@ -40,10 +40,10 @@ All commands are run from the `docs/` directory, from a terminal:
 | Command                                          | Action                                           |
 | :------------------------------------------------ | :----------------------------------------------- |
 | `docker compose build`                             | Builds the dev image (needed after Dockerfile or dependency changes) |
-| `docker compose up winutil-astro`                                | Starts local dev server at `localhost:4321`      |
-| `docker compose run --rm winutil-astro npm run build`   | Build the production site to `./dist/`           |
-| `docker compose run --rm --service-ports winutil-astro npm run preview -- --host 0.0.0.0` | Preview the build locally, before deploying      |
-| `docker compose run --rm winutil-astro npm run astro ...` | Run CLI commands like `astro add`, `astro check` |
+| `docker compose up Note-astro`                                | Starts local dev server at `localhost:4321`      |
+| `docker compose run --rm Note-astro npm run build`   | Build the production site to `./dist/`           |
+| `docker compose run --rm --service-ports Note-astro npm run preview -- --host 0.0.0.0` | Preview the build locally, before deploying      |
+| `docker compose run --rm Note-astro npm run astro ...` | Run CLI commands like `astro add`, `astro check` |
 | `docker compose down`                              | Stop and remove the dev container                |
 
 Source files are bind-mounted into the container, so edits on the host are picked up immediately by the dev server — no rebuild needed for normal content or code changes. After changing `package.json`, `package-lock.json`, or the `Dockerfile`, rebuild the image *and* drop the `node_modules` volume, since Docker only seeds a named volume from the image the first time it's created — a plain rebuild leaves the old `node_modules` in place:
@@ -51,7 +51,7 @@ Source files are bind-mounted into the container, so edits on the host are picke
 ```sh
 docker compose build
 docker compose down -v
-docker compose up winutil-astro
+docker compose up Note-astro
 ```
 
 The first `docker compose up` (or any command before an image exists) builds the image and runs `npm install` from scratch, which can take a few minutes. Subsequent runs reuse the cached image and start almost immediately.

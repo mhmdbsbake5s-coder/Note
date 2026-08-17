@@ -1,4 +1,4 @@
-function Invoke-WinUtilExplorerUpdate {
+function Invoke-NoteExplorerUpdate {
      <#
     .SYNOPSIS
         Refreshes the Windows Explorer

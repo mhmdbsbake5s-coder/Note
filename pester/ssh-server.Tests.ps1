@@ -29,7 +29,7 @@ BeforeAll {
         param($Name, [switch]$Force)
     }
 
-    . (Join-Path $script:repoRoot "functions\private\Invoke-WinUtilSSHServer.ps1")
+    . (Join-Path $script:repoRoot "functions\private\Invoke-NoteSSHServer.ps1")
 
     $script:defaultAdministratorsBlock = "Match Group administrators`n       AuthorizedKeysFile __PROGRAMDATA__/ssh/administrators_authorized_keys`n"
     $script:overriddenAdministratorsBlock = "# Match Group administrators`n#        AuthorizedKeysFile __PROGRAMDATA__/ssh/administrators_authorized_keys`n"
@@ -66,9 +66,9 @@ BeforeAll {
     }
 }
 
-Describe "Invoke-WinUtilSSHServer" {
+Describe "Invoke-NoteSSHServer" {
     BeforeEach {
-        $script:testRoot = Join-Path ([System.IO.Path]::GetTempPath()) "winutil-ssh-$([guid]::NewGuid())"
+        $script:testRoot = Join-Path ([System.IO.Path]::GetTempPath()) "Note-ssh-$([guid]::NewGuid())"
         $script:programData = Join-Path $script:testRoot "ProgramData"
         $script:userProfile = Join-Path $script:testRoot "Users\tester"
         New-Item -Path (Join-Path $script:programData "ssh") -ItemType Directory -Force | Out-Null
@@ -96,7 +96,7 @@ Describe "Invoke-WinUtilSSHServer" {
     It "leaves the administrators block in a default sshd_config alone" {
         $original = New-SshdConfig -AdministratorsBlock $script:defaultAdministratorsBlock
 
-        Invoke-WinUtilSSHServer
+        Invoke-NoteSSHServer
 
         Get-Content -Path $script:sshdConfigPath -Raw | Should -BeExactly $original
         Should -Invoke -CommandName Restart-Service -Times 0 -Exactly
@@ -106,7 +106,7 @@ Describe "Invoke-WinUtilSSHServer" {
         $original = New-SshdConfig -AdministratorsBlock ""
         Set-ProfileKeyFile -Keys @("ssh-ed25519 AAAAnotanadminkey laptop")
 
-        Invoke-WinUtilSSHServer
+        Invoke-NoteSSHServer
 
         Get-Content -Path $script:sshdConfigPath -Raw | Should -BeExactly $original
         Get-AuthorizedKeyFileContent | Should -Not -Contain "ssh-ed25519 AAAAnotanadminkey laptop"
@@ -116,7 +116,7 @@ Describe "Invoke-WinUtilSSHServer" {
     It "creates administrators_authorized_keys limited to Administrators and SYSTEM" {
         New-SshdConfig -AdministratorsBlock $script:defaultAdministratorsBlock | Out-Null
 
-        Invoke-WinUtilSSHServer
+        Invoke-NoteSSHServer
 
         Test-Path -Path $script:authorizedKeysPath | Should -BeTrue
         (Get-Acl -Path $script:authorizedKeysPath).AreAccessRulesProtected | Should -BeTrue
@@ -130,7 +130,7 @@ Describe "Invoke-WinUtilSSHServer" {
     It "restores the administrators block when an earlier run commented it out" {
         New-SshdConfig -AdministratorsBlock $script:overriddenAdministratorsBlock | Out-Null
 
-        Invoke-WinUtilSSHServer
+        Invoke-NoteSSHServer
 
         $config = Get-Content -Path $script:sshdConfigPath -Raw
         $config | Should -Match '(?m)^Match Group administrators$'
@@ -142,7 +142,7 @@ Describe "Invoke-WinUtilSSHServer" {
         New-SshdConfig -AdministratorsBlock $script:overriddenAdministratorsBlock | Out-Null
         Set-ProfileKeyFile -Keys @("# my laptop", "", "ssh-ed25519 AAAAkeyone laptop", "ssh-ed25519 AAAAkeytwo desktop")
 
-        Invoke-WinUtilSSHServer
+        Invoke-NoteSSHServer
 
         $keys = Get-AuthorizedKeyFileContent
         $keys | Should -Contain "ssh-ed25519 AAAAkeyone laptop"
@@ -154,7 +154,7 @@ Describe "Invoke-WinUtilSSHServer" {
         New-SshdConfig -AdministratorsBlock $script:defaultAdministratorsBlock | Out-Null
         Set-ProfileKeyFile -Keys @("ssh-ed25519 AAAAnotanadminkey laptop")
 
-        Invoke-WinUtilSSHServer
+        Invoke-NoteSSHServer
 
         Get-AuthorizedKeyFileContent | Should -Not -Contain "ssh-ed25519 AAAAnotanadminkey laptop"
     }
@@ -164,7 +164,7 @@ Describe "Invoke-WinUtilSSHServer" {
         Set-Content -Path $script:authorizedKeysPath -Value "ssh-ed25519 AAAAexisting server"
         Set-ProfileKeyFile -Keys @("ssh-ed25519 AAAAexisting server", "ssh-ed25519 AAAAnew laptop")
 
-        Invoke-WinUtilSSHServer
+        Invoke-NoteSSHServer
 
         $keys = @(Get-AuthorizedKeyFileContent | Where-Object { $_.Trim() })
         $keys | Should -HaveCount 2

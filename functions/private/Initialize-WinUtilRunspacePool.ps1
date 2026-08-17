@@ -1,10 +1,10 @@
-function Initialize-WinUtilRunspacePool {
+function Initialize-NoteRunspacePool {
     if ($sync.runspace -and $sync.runspace.RunspacePoolStateInfo.State -eq [System.Management.Automation.Runspaces.RunspacePoolState]::Opened) {
         return $sync.runspace
     }
 
     if ($sync.runspace) {
-        Close-WinUtilRunspacePool
+        Close-NoteRunspacePool
     }
 
     # Set the maximum number of threads for the RunspacePool to the number of threads on the machine.
@@ -18,8 +18,8 @@ function Initialize-WinUtilRunspacePool {
     $initialSessionState.Variables.Add($hashVars)
     $initialSessionState.Variables.Add($offlineVar)
 
-    # Get every WinUtil/WPF function and add it to the session state.
-    $functions = Get-ChildItem function:\ | Where-Object { $_.Name -imatch 'winutil|WPF' }
+    # Get every Note/WPF function and add it to the session state.
+    $functions = Get-ChildItem function:\ | Where-Object { $_.Name -imatch 'Note|WPF' }
     foreach ($function in $functions) {
         $functionDefinition = Get-Content function:\$($function.Name)
         $functionEntry = New-Object System.Management.Automation.Runspaces.SessionStateFunctionEntry -ArgumentList $function.Name, $functionDefinition

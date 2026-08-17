@@ -10,11 +10,11 @@ function Invoke-WPFGetInstalled {
     param($checkbox)
     if ($sync.ProcessRunning) {
         $msg = "[Invoke-WPFGetInstalled] Install process is currently running."
-        [System.Windows.MessageBox]::Show($msg, "Winutil", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Warning)
+        [System.Windows.MessageBox]::Show($msg, "Note", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Warning)
         return
     }
 
-    if (($sync.ChocoRadioButton.IsChecked -eq $false) -and ((Test-WinUtilPackageManager -winget) -eq "not-installed") -and $checkbox -eq "winget") {
+    if (($sync.ChocoRadioButton.IsChecked -eq $false) -and ((Test-NotePackageManager -winget) -eq "not-installed") -and $checkbox -eq "winget") {
         return
     }
     $managerPreference = $sync.preferences.packagemanager
@@ -29,7 +29,7 @@ function Invoke-WPFGetInstalled {
         )
         try {
             if ($completedOperation.Error) {
-                Write-WinUtilLog -Level "ERROR" -Component "Install" -Message "Get installed state failed: $($completedOperation.Error)"
+                Write-NoteLog -Level "ERROR" -Component "Install" -Message "Get installed state failed: $($completedOperation.Error)"
                 Write-Warning "Unable to get installed state: $($completedOperation.Error)"
                 return
             }
@@ -48,12 +48,12 @@ function Invoke-WPFGetInstalled {
             }
         } finally {
             $sync.ProcessRunning = $false
-            Set-WinUtilTaskbaritem -state "None"
+            Set-NoteTaskbaritem -state "None"
         }
     }
 
     $sync.ProcessRunning = $true
-    Set-WinUtilTaskbaritem -state "Indeterminate"
+    Set-NoteTaskbaritem -state "Indeterminate"
     try {
         Invoke-WPFRunspace -ParameterList @(
             ("managerPreference", $managerPreference),
@@ -70,11 +70,11 @@ function Invoke-WPFGetInstalled {
             try {
                 if ($checkbox -eq "winget") {
                     switch ($managerPreference) {
-                        "Choco" { $operation.Checkboxes = @(Invoke-WinUtilCurrentSystem -CheckBox "choco"); break }
-                        "Winget" { $operation.Checkboxes = @(Invoke-WinUtilCurrentSystem -CheckBox $checkbox); break }
+                        "Choco" { $operation.Checkboxes = @(Invoke-NoteCurrentSystem -CheckBox "choco"); break }
+                        "Winget" { $operation.Checkboxes = @(Invoke-NoteCurrentSystem -CheckBox $checkbox); break }
                     }
                 } elseif ($checkbox -eq "tweaks") {
-                    $operation.Checkboxes = @(Invoke-WinUtilCurrentSystem -CheckBox $checkbox)
+                    $operation.Checkboxes = @(Invoke-NoteCurrentSystem -CheckBox $checkbox)
                 }
             } catch {
                 $operation.Error = $_.Exception.Message

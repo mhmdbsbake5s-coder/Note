@@ -59,14 +59,14 @@ namespace System.Windows.Controls
 "@
     }
 
-    . (Join-Path $script:repoRoot "functions\private\Update-WinUtilSelections.ps1")
+    . (Join-Path $script:repoRoot "functions\private\Update-NoteSelections.ps1")
     . (Join-Path $script:repoRoot "functions\private\Reset-WPFCheckBoxes.ps1")
     . (Join-Path $script:repoRoot "functions\public\Invoke-WPFGetInstalled.ps1")
     . (Join-Path $script:repoRoot "functions\public\Invoke-WPFSelectedCheckboxesUpdate.ps1")
     . (Join-Path $script:repoRoot "functions\public\Invoke-WPFButton.ps1")
     . (Join-Path $script:repoRoot "functions\public\Invoke-WPFToggleAllCategories.ps1")
 
-    function Set-WinUtilTweaksProgressIndicator {
+    function Set-NoteTweaksProgressIndicator {
         param($Visible, $Label, $Percent)
     }
     function Invoke-WPFRunspace {
@@ -75,20 +75,20 @@ namespace System.Windows.Controls
     function Invoke-WPFUIThread {
         param([scriptblock]$ScriptBlock)
     }
-    function Invoke-WinUtilCurrentSystem {
+    function Invoke-NoteCurrentSystem {
         param($CheckBox)
     }
-    function Set-WinUtilTaskbaritem {
+    function Set-NoteTaskbaritem {
         param($state)
     }
-    function Test-WinUtilPackageManager {
+    function Test-NotePackageManager {
         param([switch]$winget)
     }
-    function Write-WinUtilLog {
+    function Write-NoteLog {
         param($Message, $Level, $Component)
     }
 
-    function script:New-WinUtilFakeCheckBox {
+    function script:New-NoteFakeCheckBox {
         param([bool]$IsChecked = $false)
 
         $checkbox = [System.Windows.Controls.CheckBox]::new()
@@ -96,7 +96,7 @@ namespace System.Windows.Controls
         $checkbox
     }
 
-    function script:New-WinUtilFakeCategory {
+    function script:New-NoteFakeCategory {
         param(
             [string]$Label,
             [Windows.Visibility]$Visibility
@@ -114,7 +114,7 @@ namespace System.Windows.Controls
         $category
     }
 
-    function script:New-WinUtilUiStateTestContext {
+    function script:New-NoteUiStateTestContext {
         $testSync = [Hashtable]::Synchronized(@{
             selectedApps = [System.Collections.Generic.List[string]]::new()
             selectedTweaks = [System.Collections.Generic.List[string]]::new()
@@ -149,9 +149,9 @@ namespace System.Windows.Controls
     }
 }
 
-Describe "Update-WinUtilSelections" {
+Describe "Update-NoteSelections" {
     BeforeEach {
-        New-WinUtilUiStateTestContext
+        New-NoteUiStateTestContext
     }
 
     AfterEach {
@@ -160,7 +160,7 @@ Describe "Update-WinUtilSelections" {
     }
 
     It "adds imported checkbox keys to the matching selected lists" {
-        Update-WinUtilSelections @(
+        Update-NoteSelections @(
             "WPFInstallGit",
             "WPFTweaksTelemetry",
             "WPFToggleDarkMode",
@@ -178,7 +178,7 @@ Describe "Update-WinUtilSelections" {
 
 Describe "Invoke-WPFSelectedCheckboxesUpdate" {
     BeforeEach {
-        New-WinUtilUiStateTestContext
+        New-NoteUiStateTestContext
     }
 
     AfterEach {
@@ -229,12 +229,12 @@ Describe "Invoke-WPFSelectedCheckboxesUpdate" {
 
 Describe "Invoke-WPFGetInstalled selection state" {
     BeforeEach {
-        New-WinUtilUiStateTestContext
+        New-NoteUiStateTestContext
 
         $script:sync.ProcessRunning = $false
         $script:sync.ChocoRadioButton = [pscustomobject]@{ IsChecked = $false }
         $script:sync.preferences = [pscustomobject]@{ packagemanager = "Winget" }
-        $script:sync.WPFInstallGit = New-WinUtilFakeCheckBox
+        $script:sync.WPFInstallGit = New-NoteFakeCheckBox
         $dispatcher = [pscustomobject]@{}
         $dispatcher | Add-Member -MemberType ScriptMethod -Name BeginInvoke -Value {
             param($Action, [object[]]$Arguments)
@@ -244,10 +244,10 @@ Describe "Invoke-WPFGetInstalled selection state" {
         $script:capturedGetInstalledScriptBlock = $null
         $script:capturedGetInstalledParameters = @{}
 
-        Mock Test-WinUtilPackageManager { "installed" }
-        Mock Invoke-WinUtilCurrentSystem { @("WPFInstallGit") }
-        Mock Set-WinUtilTaskbaritem { }
-        Mock Write-WinUtilLog { }
+        Mock Test-NotePackageManager { "installed" }
+        Mock Invoke-NoteCurrentSystem { @("WPFInstallGit") }
+        Mock Set-NoteTaskbaritem { }
+        Mock Write-NoteLog { }
         Mock Write-Warning { }
         Mock Invoke-WPFRunspace {
             $script:capturedGetInstalledScriptBlock = $ScriptBlock
@@ -280,7 +280,7 @@ Describe "Invoke-WPFGetInstalled selection state" {
     }
 
     It "clears the running state when detection fails" {
-        Mock Invoke-WinUtilCurrentSystem { throw "detection failed" }
+        Mock Invoke-NoteCurrentSystem { throw "detection failed" }
 
         Invoke-WPFGetInstalled -CheckBox "winget"
         & $script:capturedGetInstalledScriptBlock `
@@ -290,12 +290,12 @@ Describe "Invoke-WPFGetInstalled selection state" {
             -completeAction $script:capturedGetInstalledParameters.completeAction
 
         $script:sync.ProcessRunning | Should -BeFalse
-        Should -Invoke -CommandName Write-WinUtilLog -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Write-NoteLog -Times 1 -Exactly -ParameterFilter {
             $Level -eq "ERROR" -and
                 $Component -eq "Install" -and
                 $Message -eq "Get installed state failed: detection failed"
         }
-        Should -Invoke -CommandName Set-WinUtilTaskbaritem -Times 1 -Exactly -ParameterFilter { $state -eq "None" }
+        Should -Invoke -CommandName Set-NoteTaskbaritem -Times 1 -Exactly -ParameterFilter { $state -eq "None" }
     }
 
     It "clears the running state when the worker cannot be queued" {
@@ -304,18 +304,18 @@ Describe "Invoke-WPFGetInstalled selection state" {
         Invoke-WPFGetInstalled -CheckBox "winget"
 
         $script:sync.ProcessRunning | Should -BeFalse
-        Should -Invoke -CommandName Write-WinUtilLog -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Write-NoteLog -Times 1 -Exactly -ParameterFilter {
             $Level -eq "ERROR" -and
                 $Component -eq "Install" -and
                 $Message -eq "Get installed state failed: queue failed"
         }
-        Should -Invoke -CommandName Set-WinUtilTaskbaritem -Times 1 -Exactly -ParameterFilter { $state -eq "None" }
+        Should -Invoke -CommandName Set-NoteTaskbaritem -Times 1 -Exactly -ParameterFilter { $state -eq "None" }
     }
 }
 
 Describe "Reset-WPFCheckBoxes" {
     BeforeEach {
-        New-WinUtilUiStateTestContext
+        New-NoteUiStateTestContext
 
         $script:sync.selectedApps.Add("WPFInstallGit")
         $script:sync.selectedTweaks.Add("WPFTweaksTelemetry")
@@ -323,13 +323,13 @@ Describe "Reset-WPFCheckBoxes" {
         $script:sync.selectedAppx.Add("WPFAppxExample")
         $script:sync.selectedToggles.Add("WPFToggleDarkMode")
 
-        $script:sync.WPFInstallGit = New-WinUtilFakeCheckBox
-        $script:sync.WPFInstallVlc = New-WinUtilFakeCheckBox -IsChecked $true
-        $script:sync.WPFTweaksTelemetry = New-WinUtilFakeCheckBox
-        $script:sync.WPFFeatureSandbox = New-WinUtilFakeCheckBox
-        $script:sync.WPFAppxExample = New-WinUtilFakeCheckBox
-        $script:sync.WPFToggleDarkMode = New-WinUtilFakeCheckBox
-        $script:sync.WPFToggleOther = New-WinUtilFakeCheckBox -IsChecked $true
+        $script:sync.WPFInstallGit = New-NoteFakeCheckBox
+        $script:sync.WPFInstallVlc = New-NoteFakeCheckBox -IsChecked $true
+        $script:sync.WPFTweaksTelemetry = New-NoteFakeCheckBox
+        $script:sync.WPFFeatureSandbox = New-NoteFakeCheckBox
+        $script:sync.WPFAppxExample = New-NoteFakeCheckBox
+        $script:sync.WPFToggleDarkMode = New-NoteFakeCheckBox
+        $script:sync.WPFToggleOther = New-NoteFakeCheckBox -IsChecked $true
     }
 
     AfterEach {
@@ -362,7 +362,7 @@ Describe "Reset-WPFCheckBoxes" {
 
 Describe "Invoke-WPFToggleAllCategories" {
     BeforeEach {
-        New-WinUtilUiStateTestContext
+        New-NoteUiStateTestContext
 
         $script:sync.ItemsControl = [pscustomobject]@{
             Items = [System.Collections.ArrayList]::new()
@@ -375,7 +375,7 @@ Describe "Invoke-WPFToggleAllCategories" {
     }
 
     It "expands all install categories and updates collapsed labels" {
-        $category = New-WinUtilFakeCategory -Label "+ Browsers" -Visibility ([Windows.Visibility]::Collapsed)
+        $category = New-NoteFakeCategory -Label "+ Browsers" -Visibility ([Windows.Visibility]::Collapsed)
         $null = $script:sync.ItemsControl.Items.Add($category)
 
         Invoke-WPFToggleAllCategories -Action "Expand"
@@ -385,7 +385,7 @@ Describe "Invoke-WPFToggleAllCategories" {
     }
 
     It "collapses all install categories and updates expanded labels" {
-        $category = New-WinUtilFakeCategory -Label "- Browsers" -Visibility ([Windows.Visibility]::Visible)
+        $category = New-NoteFakeCategory -Label "- Browsers" -Visibility ([Windows.Visibility]::Visible)
         $null = $script:sync.ItemsControl.Items.Add($category)
 
         Invoke-WPFToggleAllCategories -Action "Collapse"
@@ -408,8 +408,8 @@ Describe "Invoke-WPFToggleAllCategories" {
 
 Describe "Invoke-WPFButton progress cleanup" {
     BeforeEach {
-        New-WinUtilUiStateTestContext
-        Mock Set-WinUtilTweaksProgressIndicator { }
+        New-NoteUiStateTestContext
+        Mock Set-NoteTweaksProgressIndicator { }
     }
 
     AfterEach {
@@ -422,7 +422,7 @@ Describe "Invoke-WPFButton progress cleanup" {
 
         Invoke-WPFButton -Button "WPFNoOp"
 
-        Should -Invoke Set-WinUtilTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke Set-NoteTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
             $Visible -eq $false
         }
     }
@@ -432,7 +432,7 @@ Describe "Invoke-WPFButton progress cleanup" {
 
         Invoke-WPFButton -Button "WPFNoOp"
 
-        Should -Not -Invoke Set-WinUtilTweaksProgressIndicator
+        Should -Not -Invoke Set-NoteTweaksProgressIndicator
     }
 
     It "leaves progress visible while a Win11 ISO process is running" {
@@ -441,7 +441,7 @@ Describe "Invoke-WPFButton progress cleanup" {
 
         Invoke-WPFButton -Button "WPFNoOp"
 
-        Should -Not -Invoke Set-WinUtilTweaksProgressIndicator
+        Should -Not -Invoke Set-NoteTweaksProgressIndicator
     }
 }
 

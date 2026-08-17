@@ -7,7 +7,7 @@ $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 BeforeAll {
     $script:repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 
-    function script:Test-WinUtilParser {
+    function script:Test-NoteParser {
         param([string]$Path)
 
         $tokens = $null
@@ -28,12 +28,12 @@ BeforeAll {
             return
         }
 
-        $previousPaths = $env:WINUTIL_TEST_PARSE_PATHS
+        $previousPaths = $env:Note_TEST_PARSE_PATHS
         try {
-            $env:WINUTIL_TEST_PARSE_PATHS = @($Path) -join [Environment]::NewLine
+            $env:Note_TEST_PARSE_PATHS = @($Path) -join [Environment]::NewLine
             $parseScript = @'
 $ErrorActionPreference = 'Stop'
-$paths = $env:WINUTIL_TEST_PARSE_PATHS -split "`r?`n" | Where-Object { $_ }
+$paths = $env:Note_TEST_PARSE_PATHS -split "`r?`n" | Where-Object { $_ }
 $failed = @()
 
 foreach ($path in $paths) {
@@ -60,9 +60,9 @@ if ($failed.Count -gt 0) {
             }
         } finally {
             if ($null -eq $previousPaths) {
-                Remove-Item Env:\WINUTIL_TEST_PARSE_PATHS -ErrorAction SilentlyContinue
+                Remove-Item Env:\Note_TEST_PARSE_PATHS -ErrorAction SilentlyContinue
             } else {
-                $env:WINUTIL_TEST_PARSE_PATHS = $previousPaths
+                $env:Note_TEST_PARSE_PATHS = $previousPaths
             }
         }
     }
@@ -85,11 +85,11 @@ Describe "PowerShell source sanity" {
         It "parses $($scriptCase.Name) with the current PowerShell parser" -TestCases $scriptCase {
             param([string]$Path)
 
-            Test-WinUtilParser -Path $Path
+            Test-NoteParser -Path $Path
         }
     }
 
-    It "parses WinUtil source files with Windows PowerShell when available" {
+    It "parses Note source files with Windows PowerShell when available" {
         $sourcePaths = @(
             Join-Path $script:repoRoot "Compile.ps1"
             Join-Path $script:repoRoot "windev.ps1"
@@ -102,9 +102,9 @@ Describe "PowerShell source sanity" {
     }
 }
 
-Describe "Compiled WinUtil sanity" {
+Describe "Compiled Note sanity" {
     BeforeAll {
-        $script:compiledPath = Join-Path $script:repoRoot "winutil.ps1"
+        $script:compiledPath = Join-Path $script:repoRoot "Note.ps1"
 
         Push-Location $script:repoRoot
         try {
@@ -114,15 +114,15 @@ Describe "Compiled WinUtil sanity" {
         }
     }
 
-    It "generates winutil.ps1" {
+    It "generates Note.ps1" {
         Test-Path -Path $script:compiledPath | Should -BeTrue
     }
 
-    It "parses compiled winutil.ps1 with the current PowerShell parser" {
-        Test-WinUtilParser -Path $script:compiledPath
+    It "parses compiled Note.ps1 with the current PowerShell parser" {
+        Test-NoteParser -Path $script:compiledPath
     }
 
-    It "parses compiled winutil.ps1 with Windows PowerShell when available" {
+    It "parses compiled Note.ps1 with Windows PowerShell when available" {
         Invoke-WindowsPowerShellParser -Path $script:compiledPath
     }
 
@@ -131,7 +131,7 @@ Describe "Compiled WinUtil sanity" {
         $requiredSnippets = @(
             ('$sync.configs.applications = @' + "'"),
             ('$inputXML = @' + "'"),
-            ('$WinUtilAutounattendXml = @' + "'"),
+            ('$NoteAutounattendXml = @' + "'"),
             "SessionStateVariableEntry -ArgumentList 'sync'",
             "SessionStateFunctionEntry",
             "[runspacefactory]::CreateRunspacePool",
@@ -177,7 +177,7 @@ Describe "Compiled WinUtil sanity" {
             'function Add-SelectedAppsMenuItem',
             ('$sync.configs.applications = @' + "'"),
             ('$inputXML = @' + "'"),
-            ('$WinUtilAutounattendXml = @' + "'"),
+            ('$NoteAutounattendXml = @' + "'"),
             '$sync.SearchBarClearButton.Add_Click({'
         )
 
@@ -207,8 +207,8 @@ Describe "Compiled WinUtil sanity" {
 Describe "Runspace sanity" {
     BeforeAll {
         . (Join-Path $script:repoRoot "functions\public\Invoke-WPFRunspace.ps1")
-        . (Join-Path $script:repoRoot "functions\private\Close-WinUtilRunspacePool.ps1")
-        . (Join-Path $script:repoRoot "functions\private\Initialize-WinUtilRunspacePool.ps1")
+        . (Join-Path $script:repoRoot "functions\private\Close-NoteRunspacePool.ps1")
+        . (Join-Path $script:repoRoot "functions\private\Initialize-NoteRunspacePool.ps1")
     }
 
     It "returns a single async handle and runs a scriptblock with arguments in the shared runspace pool" {

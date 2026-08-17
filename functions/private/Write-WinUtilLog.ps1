@@ -1,8 +1,8 @@
-function Write-WinUtilLog {
+function Write-NoteLog {
     <#
 
     .SYNOPSIS
-        Writes a timestamped WinUtil log entry to the active session log.
+        Writes a timestamped Note log entry to the active session log.
 
     .PARAMETER Message
         The message to write.
@@ -11,7 +11,7 @@ function Write-WinUtilLog {
         The severity level for the log entry.
 
     .PARAMETER Component
-        The WinUtil component producing the log entry.
+        The Note component producing the log entry.
 
     #>
     param (
@@ -21,7 +21,7 @@ function Write-WinUtilLog {
         [ValidateSet("INFO", "WARN", "ERROR", "DEBUG")]
         [string]$Level = "INFO",
 
-        [string]$Component = "WinUtil"
+        [string]$Component = "Note"
     )
 
     try {
@@ -39,18 +39,18 @@ function Write-WinUtilLog {
             $logPath = $transcriptPath
         }
 
-        if ([string]::IsNullOrWhiteSpace($logPath) -and $null -ne $sync -and $sync.ContainsKey("winutildir")) {
-            $logDirectory = Join-Path $sync.winutildir "logs"
-            $logPath = Join-Path $logDirectory "winutil_$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").log"
+        if ([string]::IsNullOrWhiteSpace($logPath) -and $null -ne $sync -and $sync.ContainsKey("Notedir")) {
+            $logDirectory = Join-Path $sync.Notedir "logs"
+            $logPath = Join-Path $logDirectory "Note_$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").log"
             $sync.logPath = $logPath
         }
 
         if ([string]::IsNullOrWhiteSpace($logPath) -and -not [string]::IsNullOrWhiteSpace($env:LocalAppData)) {
-            if ([string]::IsNullOrWhiteSpace($script:WinUtilLogPath)) {
-                $logDirectory = Join-Path (Join-Path $env:LocalAppData "winutil") "logs"
-                $script:WinUtilLogPath = Join-Path $logDirectory "winutil_$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").log"
+            if ([string]::IsNullOrWhiteSpace($script:NoteLogPath)) {
+                $logDirectory = Join-Path (Join-Path $env:LocalAppData "Note") "logs"
+                $script:NoteLogPath = Join-Path $logDirectory "Note_$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").log"
             }
-            $logPath = $script:WinUtilLogPath
+            $logPath = $script:NoteLogPath
         }
 
         if ([string]::IsNullOrWhiteSpace($logPath)) {
@@ -76,6 +76,6 @@ function Write-WinUtilLog {
             Write-Host $line
         }
     } catch {
-        Write-Warning "Unable to write WinUtil log entry: $($_.Exception.Message)"
+        Write-Warning "Unable to write Note log entry: $($_.Exception.Message)"
     }
 }

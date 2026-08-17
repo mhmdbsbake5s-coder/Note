@@ -8,7 +8,7 @@ function Invoke-WPFSSHServer {
 
     Invoke-WPFRunspace -ScriptBlock {
 
-        Invoke-WinUtilSSHServer
+        Invoke-NoteSSHServer
 
         Write-Host "======================================="
         Write-Host "--     OpenSSH Server installed!    ---"

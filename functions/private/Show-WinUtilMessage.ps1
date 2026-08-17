@@ -1,11 +1,11 @@
-function Show-WinUtilMessage {
+function Show-NoteMessage {
     <#
     .SYNOPSIS
-        Shows a WinUtil message box and returns the selected result.
+        Shows a Note message box and returns the selected result.
     #>
     param (
         [string]$Message,
-        [string]$Title = "Winutil",
+        [string]$Title = "Note",
         $Button = "OK",
         $Icon = "Information"
     )

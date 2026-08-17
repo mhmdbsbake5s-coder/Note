@@ -1,8 +1,8 @@
-# Runs the pre-release version of winutil
+# Runs the pre-release version of Note
 
-$latestTag = (Invoke-RestMethod https://api.github.com/repos/ChrisTitusTech/winutil/tags).Name | Select-Object -First 1
-$uri = "https://github.com/ChrisTitusTech/winutil/releases/download/$latestTag/winutil.ps1"
-$scriptPath = Join-Path $env:TEMP "winutil-$latestTag.ps1"
+$latestTag = (Invoke-RestMethod https://api.github.com/repos/ChrisTitusTech/Note/tags).Name | Select-Object -First 1
+$uri = "https://github.com/ChrisTitusTech/Note/releases/download/$latestTag/Note.ps1"
+$scriptPath = Join-Path $env:TEMP "Note-$latestTag.ps1"
 
 Invoke-WebRequest -Uri $uri -OutFile $scriptPath -UseBasicParsing -ErrorAction Stop
 

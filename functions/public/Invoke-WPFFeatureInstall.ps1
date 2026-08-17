@@ -8,7 +8,7 @@ function Invoke-WPFFeatureInstall {
 
     if($sync.ProcessRunning) {
         $msg = "[Invoke-WPFFeatureInstall] Install process is currently running."
-        [System.Windows.MessageBox]::Show($msg, "Winutil", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Warning)
+        [System.Windows.MessageBox]::Show($msg, "Note", [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Warning)
         return
     }
 
@@ -16,21 +16,21 @@ function Invoke-WPFFeatureInstall {
         $Features = $sync.selectedFeatures
         $sync.ProcessRunning = $true
         if ($Features.count -eq 1) {
-            Invoke-WPFUIThread -ScriptBlock { Set-WinUtilTaskbaritem -state "Indeterminate" -value 0.01 -overlay "logo" }
+            Invoke-WPFUIThread -ScriptBlock { Set-NoteTaskbaritem -state "Indeterminate" -value 0.01 -overlay "logo" }
         } else {
-            Invoke-WPFUIThread -ScriptBlock { Set-WinUtilTaskbaritem -state "Normal" -value 0.01 -overlay "logo" }
+            Invoke-WPFUIThread -ScriptBlock { Set-NoteTaskbaritem -state "Normal" -value 0.01 -overlay "logo" }
         }
 
         $x = 0
 
         $Features | ForEach-Object {
-            Invoke-WinUtilFeatureInstall $_
+            Invoke-NoteFeatureInstall $_
             $X++
-            Invoke-WPFUIThread -ScriptBlock { Set-WinUtilTaskbaritem -value ($x/$Features.Count) }
+            Invoke-WPFUIThread -ScriptBlock { Set-NoteTaskbaritem -value ($x/$Features.Count) }
         }
 
         $sync.ProcessRunning = $false
-        Invoke-WPFUIThread -ScriptBlock { Set-WinUtilTaskbaritem -state "None" -overlay "checkmark" }
+        Invoke-WPFUIThread -ScriptBlock { Set-NoteTaskbaritem -state "None" -overlay "checkmark" }
 
         Write-Host "==================================="
         Write-Host "---   Features are Installed    ---"

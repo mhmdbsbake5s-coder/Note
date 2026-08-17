@@ -25,13 +25,13 @@ BeforeAll {
     $script:mainScriptPath = Join-Path $script:repoRoot "scripts\main.ps1"
     $script:buttonScriptPath = Join-Path $script:repoRoot "functions\public\Invoke-WPFButton.ps1"
 
-function script:Get-WinUtilConfigObject {
+function script:Get-NoteConfigObject {
     param([string]$Name)
 
     Get-Content -Path (Join-Path $script:configRoot "$Name.json") -Raw | ConvertFrom-Json
 }
 
-function script:Test-WinUtilHasProperty {
+function script:Test-NoteHasProperty {
     param(
         [Parameter(Mandatory)]
         [psobject]$Object,
@@ -43,7 +43,7 @@ function script:Test-WinUtilHasProperty {
     return @($Object.PSObject.Properties.Name) -contains $Name
 }
 
-function script:Test-WinUtilHasNonEmptyProperty {
+function script:Test-NoteHasNonEmptyProperty {
     param(
         [Parameter(Mandatory)]
         [psobject]$Object,
@@ -52,7 +52,7 @@ function script:Test-WinUtilHasNonEmptyProperty {
         [string]$Name
     )
 
-    if (-not (Test-WinUtilHasProperty -Object $Object -Name $Name)) {
+    if (-not (Test-NoteHasProperty -Object $Object -Name $Name)) {
         return $false
     }
 
@@ -72,7 +72,7 @@ function script:Test-WinUtilHasNonEmptyProperty {
     return -not [string]::IsNullOrWhiteSpace([string]$value)
 }
 
-function script:Get-WinUtilMissingRequiredFields {
+function script:Get-NoteMissingRequiredFields {
     param(
         [Parameter(Mandatory)]
         [string]$EntryName,
@@ -85,13 +85,13 @@ function script:Get-WinUtilMissingRequiredFields {
     )
 
     foreach ($field in $RequiredFields) {
-        if (-not (Test-WinUtilHasNonEmptyProperty -Object $Entry -Name $field)) {
+        if (-not (Test-NoteHasNonEmptyProperty -Object $Entry -Name $field)) {
             "$EntryName missing $field"
         }
     }
 }
 
-function script:Get-WinUtilTopLevelFunctionNames {
+function script:Get-NoteTopLevelFunctionNames {
     Get-ChildItem -Path $script:functionRoot -Filter *.ps1 -Recurse | ForEach-Object {
         $tokens = $null
         $syntaxErrors = $null
@@ -106,7 +106,7 @@ function script:Get-WinUtilTopLevelFunctionNames {
     } | Sort-Object -Unique
 }
 
-function script:Get-WinUtilButtonSwitchNames {
+function script:Get-NoteButtonSwitchNames {
     $buttonSource = Get-Content -Path $script:buttonScriptPath -Raw
     [regex]::Matches($buttonSource, '"(WPF[A-Za-z0-9_]+)"\s*\{') |
         ForEach-Object { $_.Groups[1].Value } |
@@ -221,18 +221,18 @@ Describe "Tweaks config" {
 
 Describe "Preset config" {
     It "references existing config entries or supported actions" {
-        $preset = Get-WinUtilConfigObject -Name "preset"
-        $applications = Get-WinUtilConfigObject -Name "applications"
-        $tweaks = Get-WinUtilConfigObject -Name "tweaks"
-        $feature = Get-WinUtilConfigObject -Name "feature"
-        $appx = Get-WinUtilConfigObject -Name "appx"
+        $preset = Get-NoteConfigObject -Name "preset"
+        $applications = Get-NoteConfigObject -Name "applications"
+        $tweaks = Get-NoteConfigObject -Name "tweaks"
+        $feature = Get-NoteConfigObject -Name "feature"
+        $appx = Get-NoteConfigObject -Name "appx"
 
         $validReferences = @(
             $tweaks.PSObject.Properties.Name
             $feature.PSObject.Properties.Name
             $appx.PSObject.Properties.Name
             $applications.PSObject.Properties.Name | ForEach-Object { "WPFInstall$_" }
-            Get-WinUtilButtonSwitchNames
+            Get-NoteButtonSwitchNames
         ) | Sort-Object -Unique
 
         $invalidReferences = New-Object System.Collections.Generic.List[string]
@@ -253,7 +253,7 @@ Describe "Preset config" {
 Describe "App navigation config" {
     It "is wired to an existing XAML target grid" {
         $mainScript = Get-Content -Path $script:mainScriptPath -Raw
-        $tabInitializerScript = Get-Content -Path (Join-Path $script:repoRoot "functions/private/Initialize-WinUtilTabContent.ps1") -Raw
+        $tabInitializerScript = Get-Content -Path (Join-Path $script:repoRoot "functions/private/Initialize-NoteTabContent.ps1") -Raw
         $targetGridMatch = [regex]::Match(
             "$mainScript`n$tabInitializerScript",
             'Invoke-WPFUIElements\s+-configVariable\s+\$sync\.configs\.appnavigation\s+-targetGridName\s+"([^"]+)"'
@@ -271,18 +271,18 @@ Describe "App navigation config" {
     }
 
     It "contains renderable entries with valid button and radio groups" {
-        $appnavigation = Get-WinUtilConfigObject -Name "appnavigation"
-        $feature = Get-WinUtilConfigObject -Name "feature"
+        $appnavigation = Get-NoteConfigObject -Name "appnavigation"
+        $feature = Get-NoteConfigObject -Name "feature"
         $requiredFields = @("Content", "Category", "Type", "Order", "Description")
         $allowedTypes = @("Button", "RadioButton", "Note")
         $supportedButtons = @(
-            Get-WinUtilButtonSwitchNames
+            Get-NoteButtonSwitchNames
             $feature.PSObject.Properties.Name
         ) | Sort-Object -Unique
         $invalidEntries = New-Object System.Collections.Generic.List[string]
 
         foreach ($entry in $appnavigation.PSObject.Properties) {
-            foreach ($missingField in (Get-WinUtilMissingRequiredFields -EntryName $entry.Name -Entry $entry.Value -RequiredFields $requiredFields)) {
+            foreach ($missingField in (Get-NoteMissingRequiredFields -EntryName $entry.Name -Entry $entry.Value -RequiredFields $requiredFields)) {
                 $invalidEntries.Add($missingField)
             }
 
@@ -295,11 +295,11 @@ Describe "App navigation config" {
             }
 
             if ($entry.Value.Type -eq "RadioButton") {
-                if (-not (Test-WinUtilHasNonEmptyProperty -Object $entry.Value -Name "GroupName")) {
+                if (-not (Test-NoteHasNonEmptyProperty -Object $entry.Value -Name "GroupName")) {
                     $invalidEntries.Add("$($entry.Name) missing GroupName")
                 }
 
-                if (-not (Test-WinUtilHasProperty -Object $entry.Value -Name "Checked")) {
+                if (-not (Test-NoteHasProperty -Object $entry.Value -Name "Checked")) {
                     $invalidEntries.Add("$($entry.Name) missing Checked")
                 }
             }
@@ -326,16 +326,16 @@ Describe "App navigation config" {
 
 Describe "UI-rendered config entries" {
     It "contains required AppX fields" {
-        $appx = Get-WinUtilConfigObject -Name "appx"
+        $appx = Get-NoteConfigObject -Name "appx"
         $requiredFields = @("Category", "Content", "Description", "Panel", "PackageId")
         $invalidEntries = New-Object System.Collections.Generic.List[string]
 
         foreach ($entry in $appx.PSObject.Properties) {
-            foreach ($missingField in (Get-WinUtilMissingRequiredFields -EntryName $entry.Name -Entry $entry.Value -RequiredFields $requiredFields)) {
+            foreach ($missingField in (Get-NoteMissingRequiredFields -EntryName $entry.Name -Entry $entry.Value -RequiredFields $requiredFields)) {
                 $invalidEntries.Add($missingField)
             }
 
-            if ((Test-WinUtilHasProperty -Object $entry.Value -Name "StoreId") -and
+            if ((Test-NoteHasProperty -Object $entry.Value -Name "StoreId") -and
                 $entry.Value.StoreId -notmatch '^(?:[A-Z0-9]{12}|XP[A-Z0-9]{12})$') {
                 $invalidEntries.Add("$($entry.Name) has invalid Microsoft Store ID '$($entry.Value.StoreId)'")
             }
@@ -347,17 +347,17 @@ Describe "UI-rendered config entries" {
     }
 
     It "contains required DNS fields with parseable IP addresses" {
-        $dns = Get-WinUtilConfigObject -Name "dns"
+        $dns = Get-NoteConfigObject -Name "dns"
         $requiredFields = @("Primary", "Secondary", "Primary6", "Secondary6")
         $invalidEntries = New-Object System.Collections.Generic.List[string]
 
         foreach ($entry in $dns.PSObject.Properties) {
-            foreach ($missingField in (Get-WinUtilMissingRequiredFields -EntryName $entry.Name -Entry $entry.Value -RequiredFields $requiredFields)) {
+            foreach ($missingField in (Get-NoteMissingRequiredFields -EntryName $entry.Name -Entry $entry.Value -RequiredFields $requiredFields)) {
                 $invalidEntries.Add($missingField)
             }
 
             foreach ($field in $requiredFields) {
-                if (-not (Test-WinUtilHasNonEmptyProperty -Object $entry.Value -Name $field)) {
+                if (-not (Test-NoteHasNonEmptyProperty -Object $entry.Value -Name $field)) {
                     continue
                 }
 
@@ -375,8 +375,8 @@ Describe "UI-rendered config entries" {
     }
 
     It "exposes every configured DNS provider in the DNS combobox" {
-        $dns = Get-WinUtilConfigObject -Name "dns"
-        $tweaks = Get-WinUtilConfigObject -Name "tweaks"
+        $dns = Get-NoteConfigObject -Name "dns"
+        $tweaks = Get-NoteConfigObject -Name "tweaks"
         $comboItems = @($tweaks.WPFchangedns.ComboItems -split " ")
         $missingProviders = @($dns.PSObject.Properties.Name | Where-Object { $comboItems -notcontains $_ })
 
@@ -386,13 +386,13 @@ Describe "UI-rendered config entries" {
     }
 
     It "contains required feature fields and valid configured functions" {
-        $feature = Get-WinUtilConfigObject -Name "feature"
-        $functionNames = Get-WinUtilTopLevelFunctionNames
+        $feature = Get-NoteConfigObject -Name "feature"
+        $functionNames = Get-NoteTopLevelFunctionNames
         $requiredFields = @("Content", "category", "panel", "link")
         $invalidEntries = New-Object System.Collections.Generic.List[string]
 
         foreach ($entry in $feature.PSObject.Properties) {
-            foreach ($missingField in (Get-WinUtilMissingRequiredFields -EntryName $entry.Name -Entry $entry.Value -RequiredFields $requiredFields)) {
+            foreach ($missingField in (Get-NoteMissingRequiredFields -EntryName $entry.Name -Entry $entry.Value -RequiredFields $requiredFields)) {
                 $invalidEntries.Add($missingField)
             }
 
@@ -405,7 +405,7 @@ Describe "UI-rendered config entries" {
                     $invalidEntries.Add("$($entry.Name) button missing function or InvokeScript")
                 }
             } else {
-                if (-not (Test-WinUtilHasNonEmptyProperty -Object $entry.Value -Name "Description")) {
+                if (-not (Test-NoteHasNonEmptyProperty -Object $entry.Value -Name "Description")) {
                     $invalidEntries.Add("$($entry.Name) missing Description")
                 }
 
@@ -425,14 +425,14 @@ Describe "UI-rendered config entries" {
     }
 
     It "contains required tweak fields and valid action metadata" {
-        $tweaks = Get-WinUtilConfigObject -Name "tweaks"
+        $tweaks = Get-NoteConfigObject -Name "tweaks"
         $requiredFields = @("Content", "category", "panel", "link")
         $allowedTypes = @("Button", "Combobox", "Toggle", "ToggleButton")
-        $supportedButtons = Get-WinUtilButtonSwitchNames
+        $supportedButtons = Get-NoteButtonSwitchNames
         $invalidEntries = New-Object System.Collections.Generic.List[string]
 
         foreach ($entry in $tweaks.PSObject.Properties) {
-            foreach ($missingField in (Get-WinUtilMissingRequiredFields -EntryName $entry.Name -Entry $entry.Value -RequiredFields $requiredFields)) {
+            foreach ($missingField in (Get-NoteMissingRequiredFields -EntryName $entry.Name -Entry $entry.Value -RequiredFields $requiredFields)) {
                 $invalidEntries.Add($missingField)
             }
 
@@ -445,7 +445,7 @@ Describe "UI-rendered config entries" {
                     $invalidEntries.Add("$($entry.Name) is not handled by Invoke-WPFButton")
                 }
             } elseif ($entry.Value.Type -eq "Combobox") {
-                if (-not (Test-WinUtilHasNonEmptyProperty -Object $entry.Value -Name "ComboItems")) {
+                if (-not (Test-NoteHasNonEmptyProperty -Object $entry.Value -Name "ComboItems")) {
                     $invalidEntries.Add("$($entry.Name) combobox missing ComboItems")
                 }
                 $statefulRegistry = @($entry.Value.registry | Where-Object Values)
@@ -470,7 +470,7 @@ Describe "UI-rendered config entries" {
                     }
                 }
             } else {
-                if (-not (Test-WinUtilHasNonEmptyProperty -Object $entry.Value -Name "Description")) {
+                if (-not (Test-NoteHasNonEmptyProperty -Object $entry.Value -Name "Description")) {
                     $invalidEntries.Add("$($entry.Name) missing Description")
                 }
 
@@ -487,7 +487,7 @@ Describe "UI-rendered config entries" {
                 } else {
                     @("Path", "Name", "Type", "Value", "OriginalValue")
                 }
-                foreach ($missingField in (Get-WinUtilMissingRequiredFields -EntryName "$($entry.Name),registry" -Entry $registryEntry -RequiredFields $requiredRegistryFields)) {
+                foreach ($missingField in (Get-NoteMissingRequiredFields -EntryName "$($entry.Name),registry" -Entry $registryEntry -RequiredFields $requiredRegistryFields)) {
                     $invalidEntries.Add($missingField)
                 }
             }
@@ -495,7 +495,7 @@ Describe "UI-rendered config entries" {
             foreach ($serviceEntry in @($entry.Value.service)) {
                 if ($null -eq $serviceEntry) { continue }
 
-                foreach ($missingField in (Get-WinUtilMissingRequiredFields -EntryName "$($entry.Name),service" -Entry $serviceEntry -RequiredFields @("Name", "StartupType", "OriginalType"))) {
+                foreach ($missingField in (Get-NoteMissingRequiredFields -EntryName "$($entry.Name),service" -Entry $serviceEntry -RequiredFields @("Name", "StartupType", "OriginalType"))) {
                     $invalidEntries.Add($missingField)
                 }
             }
@@ -507,11 +507,11 @@ Describe "UI-rendered config entries" {
     }
 
     It "defines theme resources required by XAML rendering" {
-        $themes = Get-WinUtilConfigObject -Name "themes"
+        $themes = Get-NoteConfigObject -Name "themes"
         $invalidEntries = New-Object System.Collections.Generic.List[string]
 
         foreach ($themeName in @("shared", "Light", "Dark")) {
-            if (-not (Test-WinUtilHasProperty -Object $themes -Name $themeName)) {
+            if (-not (Test-NoteHasProperty -Object $themes -Name $themeName)) {
                 $invalidEntries.Add("themes.json missing $themeName")
                 continue
             }
@@ -573,7 +573,7 @@ Describe "Embedded config scripts" {
             $config = Get-Content -Path $configFile.FullName -Raw | ConvertFrom-Json
             foreach ($entry in $config.PSObject.Properties) {
                 foreach ($field in @("InvokeScript", "UndoScript")) {
-                    if (-not (Test-WinUtilHasProperty -Object $entry.Value -Name $field)) {
+                    if (-not (Test-NoteHasProperty -Object $entry.Value -Name $field)) {
                         continue
                     }
 

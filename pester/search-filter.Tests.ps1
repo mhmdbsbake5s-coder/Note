@@ -113,11 +113,11 @@ namespace Windows.Controls
     . (Join-Path $script:repoRoot "functions\private\Find-AppsByNameOrDescription.ps1")
     . (Join-Path $script:repoRoot "functions\private\Find-TweaksByNameOrDescription.ps1")
 
-    function script:New-WinUtilSearchCollection {
+    function script:New-NoteSearchCollection {
         return ,[System.Collections.ArrayList]::new()
     }
 
-    function script:New-WinUtilAppSearchItem {
+    function script:New-NoteAppSearchItem {
         param([string]$Tag)
 
         [pscustomobject]@{
@@ -126,7 +126,7 @@ namespace Windows.Controls
         }
     }
 
-    function script:New-WinUtilAppCategory {
+    function script:New-NoteAppCategory {
         param(
             [string]$Label,
             [object[]]$Items
@@ -137,7 +137,7 @@ namespace Windows.Controls
             Visibility = [Windows.Visibility]::Visible
         }
         $wrapPanel = [pscustomobject]@{
-            Children = New-WinUtilSearchCollection
+            Children = New-NoteSearchCollection
             Visibility = [Windows.Visibility]::Visible
         }
 
@@ -145,7 +145,7 @@ namespace Windows.Controls
             $null = $wrapPanel.Children.Add($item)
         }
 
-        $children = New-WinUtilSearchCollection
+        $children = New-NoteSearchCollection
         $null = $children.Add($labelControl)
         $null = $children.Add($wrapPanel)
 
@@ -155,10 +155,10 @@ namespace Windows.Controls
         }
     }
 
-    function script:New-WinUtilAppSearchContext {
+    function script:New-NoteAppSearchContext {
         param([object[]]$Categories)
 
-        $items = New-WinUtilSearchCollection
+        $items = New-NoteSearchCollection
         foreach ($category in $Categories) {
             $null = $items.Add($category)
         }
@@ -200,7 +200,7 @@ namespace Windows.Controls
         $global:sync = $script:sync
     }
 
-    function script:New-WinUtilFakeSearchForm {
+    function script:New-NoteFakeSearchForm {
         param(
             $TweaksPanel,
             $AppxPanel
@@ -219,7 +219,7 @@ namespace Windows.Controls
         $form
     }
 
-    function script:New-WinUtilTweakLabelItem {
+    function script:New-NoteTweakLabelItem {
         param(
             [string]$Content,
             [string]$ToolTip = ""
@@ -236,7 +236,7 @@ namespace Windows.Controls
         $item
     }
 
-    function script:New-WinUtilTweakCheckboxItem {
+    function script:New-NoteTweakCheckboxItem {
         param(
             [string]$Content,
             [string]$ToolTip = ""
@@ -251,7 +251,7 @@ namespace Windows.Controls
         $item
     }
 
-    function script:New-WinUtilTweakCategory {
+    function script:New-NoteTweakCategory {
         param(
             [string]$Label,
             [object[]]$Items
@@ -281,11 +281,11 @@ namespace Windows.Controls
         }
     }
 
-    function script:New-WinUtilTweakPanel {
+    function script:New-NoteTweakPanel {
         param([object[]]$Categories)
 
         $panel = [pscustomobject]@{
-            Children = New-WinUtilSearchCollection
+            Children = New-NoteSearchCollection
         }
 
         foreach ($category in $Categories) {
@@ -295,7 +295,7 @@ namespace Windows.Controls
         $panel
     }
 
-    function script:New-WinUtilTweakSearchContext {
+    function script:New-NoteTweakSearchContext {
         param(
             $TweaksPanel,
             $AppxPanel = $null,
@@ -304,32 +304,32 @@ namespace Windows.Controls
 
         $script:sync = [Hashtable]::Synchronized(@{
             currentTab = $CurrentTab
-            Form = New-WinUtilFakeSearchForm -TweaksPanel $TweaksPanel -AppxPanel $AppxPanel
+            Form = New-NoteFakeSearchForm -TweaksPanel $TweaksPanel -AppxPanel $AppxPanel
         })
         $global:sync = $script:sync
     }
 
-    function script:Remove-WinUtilSearchGlobals {
+    function script:Remove-NoteSearchGlobals {
         Remove-Variable -Name sync -Scope Global -ErrorAction SilentlyContinue
     }
 }
 
 Describe "Find-AppsByNameOrDescription" {
     AfterEach {
-        Remove-WinUtilSearchGlobals
+        Remove-NoteSearchGlobals
     }
 
     It "restores app visibility and respects collapsed category state for empty search" {
-        $browserItem = New-WinUtilAppSearchItem -Tag "WPFInstallBrowser"
-        $mediaItem = New-WinUtilAppSearchItem -Tag "WPFInstallMedia"
+        $browserItem = New-NoteAppSearchItem -Tag "WPFInstallBrowser"
+        $mediaItem = New-NoteAppSearchItem -Tag "WPFInstallMedia"
         $browserItem.Visibility = [Windows.Visibility]::Collapsed
         $mediaItem.Visibility = [Windows.Visibility]::Collapsed
 
-        $collapsedCategory = New-WinUtilAppCategory -Label "+ Browsers" -Items @($browserItem)
-        $expandedCategory = New-WinUtilAppCategory -Label "- Media" -Items @($mediaItem)
+        $collapsedCategory = New-NoteAppCategory -Label "+ Browsers" -Items @($browserItem)
+        $expandedCategory = New-NoteAppCategory -Label "- Media" -Items @($mediaItem)
         $collapsedCategory.Children[1].Visibility = [Windows.Visibility]::Collapsed
         $expandedCategory.Children[1].Visibility = [Windows.Visibility]::Collapsed
-        New-WinUtilAppSearchContext -Categories @($collapsedCategory, $expandedCategory)
+        New-NoteAppSearchContext -Categories @($collapsedCategory, $expandedCategory)
 
         Find-AppsByNameOrDescription -SearchString ""
 
@@ -342,12 +342,12 @@ Describe "Find-AppsByNameOrDescription" {
     }
 
     It "shows matching apps by description and hides categories without matches" {
-        $browserItem = New-WinUtilAppSearchItem -Tag "WPFInstallBrowser"
-        $mediaItem = New-WinUtilAppSearchItem -Tag "WPFInstallMedia"
-        $editorItem = New-WinUtilAppSearchItem -Tag "WPFInstallEditor"
-        $browserCategory = New-WinUtilAppCategory -Label "+ Browsers" -Items @($browserItem, $mediaItem)
-        $editorCategory = New-WinUtilAppCategory -Label "- Editors" -Items @($editorItem)
-        New-WinUtilAppSearchContext -Categories @($browserCategory, $editorCategory)
+        $browserItem = New-NoteAppSearchItem -Tag "WPFInstallBrowser"
+        $mediaItem = New-NoteAppSearchItem -Tag "WPFInstallMedia"
+        $editorItem = New-NoteAppSearchItem -Tag "WPFInstallEditor"
+        $browserCategory = New-NoteAppCategory -Label "+ Browsers" -Items @($browserItem, $mediaItem)
+        $editorCategory = New-NoteAppCategory -Label "- Editors" -Items @($editorItem)
+        New-NoteAppSearchContext -Categories @($browserCategory, $editorCategory)
 
         Find-AppsByNameOrDescription -SearchString "private"
 
@@ -361,10 +361,10 @@ Describe "Find-AppsByNameOrDescription" {
     }
 
     It "treats wildcard characters as literal app search text" {
-        $literalItem = New-WinUtilAppSearchItem -Tag "WPFInstallLiteral"
-        $mediaItem = New-WinUtilAppSearchItem -Tag "WPFInstallMedia"
-        $category = New-WinUtilAppCategory -Label "- Tools" -Items @($literalItem, $mediaItem)
-        New-WinUtilAppSearchContext -Categories @($category)
+        $literalItem = New-NoteAppSearchItem -Tag "WPFInstallLiteral"
+        $mediaItem = New-NoteAppSearchItem -Tag "WPFInstallMedia"
+        $category = New-NoteAppCategory -Label "- Tools" -Items @($literalItem, $mediaItem)
+        New-NoteAppSearchContext -Categories @($category)
 
         Find-AppsByNameOrDescription -SearchString "[abc]"
 
@@ -374,10 +374,10 @@ Describe "Find-AppsByNameOrDescription" {
     }
 
     It "filters category chips by exact application category" {
-        $utilityItem = New-WinUtilAppSearchItem -Tag "WPFInstallLiteral"
-        $powerToysItem = New-WinUtilAppSearchItem -Tag "WPFInstallPowerToys"
-        $category = New-WinUtilAppCategory -Label "- Tools" -Items @($utilityItem, $powerToysItem)
-        New-WinUtilAppSearchContext -Categories @($category)
+        $utilityItem = New-NoteAppSearchItem -Tag "WPFInstallLiteral"
+        $powerToysItem = New-NoteAppSearchItem -Tag "WPFInstallPowerToys"
+        $category = New-NoteAppCategory -Label "- Tools" -Items @($utilityItem, $powerToysItem)
+        New-NoteAppSearchContext -Categories @($category)
 
         Find-AppsByNameOrDescription -Categories @("Utilities")
 
@@ -387,11 +387,11 @@ Describe "Find-AppsByNameOrDescription" {
     }
 
     It "shows apps from every selected category when several chips are active" {
-        $utilityItem = New-WinUtilAppSearchItem -Tag "WPFInstallLiteral"
-        $powerToysItem = New-WinUtilAppSearchItem -Tag "WPFInstallPowerToys"
-        $browserItem = New-WinUtilAppSearchItem -Tag "WPFInstallBrowser"
-        $category = New-WinUtilAppCategory -Label "- Tools" -Items @($utilityItem, $powerToysItem, $browserItem)
-        New-WinUtilAppSearchContext -Categories @($category)
+        $utilityItem = New-NoteAppSearchItem -Tag "WPFInstallLiteral"
+        $powerToysItem = New-NoteAppSearchItem -Tag "WPFInstallPowerToys"
+        $browserItem = New-NoteAppSearchItem -Tag "WPFInstallBrowser"
+        $category = New-NoteAppCategory -Label "- Tools" -Items @($utilityItem, $powerToysItem, $browserItem)
+        New-NoteAppSearchContext -Categories @($category)
 
         Find-AppsByNameOrDescription -Categories @("Utilities", "Microsoft Tools")
 
@@ -401,10 +401,10 @@ Describe "Find-AppsByNameOrDescription" {
     }
 
     It "applies the search text and the category filter together" {
-        $powerToysItem = New-WinUtilAppSearchItem -Tag "WPFInstallPowerToys"
-        $literalItem = New-WinUtilAppSearchItem -Tag "WPFInstallLiteral"
-        $category = New-WinUtilAppCategory -Label "- Tools" -Items @($powerToysItem, $literalItem)
-        New-WinUtilAppSearchContext -Categories @($category)
+        $powerToysItem = New-NoteAppSearchItem -Tag "WPFInstallPowerToys"
+        $literalItem = New-NoteAppSearchItem -Tag "WPFInstallLiteral"
+        $category = New-NoteAppCategory -Label "- Tools" -Items @($powerToysItem, $literalItem)
+        New-NoteAppSearchContext -Categories @($category)
 
         Find-AppsByNameOrDescription -SearchString "PowerToys" -Categories @("Microsoft Tools")
 
@@ -413,9 +413,9 @@ Describe "Find-AppsByNameOrDescription" {
     }
 
     It "hides a category when the search text matches nothing inside the selected categories" {
-        $powerToysItem = New-WinUtilAppSearchItem -Tag "WPFInstallPowerToys"
-        $category = New-WinUtilAppCategory -Label "- Tools" -Items @($powerToysItem)
-        New-WinUtilAppSearchContext -Categories @($category)
+        $powerToysItem = New-NoteAppSearchItem -Tag "WPFInstallPowerToys"
+        $category = New-NoteAppCategory -Label "- Tools" -Items @($powerToysItem)
+        New-NoteAppSearchContext -Categories @($category)
 
         Find-AppsByNameOrDescription -SearchString "Firefox" -Categories @("Microsoft Tools")
 
@@ -424,9 +424,9 @@ Describe "Find-AppsByNameOrDescription" {
     }
 
     It "expands a collapsed category that has matches for the selected filter" {
-        $powerToysItem = New-WinUtilAppSearchItem -Tag "WPFInstallPowerToys"
-        $category = New-WinUtilAppCategory -Label "+ Tools" -Items @($powerToysItem)
-        New-WinUtilAppSearchContext -Categories @($category)
+        $powerToysItem = New-NoteAppSearchItem -Tag "WPFInstallPowerToys"
+        $category = New-NoteAppCategory -Label "+ Tools" -Items @($powerToysItem)
+        New-NoteAppSearchContext -Categories @($category)
 
         Find-AppsByNameOrDescription -Categories @("Microsoft Tools")
 
@@ -435,9 +435,9 @@ Describe "Find-AppsByNameOrDescription" {
     }
 
     It "re-collapses a category it expanded once the filter is cleared" {
-        $powerToysItem = New-WinUtilAppSearchItem -Tag "WPFInstallPowerToys"
-        $category = New-WinUtilAppCategory -Label "+ Tools" -Items @($powerToysItem)
-        New-WinUtilAppSearchContext -Categories @($category)
+        $powerToysItem = New-NoteAppSearchItem -Tag "WPFInstallPowerToys"
+        $category = New-NoteAppCategory -Label "+ Tools" -Items @($powerToysItem)
+        New-NoteAppSearchContext -Categories @($category)
 
         Find-AppsByNameOrDescription -Categories @("Microsoft Tools")
         $category.Children[0].Content | Should -Be "- Tools"
@@ -449,9 +449,9 @@ Describe "Find-AppsByNameOrDescription" {
     }
 
     It "leaves a category the user had expanded alone when the filter is cleared" {
-        $powerToysItem = New-WinUtilAppSearchItem -Tag "WPFInstallPowerToys"
-        $category = New-WinUtilAppCategory -Label "- Tools" -Items @($powerToysItem)
-        New-WinUtilAppSearchContext -Categories @($category)
+        $powerToysItem = New-NoteAppSearchItem -Tag "WPFInstallPowerToys"
+        $category = New-NoteAppCategory -Label "- Tools" -Items @($powerToysItem)
+        New-NoteAppSearchContext -Categories @($category)
 
         Find-AppsByNameOrDescription -Categories @("Microsoft Tools")
         Find-AppsByNameOrDescription -SearchString ""
@@ -463,19 +463,19 @@ Describe "Find-AppsByNameOrDescription" {
 
 Describe "Find-TweaksByNameOrDescription" {
     AfterEach {
-        Remove-WinUtilSearchGlobals
+        Remove-NoteSearchGlobals
     }
 
     It "restores category labels and tweak item visibility for empty search" {
-        $labelItem = New-WinUtilTweakLabelItem -Content "Disable Telemetry" -ToolTip "Stop tracking"
-        $stackItem = New-WinUtilTweakCheckboxItem -Content "Show Extensions" -ToolTip "File extension display"
-        $category = New-WinUtilTweakCategory -Label "+ Privacy" -Items @($labelItem, $stackItem)
+        $labelItem = New-NoteTweakLabelItem -Content "Disable Telemetry" -ToolTip "Stop tracking"
+        $stackItem = New-NoteTweakCheckboxItem -Content "Show Extensions" -ToolTip "File extension display"
+        $category = New-NoteTweakCategory -Label "+ Privacy" -Items @($labelItem, $stackItem)
         $labelItem.Visibility = [Windows.Visibility]::Collapsed
         $stackItem.Visibility = [Windows.Visibility]::Collapsed
         $category.Label.Visibility = [Windows.Visibility]::Collapsed
         $category.Border.Visibility = [Windows.Visibility]::Collapsed
-        $panel = New-WinUtilTweakPanel -Categories @($category)
-        New-WinUtilTweakSearchContext -TweaksPanel $panel
+        $panel = New-NoteTweakPanel -Categories @($category)
+        New-NoteTweakSearchContext -TweaksPanel $panel
 
         Find-TweaksByNameOrDescription -SearchString ""
 
@@ -486,12 +486,12 @@ Describe "Find-TweaksByNameOrDescription" {
     }
 
     It "shows tweak matches by label tooltip and checkbox content" {
-        $telemetryItem = New-WinUtilTweakLabelItem -Content "Disable Telemetry" -ToolTip "Stop tracking"
-        $extensionsItem = New-WinUtilTweakCheckboxItem -Content "Show Extensions" -ToolTip "File extension display"
-        $nonMatchItem = New-WinUtilTweakLabelItem -Content "Enable NumLock" -ToolTip "Keyboard setting"
-        $category = New-WinUtilTweakCategory -Label "+ Privacy" -Items @($telemetryItem, $extensionsItem, $nonMatchItem)
-        $panel = New-WinUtilTweakPanel -Categories @($category)
-        New-WinUtilTweakSearchContext -TweaksPanel $panel
+        $telemetryItem = New-NoteTweakLabelItem -Content "Disable Telemetry" -ToolTip "Stop tracking"
+        $extensionsItem = New-NoteTweakCheckboxItem -Content "Show Extensions" -ToolTip "File extension display"
+        $nonMatchItem = New-NoteTweakLabelItem -Content "Enable NumLock" -ToolTip "Keyboard setting"
+        $category = New-NoteTweakCategory -Label "+ Privacy" -Items @($telemetryItem, $extensionsItem, $nonMatchItem)
+        $panel = New-NoteTweakPanel -Categories @($category)
+        New-NoteTweakSearchContext -TweaksPanel $panel
 
         Find-TweaksByNameOrDescription -SearchString "tracking"
 
@@ -510,10 +510,10 @@ Describe "Find-TweaksByNameOrDescription" {
     }
 
     It "hides tweak category panels when no items match" {
-        $item = New-WinUtilTweakLabelItem -Content "Disable Telemetry" -ToolTip "Stop tracking"
-        $category = New-WinUtilTweakCategory -Label "- Privacy" -Items @($item)
-        $panel = New-WinUtilTweakPanel -Categories @($category)
-        New-WinUtilTweakSearchContext -TweaksPanel $panel
+        $item = New-NoteTweakLabelItem -Content "Disable Telemetry" -ToolTip "Stop tracking"
+        $category = New-NoteTweakCategory -Label "- Privacy" -Items @($item)
+        $panel = New-NoteTweakPanel -Categories @($category)
+        New-NoteTweakSearchContext -TweaksPanel $panel
 
         Find-TweaksByNameOrDescription -SearchString "not-present"
 
@@ -523,13 +523,13 @@ Describe "Find-TweaksByNameOrDescription" {
     }
 
     It "searches the AppX panel when AppX is the current tab" {
-        $tweakItem = New-WinUtilTweakLabelItem -Content "Disable Telemetry" -ToolTip "Stop tracking"
-        $appxItem = New-WinUtilTweakCheckboxItem -Content "Xbox Overlay" -ToolTip "Gaming overlay package"
-        $tweakCategory = New-WinUtilTweakCategory -Label "- Privacy" -Items @($tweakItem)
-        $appxCategory = New-WinUtilTweakCategory -Label "+ AppX" -Items @($appxItem)
-        $tweakPanel = New-WinUtilTweakPanel -Categories @($tweakCategory)
-        $appxPanel = New-WinUtilTweakPanel -Categories @($appxCategory)
-        New-WinUtilTweakSearchContext -TweaksPanel $tweakPanel -AppxPanel $appxPanel -CurrentTab "AppX"
+        $tweakItem = New-NoteTweakLabelItem -Content "Disable Telemetry" -ToolTip "Stop tracking"
+        $appxItem = New-NoteTweakCheckboxItem -Content "Xbox Overlay" -ToolTip "Gaming overlay package"
+        $tweakCategory = New-NoteTweakCategory -Label "- Privacy" -Items @($tweakItem)
+        $appxCategory = New-NoteTweakCategory -Label "+ AppX" -Items @($appxItem)
+        $tweakPanel = New-NoteTweakPanel -Categories @($tweakCategory)
+        $appxPanel = New-NoteTweakPanel -Categories @($appxCategory)
+        New-NoteTweakSearchContext -TweaksPanel $tweakPanel -AppxPanel $appxPanel -CurrentTab "AppX"
 
         Find-TweaksByNameOrDescription -SearchString "overlay"
 

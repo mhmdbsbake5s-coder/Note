@@ -1,4 +1,4 @@
-Function Invoke-WinUtilCurrentSystem {
+Function Invoke-NoteCurrentSystem {
 
     <#
 
@@ -6,7 +6,7 @@ Function Invoke-WinUtilCurrentSystem {
         Checks to see what tweaks have already been applied and what programs are installed, and checks the according boxes
 
     .EXAMPLE
-        InvokeWinUtilCurrentSystem -Checkbox "winget"
+        InvokeNoteCurrentSystem -Checkbox "winget"
 
     #>
 
@@ -65,7 +65,7 @@ Function Invoke-WinUtilCurrentSystem {
                 $Values = @()
 
                 if ($entryType -eq "Toggle") {
-                    if (-not (Get-WinUtilToggleStatus $Config)) {
+                    if (-not (Get-NoteToggleStatus $Config)) {
                         $values += $False
                     }
                 } else {

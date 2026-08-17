@@ -1,4 +1,4 @@
-function Invoke-WinUtilAppCategoryChip {
+function Invoke-NoteAppCategoryChip {
     <#
         .SYNOPSIS
             Handles a click on an Install tab category chip
@@ -16,5 +16,5 @@ function Invoke-WinUtilAppCategoryChip {
     )
 
     $ctrlDown = [bool]([System.Windows.Input.Keyboard]::Modifiers -band [System.Windows.Input.ModifierKeys]::Control)
-    Set-WinUtilAppCategoryFilter -Category $Chip.Tag -Additive:$ctrlDown
+    Set-NoteAppCategoryFilter -Category $Chip.Tag -Additive:$ctrlDown
 }

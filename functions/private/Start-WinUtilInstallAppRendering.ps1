@@ -1,4 +1,4 @@
-function Invoke-WinUtilInstallAppRenderBatch {
+function Invoke-NoteInstallAppRenderBatch {
     param(
         [Parameter(Mandatory = $true)]
         $CategoryBatch
@@ -19,28 +19,28 @@ function Invoke-WinUtilInstallAppRenderBatch {
     }
 }
 
-function Complete-WinUtilInstallAppRendering {
+function Complete-NoteInstallAppRendering {
     $sync.InstallAppEntriesRendered = $true
 }
 
-function Invoke-WinUtilInstallAppRenderNextBatch {
+function Invoke-NoteInstallAppRenderNextBatch {
     if ($sync.InstallAppRenderQueue.Count -gt 0) {
         $categoryBatch = $sync.InstallAppRenderQueue.Dequeue()
-        Invoke-WinUtilInstallAppRenderBatch -CategoryBatch $categoryBatch
+        Invoke-NoteInstallAppRenderBatch -CategoryBatch $categoryBatch
     }
 
     if ($sync.InstallAppRenderQueue.Count -gt 0) {
         $sync.Form.Dispatcher.BeginInvoke(
             [System.Windows.Threading.DispatcherPriority]::Background,
-            [action]{ Invoke-WinUtilInstallAppRenderNextBatch }
+            [action]{ Invoke-NoteInstallAppRenderNextBatch }
         ) | Out-Null
         return
     }
 
-    Complete-WinUtilInstallAppRendering
+    Complete-NoteInstallAppRendering
 }
 
-function Start-WinUtilInstallAppRendering {
+function Start-NoteInstallAppRendering {
     if ($null -eq $sync.InstallAppRenderQueue) {
         return
     }
@@ -50,15 +50,15 @@ function Start-WinUtilInstallAppRendering {
     if ($sync.Form -and $sync.Form.Dispatcher) {
         $sync.Form.Dispatcher.BeginInvoke(
             [System.Windows.Threading.DispatcherPriority]::Background,
-            [action]{ Invoke-WinUtilInstallAppRenderNextBatch }
+            [action]{ Invoke-NoteInstallAppRenderNextBatch }
         ) | Out-Null
         return
     }
 
     while ($sync.InstallAppRenderQueue.Count -gt 0) {
         $categoryBatch = $sync.InstallAppRenderQueue.Dequeue()
-        Invoke-WinUtilInstallAppRenderBatch -CategoryBatch $categoryBatch
+        Invoke-NoteInstallAppRenderBatch -CategoryBatch $categoryBatch
     }
 
-    Complete-WinUtilInstallAppRendering
+    Complete-NoteInstallAppRendering
 }

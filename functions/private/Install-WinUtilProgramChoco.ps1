@@ -1,4 +1,4 @@
-function Install-WinUtilProgramChoco {
+function Install-NoteProgramChoco {
     param (
         [Parameter(Mandatory=$true)]
         [ValidateSet("Install", "Uninstall")]
@@ -14,7 +14,7 @@ function Install-WinUtilProgramChoco {
         $arguments = "uninstall $Programs -y"
     }
 
-    Write-WinUtilLog -Component "Package" -Message "$Action choco package(s): $($Programs -join ', ')"
+    Write-NoteLog -Component "Package" -Message "$Action choco package(s): $($Programs -join ', ')"
     $process = Start-Process -FilePath choco -ArgumentList $arguments -NoNewWindow -Wait -PassThru
-    Write-WinUtilLog -Component "Package" -Message "$Action choco package(s) completed: $($Programs -join ', ') (exit code: $($process.ExitCode))"
+    Write-NoteLog -Component "Package" -Message "$Action choco package(s) completed: $($Programs -join ', ') (exit code: $($process.ExitCode))"
 }

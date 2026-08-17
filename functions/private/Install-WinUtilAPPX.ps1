@@ -1,4 +1,4 @@
-function Install-WinUtilAPPX {
+function Install-NoteAPPX {
     <#
 
     .SYNOPSIS
@@ -18,7 +18,7 @@ function Install-WinUtilAPPX {
         [string]$StoreId
     )
 
-    Write-WinUtilLog -Component "AppX" -Message "Installing AppX package: $Name"
+    Write-NoteLog -Component "AppX" -Message "Installing AppX package: $Name"
 
     # AppX and DISM cmdlets are more reliable in Windows PowerShell 5.1. Query both installed and
     # provisioned package metadata because either can expose a local manifest that can be registered.
@@ -57,23 +57,23 @@ function Install-WinUtilAPPX {
     if ($LASTEXITCODE -eq 0 -and $null -ne $manifestOutput) {
         $manifestPath = ($manifestOutput | Select-Object -Last 1).ToString().Trim()
         if (-not [string]::IsNullOrWhiteSpace($manifestPath)) {
-            Write-WinUtilLog -Component "AppX" -Message "Registered local AppX manifest for $Name`: $manifestPath"
+            Write-NoteLog -Component "AppX" -Message "Registered local AppX manifest for $Name`: $manifestPath"
             return
         }
     }
 
     if ($LASTEXITCODE -ne 0) {
         $failureDetails = ($manifestOutput | Out-String).Trim()
-        Write-WinUtilLog -Level "WARN" -Component "AppX" -Message "Local AppX registration failed for $Name`: $failureDetails"
+        Write-NoteLog -Level "WARN" -Component "AppX" -Message "Local AppX registration failed for $Name`: $failureDetails"
     }
 
     if ([string]::IsNullOrWhiteSpace($StoreId)) {
         $errorMessage = "Unable to install $Name because no local manifest or Microsoft Store ID is available."
-        Write-WinUtilLog -Level "ERROR" -Component "AppX" -Message $errorMessage
+        Write-NoteLog -Level "ERROR" -Component "AppX" -Message $errorMessage
         throw $errorMessage
     }
 
-    Write-WinUtilLog -Component "AppX" -Message "No usable local manifest found for $Name. Installing Microsoft Store product $StoreId."
-    Install-WinUtilWinget
-    Install-WinUtilProgramWinget -Action Install -Programs @("msstore:$StoreId")
+    Write-NoteLog -Component "AppX" -Message "No usable local manifest found for $Name. Installing Microsoft Store product $StoreId."
+    Install-NoteWinget
+    Install-NoteProgramWinget -Action Install -Programs @("msstore:$StoreId")
 }

@@ -19,9 +19,9 @@ namespace Windows
     }
 
     . (Join-Path $script:repoRoot "functions\public\Invoke-WPFUIThread.ps1")
-    . (Join-Path $script:repoRoot "functions\private\Set-WinUtilTweaksProgressIndicator.ps1")
+    . (Join-Path $script:repoRoot "functions\private\Set-NoteTweaksProgressIndicator.ps1")
 
-    function script:New-WinUtilFakeForm {
+    function script:New-NoteFakeForm {
         $dispatcher = New-Object psobject
         $dispatcher | Add-Member -MemberType NoteProperty -Name InvokeCount -Value 0
         $dispatcher | Add-Member -MemberType ScriptMethod -Name Invoke -Value {
@@ -36,7 +36,7 @@ namespace Windows
         return $form
     }
 
-    function script:New-WinUtilFakeIndicatorControlSet {
+    function script:New-NoteFakeIndicatorControlSet {
         @{
             Bar   = [pscustomobject]@{ Visibility = [Windows.Visibility]::Collapsed }
             Label = [pscustomobject]@{ Text = "" }
@@ -67,7 +67,7 @@ Describe "Invoke-WPFUIThread without a window" {
     }
 
     It "still marshals onto the dispatcher when a window exists" {
-        $form = New-WinUtilFakeForm
+        $form = New-NoteFakeForm
         $script:sync = [Hashtable]::Synchronized(@{ Form = $form })
 
         Invoke-WPFUIThread -ScriptBlock { }
@@ -76,7 +76,7 @@ Describe "Invoke-WPFUIThread without a window" {
     }
 }
 
-Describe "Set-WinUtilTweaksProgressIndicator without a window" {
+Describe "Set-NoteTweaksProgressIndicator without a window" {
     AfterEach {
         Remove-Variable -Name sync -Scope Script -ErrorAction SilentlyContinue
     }
@@ -84,13 +84,13 @@ Describe "Set-WinUtilTweaksProgressIndicator without a window" {
     It "returns before resolving WPF types when the form is missing" {
         $script:sync = [Hashtable]::Synchronized(@{})
 
-        { Set-WinUtilTweaksProgressIndicator -Visible $true -Label "Creating restore point" -Percent 0 } | Should -Not -Throw
+        { Set-NoteTweaksProgressIndicator -Visible $true -Label "Creating restore point" -Percent 0 } | Should -Not -Throw
     }
 
     It "still updates the indicator controls when a window exists" {
-        $controls = New-WinUtilFakeIndicatorControlSet
+        $controls = New-NoteFakeIndicatorControlSet
         $script:sync = [Hashtable]::Synchronized(@{
-            Form                    = New-WinUtilFakeForm
+            Form                    = New-NoteFakeForm
             WPFTweaksProgressBar    = $controls.Bar
             WPFTweaksProgressLabel  = $controls.Label
             WPFTweaksProgressValue  = $controls.Value
@@ -98,7 +98,7 @@ Describe "Set-WinUtilTweaksProgressIndicator without a window" {
 
         Mock Invoke-WPFUIThread { & $ScriptBlock }
 
-        Set-WinUtilTweaksProgressIndicator -Visible $true -Label "Applying WPFTweaksTelemetry (1/17)" -Percent 42
+        Set-NoteTweaksProgressIndicator -Visible $true -Label "Applying WPFTweaksTelemetry (1/17)" -Percent 42
 
         $controls.Bar.Visibility | Should -Be ([Windows.Visibility]::Visible)
         $controls.Label.Text | Should -Be "Applying WPFTweaksTelemetry (1/17)"

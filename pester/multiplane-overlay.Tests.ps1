@@ -6,11 +6,11 @@ BeforeAll {
     $script:repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
     $script:config = Get-Content (Join-Path $script:repoRoot "config\tweaks.json") -Raw | ConvertFrom-Json
     $script:states = $script:config.WPFMultiplaneOverlay.registry
-    . (Join-Path $script:repoRoot "functions\private\Get-WinUtilRegistryComboState.ps1")
-    . (Join-Path $script:repoRoot "functions\private\Get-WinUtilRegistryComboValue.ps1")
-    . (Join-Path $script:repoRoot "functions\private\Set-WinUtilRegistryComboState.ps1")
+    . (Join-Path $script:repoRoot "functions\private\Get-NoteRegistryComboState.ps1")
+    . (Join-Path $script:repoRoot "functions\private\Get-NoteRegistryComboValue.ps1")
+    . (Join-Path $script:repoRoot "functions\private\Set-NoteRegistryComboState.ps1")
 
-    function Set-WinUtilRegistry {
+    function Set-NoteRegistry {
         param($Name, $Path, $Type, $Value)
     }
 }
@@ -30,13 +30,13 @@ Describe "Multiplane Overlay configuration" {
     It "uses the generic combo registry handler" {
         $renderer = Get-Content (Join-Path $script:repoRoot "functions\public\Invoke-WPFUIElements.ps1") -Raw
 
-        $renderer | Should -Match 'Get-WinUtilRegistryComboState'
-        $renderer | Should -Match 'Set-WinUtilRegistryComboState'
+        $renderer | Should -Match 'Get-NoteRegistryComboState'
+        $renderer | Should -Match 'Set-NoteRegistryComboState'
         $renderer | Should -Not -Match 'WPFMultiplaneOverlay'
     }
 }
 
-Describe "Get-WinUtilRegistryComboState" {
+Describe "Get-NoteRegistryComboState" {
     It "treats missing registry properties and paths as absent" -TestCases @(
         @{ Exception = [System.Management.Automation.PSArgumentException]::new("Property is missing") }
         @{ Exception = [System.Management.Automation.ItemNotFoundException]::new("Path is missing") }
@@ -44,7 +44,7 @@ Describe "Get-WinUtilRegistryComboState" {
         param($Exception)
         Mock Get-ItemProperty { throw $Exception }
 
-        Get-WinUtilRegistryComboState -Registry $script:states | Should -Be "Enabled"
+        Get-NoteRegistryComboState -Registry $script:states | Should -Be "Enabled"
     }
 
     It "reports Enabled when the values are absent or zero" -TestCases @(
@@ -59,7 +59,7 @@ Describe "Get-WinUtilRegistryComboState" {
             [pscustomobject]@{ DisableOverlays = $DisableOverlays }
         }
 
-        Get-WinUtilRegistryComboState -Registry $script:states | Should -Be "Enabled"
+        Get-NoteRegistryComboState -Registry $script:states | Should -Be "Enabled"
     }
 
     It "reports each disabled state" -TestCases @(
@@ -74,7 +74,7 @@ Describe "Get-WinUtilRegistryComboState" {
             [pscustomobject]@{ DisableOverlays = $DisableOverlays }
         }
 
-        Get-WinUtilRegistryComboState -Registry $script:states | Should -Be $Expected
+        Get-NoteRegistryComboState -Registry $script:states | Should -Be $Expected
     }
 
     It "rejects an unsupported combination" {
@@ -85,11 +85,11 @@ Describe "Get-WinUtilRegistryComboState" {
             [pscustomobject]@{ DisableOverlays = 1 }
         }
 
-        { Get-WinUtilRegistryComboState -Registry $script:states } | Should -Throw "Registry values do not match a supported state."
+        { Get-NoteRegistryComboState -Registry $script:states } | Should -Throw "Registry values do not match a supported state."
     }
 }
 
-Describe "Set-WinUtilRegistryComboState" {
+Describe "Set-NoteRegistryComboState" {
     BeforeEach {
         $script:registryValues = @{ OverlayTestMode = 0; DisableOverlays = 0 }
         Mock Get-ItemProperty {
@@ -102,7 +102,7 @@ Describe "Set-WinUtilRegistryComboState" {
             }
             [pscustomobject]@{}
         }
-        Mock Set-WinUtilRegistry {
+        Mock Set-NoteRegistry {
             param($Name, $Path, $Type, $Value)
             if ($Value -eq "<RemoveEntry>") {
                 $script:registryValues.Remove($Name)
@@ -119,14 +119,14 @@ Describe "Set-WinUtilRegistryComboState" {
     ) {
         param($State, $OverlayTestMode, $DisableOverlays)
 
-        Set-WinUtilRegistryComboState -Registry $script:states -State $State
+        Set-NoteRegistryComboState -Registry $script:states -State $State
 
         $script:registryValues.OverlayTestMode | Should -Be $OverlayTestMode
         $script:registryValues.DisableOverlays | Should -Be $DisableOverlays
     }
 
     It "restores previous values when verification fails" {
-        Mock Set-WinUtilRegistry {
+        Mock Set-NoteRegistry {
             param($Name, $Path, $Type, $Value)
             if ($Name -eq "DisableOverlays" -and $Value -eq 1) {
                 return
@@ -138,14 +138,14 @@ Describe "Set-WinUtilRegistryComboState" {
             }
         }
 
-        { Set-WinUtilRegistryComboState -Registry $script:states -State "Fully Disabled" } | Should -Throw "Unable to apply registry state*"
+        { Set-NoteRegistryComboState -Registry $script:states -State "Fully Disabled" } | Should -Throw "Unable to apply registry state*"
         $script:registryValues.OverlayTestMode | Should -Be 0
         $script:registryValues.DisableOverlays | Should -Be 0
     }
 
     It "restores absence when a state cannot be applied" {
         $script:registryValues.Clear()
-        Mock Set-WinUtilRegistry {
+        Mock Set-NoteRegistry {
             param($Name, $Path, $Type, $Value)
             if ($Name -eq "DisableOverlays" -and $Value -eq 1) {
                 return
@@ -157,13 +157,13 @@ Describe "Set-WinUtilRegistryComboState" {
             }
         }
 
-        { Set-WinUtilRegistryComboState -Registry $script:states -State "Fully Disabled" } | Should -Throw "Unable to apply registry state*"
+        { Set-NoteRegistryComboState -Registry $script:states -State "Fully Disabled" } | Should -Throw "Unable to apply registry state*"
         $script:registryValues.ContainsKey("OverlayTestMode") | Should -BeFalse
         $script:registryValues.ContainsKey("DisableOverlays") | Should -BeFalse
     }
 
     It "reports when the previous values cannot be restored" {
-        Mock Set-WinUtilRegistry {
+        Mock Set-NoteRegistry {
             param($Name, $Path, $Type, $Value)
             if (($Name -eq "DisableOverlays" -and $Value -eq 1) -or ($Name -eq "OverlayTestMode" -and $Value -eq 0)) {
                 return
@@ -175,6 +175,6 @@ Describe "Set-WinUtilRegistryComboState" {
             }
         }
 
-        { Set-WinUtilRegistryComboState -Registry $script:states -State "Fully Disabled" } | Should -Throw "*previous registry state could not be restored*"
+        { Set-NoteRegistryComboState -Registry $script:states -State "Fully Disabled" } | Should -Throw "*previous registry state could not be restored*"
     }
 }

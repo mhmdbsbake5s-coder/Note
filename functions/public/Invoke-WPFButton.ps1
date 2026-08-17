@@ -13,9 +13,9 @@ function Invoke-WPFButton {
     Param ([string]$Button)
 
     # Use this to get the name of the button
-    #[System.Windows.MessageBox]::Show("$Button","Chris Titus Tech's Windows Utility","OK","Info")
+    #[System.Windows.MessageBox]::Show("$Button","Note","OK","Info")
     if (-not $sync.ProcessRunning -and -not $sync.Win11ISOProcessRunning) {
-        Set-WinUtilTweaksProgressIndicator -Visible $false
+        Set-NoteTweaksProgressIndicator -Visible $false
     }
 
     # Check if button is defined in feature config with function or InvokeScript
@@ -77,7 +77,7 @@ function Invoke-WPFButton {
             $sync.configs.appxHashtable.Keys | ForEach-Object {$sync.$_.IsChecked = $false}
         }
         "WPFGetInstalledAppx" {
-            $installedAppxPackages = Get-WinUtilInstalledAPPX
+            $installedAppxPackages = Get-NoteInstalledAPPX
             foreach ($appx in $sync.configs.appxHashtable.GetEnumerator()) {
                 if ($appx.Value.PackageId -in $installedAppxPackages) {
                     $sync.$($appx.Key).IsChecked = $true

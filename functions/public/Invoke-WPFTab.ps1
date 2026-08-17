@@ -15,10 +15,10 @@ function Invoke-WPFTab {
         [string]$ClickedTab
     )
 
-    $tabNav = Get-WinUtilVariables | Where-Object {$psitem -like "WPFTabNav"}
+    $tabNav = Get-NoteVariables | Where-Object {$psitem -like "WPFTabNav"}
     $tabNumber = [int]($ClickedTab -replace "WPFTab","" -replace "BT","") - 1
 
-    $filter = Get-WinUtilVariables -Type ToggleButton | Where-Object {$psitem -like "WPFTab?BT"}
+    $filter = Get-NoteVariables -Type ToggleButton | Where-Object {$psitem -like "WPFTab?BT"}
     $sync.$tabNav.Items[$tabNumber].IsSelected = $true
     ($sync.GetEnumerator()).where{$psitem.Key -in $filter} | ForEach-Object {
         if ($ClickedTab -ne $PSItem.name) {
@@ -28,7 +28,7 @@ function Invoke-WPFTab {
         }
     }
     $sync.currentTab = $sync.$tabNav.Items[$tabNumber].Header
-    Initialize-WinUtilTabContent -TabName $sync.currentTab
+    Initialize-NoteTabContent -TabName $sync.currentTab
 
     # Always reset the filter for the current tab
     if ($sync.currentTab -eq "Install") {

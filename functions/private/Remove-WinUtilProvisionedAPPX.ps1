@@ -1,4 +1,4 @@
-function Remove-WinUtilProvisionedAPPX {
+function Remove-NoteProvisionedAPPX {
     <#
 
     .SYNOPSIS
@@ -8,7 +8,7 @@ function Remove-WinUtilProvisionedAPPX {
         An array of names of the APPX packages to remove
 
     .EXAMPLE
-        Remove-WinUtilProvisionedAPPX -PackageList @("Microsoft.Microsoft3DViewer", "Microsoft.WindowsCalculator")
+        Remove-NoteProvisionedAPPX -PackageList @("Microsoft.Microsoft3DViewer", "Microsoft.WindowsCalculator")
 
     #>
     param (
@@ -20,7 +20,7 @@ function Remove-WinUtilProvisionedAPPX {
     }
 
     Write-Host "`nRemoving provisioned packages..."
-    Write-WinUtilLog -Component "AppX" -Message "Removing AppX provisioned packages: $($PackageList -join ', ')"
+    Write-NoteLog -Component "AppX" -Message "Removing AppX provisioned packages: $($PackageList -join ', ')"
 
     # DISM cmdlets like Get-AppxProvisionedPackage often fail with "Class not registered" or hang in PowerShell 7.
     # We shell out to Windows PowerShell 5.1 (powershell.exe) to reliably remove the provisioned packages.
@@ -54,9 +54,9 @@ function Remove-WinUtilProvisionedAPPX {
     if ($LASTEXITCODE -ne 0 -or $null -ne $removalOutput) {
         $failureDetails = ($removalOutput | Out-String).Trim()
         $errorMessage = "AppX provisioned package removal failed: $failureDetails"
-        Write-WinUtilLog -Level "ERROR" -Component "AppX" -Message $errorMessage
+        Write-NoteLog -Level "ERROR" -Component "AppX" -Message $errorMessage
         throw $errorMessage
     }
 
-    Write-WinUtilLog -Component "AppX" -Message "AppX provisioned package removal completed."
+    Write-NoteLog -Component "AppX" -Message "AppX provisioned package removal completed."
 }

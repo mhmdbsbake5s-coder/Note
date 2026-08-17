@@ -103,7 +103,7 @@ function Initialize-InstallAppEntry {
 
         # Mark FOSS apps with a corner badge, bled into the border padding so it sits on the edge
         if ($app.foss -eq $true) {
-            $fossBadge = New-WinUtilFossBadge
+            $fossBadge = New-NoteFossBadge
             $fossBadge.HorizontalAlignment = "Right"
             $fossBadge.VerticalAlignment = "Top"
             $fossBadge.Margin = New-Object Windows.Thickness(0, -4, -6, 0)

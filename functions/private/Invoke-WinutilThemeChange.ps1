@@ -1,7 +1,7 @@
-function Invoke-WinutilThemeChange {
+function Invoke-NoteThemeChange {
     <#
     .SYNOPSIS
-        Toggles between light and dark themes for a Windows utility application.
+        Toggles between light and dark themes for a Note application.
 
     .DESCRIPTION
         This function toggles the theme of the user interface between 'Light' and 'Dark' modes,
@@ -9,7 +9,7 @@ function Invoke-WinutilThemeChange {
         If the '-init' switch is used, it initializes the theme based on the system's current dark mode setting.
 
     .EXAMPLE
-        Invoke-WinutilThemeChange
+        Invoke-NoteThemeChange
         # Toggles the theme between 'Light' and 'Dark'.
 
 
@@ -18,7 +18,7 @@ function Invoke-WinutilThemeChange {
         [string]$theme = "Auto"
     )
 
-    function Set-WinutilTheme {
+    function Set-NoteTheme {
         <#
         .SYNOPSIS
             Applies the specified theme to the application's user interface.
@@ -124,11 +124,11 @@ function Invoke-WinutilThemeChange {
     }
 
     $sync.preferences.theme = $theme
-    Set-WinutilTheme -currentTheme "shared"
+    Set-NoteTheme -currentTheme "shared"
 
     switch ($sync.preferences.theme) {
         "Auto" {
-            $systemUsesDarkMode = Get-WinUtilToggleStatus WPFToggleDarkMode
+            $systemUsesDarkMode = Get-NoteToggleStatus WPFToggleDarkMode
             if ($systemUsesDarkMode) {
                 $theme = "Dark"
             }
@@ -136,22 +136,22 @@ function Invoke-WinutilThemeChange {
                 $theme = "Light"
             }
 
-            Set-WinutilTheme -currentTheme $theme
+            Set-NoteTheme -currentTheme $theme
             $themeButtonIcon = [char]0xF08C
         }
         "Dark" {
-            Set-WinutilTheme -currentTheme $sync.preferences.theme
+            Set-NoteTheme -currentTheme $sync.preferences.theme
             $themeButtonIcon = [char]0xE708
            }
         "Light" {
-            Set-WinutilTheme -currentTheme $sync.preferences.theme
+            Set-NoteTheme -currentTheme $sync.preferences.theme
             $themeButtonIcon = [char]0xE706
         }
     }
 
     # Reapply font scaling if it was previously set (theme change resets shared resources)
     if ($sync.ContainsKey("FontScaleFactor") -and $sync.FontScaleFactor -ne 1.0) {
-        Invoke-WinUtilFontScaling -ScaleFactor $sync.FontScaleFactor
+        Invoke-NoteFontScaling -ScaleFactor $sync.FontScaleFactor
     }
 
     # Update the theme selector button with the appropriate icon

@@ -1,4 +1,4 @@
-function Set-WinUtilRegistryComboState {
+function Set-NoteRegistryComboState {
     <#
     .SYNOPSIS
         Applies and verifies a config-defined registry combo-box state.
@@ -23,7 +23,7 @@ function Set-WinUtilRegistryComboState {
 
     # Preserve exact prior values so a partial update can be rolled back.
     $previousValues = foreach ($setting in @($Registry)) {
-        $currentValue = Get-WinUtilRegistryComboValue -Setting $setting
+        $currentValue = Get-NoteRegistryComboValue -Setting $setting
         [pscustomobject]@{ Setting = $setting; Exists = $currentValue.Exists; Value = $currentValue.Value }
     }
 
@@ -32,14 +32,14 @@ function Set-WinUtilRegistryComboState {
             $configuredValue = $setting.Values.PSObject.Properties[$State].Value
             $previousValue = $previousValues | Where-Object Setting -EQ $setting
             if ($configuredValue -ne "<RemoveEntry>" -or $previousValue.Exists) {
-                Set-WinUtilRegistry -Name $setting.Name -Path $setting.Path -Type $setting.Type -Value $configuredValue
+                Set-NoteRegistry -Name $setting.Name -Path $setting.Path -Type $setting.Type -Value $configuredValue
             }
         }
 
-        # Set-WinUtilRegistry reports write errors without throwing, so verify each result explicitly.
+        # Set-NoteRegistry reports write errors without throwing, so verify each result explicitly.
         foreach ($setting in @($Registry)) {
             $configuredValue = $setting.Values.PSObject.Properties[$State].Value
-            $currentValue = Get-WinUtilRegistryComboValue -Setting $setting
+            $currentValue = Get-NoteRegistryComboValue -Setting $setting
             $writeMatches = if ($configuredValue -eq "<RemoveEntry>") {
                 -not $currentValue.Exists
             } else {
@@ -57,12 +57,12 @@ function Set-WinUtilRegistryComboState {
         $rollbackFailed = $false
         foreach ($previousValue in $previousValues) {
             try {
-                $currentValue = Get-WinUtilRegistryComboValue -Setting $previousValue.Setting
+                $currentValue = Get-NoteRegistryComboValue -Setting $previousValue.Setting
                 if ($previousValue.Exists -or $currentValue.Exists) {
                     $rollbackValue = if ($previousValue.Exists) { $previousValue.Value } else { "<RemoveEntry>" }
-                    Set-WinUtilRegistry -Name $previousValue.Setting.Name -Path $previousValue.Setting.Path -Type $previousValue.Setting.Type -Value $rollbackValue
+                    Set-NoteRegistry -Name $previousValue.Setting.Name -Path $previousValue.Setting.Path -Type $previousValue.Setting.Type -Value $rollbackValue
                 }
-                $restoredValue = Get-WinUtilRegistryComboValue -Setting $previousValue.Setting
+                $restoredValue = Get-NoteRegistryComboValue -Setting $previousValue.Setting
                 if ($restoredValue.Exists -ne $previousValue.Exists -or ($restoredValue.Exists -and [string]$restoredValue.Value -ne [string]$previousValue.Value)) {
                     $rollbackFailed = $true
                 }

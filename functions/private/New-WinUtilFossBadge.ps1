@@ -1,4 +1,4 @@
-function New-WinUtilFossBadge {
+function New-NoteFossBadge {
     <#
         .SYNOPSIS
             Creates the FOSS marker: the open source keyhole on a green backdrop

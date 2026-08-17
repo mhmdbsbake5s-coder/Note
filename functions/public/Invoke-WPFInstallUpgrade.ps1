@@ -1,6 +1,6 @@
 function Invoke-WPFInstallUpgrade {
     if ($sync.ChocoRadioButton.IsChecked) {
-        Install-WinUtilChoco # Ensure Chocolatey is installed before upgrading
+        Install-NoteChoco # Ensure Chocolatey is installed before upgrading
 
         Write-Host "==========================================="
         Write-Host "--           Updates started            ---"
@@ -9,7 +9,7 @@ function Invoke-WPFInstallUpgrade {
 
         Start-Process -FilePath powershell.exe -ArgumentList 'choco upgrade all -y'
     } else {
-        Install-WinUtilWinget # Ensure WinGet is installed before upgrading
+        Install-NoteWinget # Ensure WinGet is installed before upgrading
 
         Write-Host "==========================================="
         Write-Host "--           Updates started            ---"

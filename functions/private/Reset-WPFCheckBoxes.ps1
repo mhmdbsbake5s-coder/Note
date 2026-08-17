@@ -2,7 +2,7 @@ function Reset-WPFCheckBoxes {
     <#
 
     .SYNOPSIS
-        Set winutil checkboxs to match $sync.selected values.
+        Set Note checkboxs to match $sync.selected values.
         Should only need to be run if $sync.selected updated outside of UI (i.e. presets or import)
 
     .PARAMETER doToggles
@@ -40,7 +40,7 @@ function Reset-WPFCheckBoxes {
         # Restore toggle switch states from imported config.
         # Only act on toggles that are explicitly listed in the import - toggles absent
         # from the export file were not part of the saved config and should keep whatever
-        # state the live system already has (set during UI initialisation via Get-WinUtilToggleStatus).
+        # state the live system already has (set during UI initialisation via Get-NoteToggleStatus).
         $importedToggles = [System.Collections.Generic.HashSet[string]]::new([string[]]@($sync.selectedToggles), [StringComparer]::OrdinalIgnoreCase)
         foreach ($toggle in $sync.GetEnumerator()) {
             if ($toggle.Key -like "WPFToggle*" -and $toggle.Value -is [System.Windows.Controls.CheckBox] -and $importedToggles.Contains($toggle.Key)) {

@@ -53,7 +53,7 @@ function Invoke-WPFImpex {
                     }
                     $jsonFile = $allConfs | ConvertTo-Json
                     $jsonFile | Out-File $Config -Force
-                    "iex ""& { `$(irm https://christitus.com/win) } -Config '$Config'""" | Set-Clipboard
+                    "iex ""& { `$(irm https://yourdomain.example/note) } -Config '$Config'""" | Set-Clipboard
                 }
             } catch {
                 Write-Error "An error occurred while exporting: $_"
@@ -92,7 +92,7 @@ function Invoke-WPFImpex {
                     $sync.selectedToggles = [System.Collections.Generic.List[string]]::new()
                     $sync.selectedFeatures = [System.Collections.Generic.List[string]]::new()
 
-                    Update-WinUtilSelections -flatJson $flattenedJson
+                    Update-NoteSelections -flatJson $flattenedJson
 
                     if ($sync.Form) {
                         Reset-WPFCheckBoxes -doToggles $true

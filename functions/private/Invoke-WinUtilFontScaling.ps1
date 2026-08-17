@@ -1,4 +1,4 @@
-function Invoke-WinUtilFontScaling {
+function Invoke-NoteFontScaling {
     <#
 
     .SYNOPSIS
@@ -9,7 +9,7 @@ function Invoke-WinUtilFontScaling {
         Default is 1.0 (100% - no scaling)
 
     .EXAMPLE
-        Invoke-WinUtilFontScaling -ScaleFactor 1.25
+        Invoke-NoteFontScaling -ScaleFactor 1.25
         # Applies 125% scaling
     #>
 

@@ -4,25 +4,25 @@
 
 BeforeAll {
     $script:repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-    . (Join-Path $script:repoRoot "functions\private\Invoke-WinUtilTweaks.ps1")
+    . (Join-Path $script:repoRoot "functions\private\Invoke-NoteTweaks.ps1")
     . (Join-Path $script:repoRoot "functions\public\Invoke-WPFtweaksbutton.ps1")
 
-    function Set-WinUtilService {
+    function Set-NoteService {
         param($Name, $StartupType)
     }
-    function Set-WinUtilRegistry {
+    function Set-NoteRegistry {
         param($Name, $Path, $Type, $Value)
     }
-    function Invoke-WinUtilScript {
+    function Invoke-NoteScript {
         param($Name, [scriptblock]$ScriptBlock)
     }
-    function Remove-WinUtilAPPX {
+    function Remove-NoteAPPX {
         param($Name)
     }
-    function Remove-WinUtilProvisionedAPPX {
+    function Remove-NoteProvisionedAPPX {
         param($PackageList)
     }
-    function Set-WinUtilDNS {
+    function Set-NoteDNS {
         param($DNSProvider)
     }
     function Invoke-WPFRunspace {
@@ -31,14 +31,14 @@ BeforeAll {
     function Invoke-WPFUIThread {
         param([scriptblock]$ScriptBlock)
     }
-    function Set-WinUtilTweaksProgressIndicator {
+    function Set-NoteTweaksProgressIndicator {
         param($Visible, $Label, $Percent)
     }
-    function Write-WinUtilLog {
+    function Write-NoteLog {
         param($Message, $Level, $Component)
     }
 
-    function script:New-WinUtilTweaksConfig {
+    function script:New-NoteTweaksConfig {
         [pscustomobject]@{
             WPFTweaksExample = [pscustomobject]@{
                 service = @(
@@ -50,7 +50,7 @@ BeforeAll {
                 )
                 registry = @(
                     [pscustomobject]@{
-                        Path = "HKLM:\Software\WinUtilTest"
+                        Path = "HKLM:\Software\NoteTest"
                         Name = "AllowTelemetry"
                         Type = "DWord"
                         Value = "0"
@@ -74,11 +74,11 @@ BeforeAll {
     }
 }
 
-Describe "Invoke-WinUtilTweaks" {
+Describe "Invoke-NoteTweaks" {
     BeforeEach {
         $script:sync = [Hashtable]::Synchronized(@{
             configs = @{
-                tweaks = New-WinUtilTweaksConfig
+                tweaks = New-NoteTweaksConfig
             }
         })
 
@@ -88,12 +88,12 @@ Describe "Invoke-WinUtilTweaks" {
                 StartType = "Automatic"
             }
         }
-        Mock Set-WinUtilService { }
-        Mock Set-WinUtilRegistry { }
-        Mock Invoke-WinUtilScript { }
-        Mock Remove-WinUtilAPPX { }
-        Mock Remove-WinUtilProvisionedAPPX { }
-        Mock Write-WinUtilLog { }
+        Mock Set-NoteService { }
+        Mock Set-NoteRegistry { }
+        Mock Invoke-NoteScript { }
+        Mock Remove-NoteAPPX { }
+        Mock Remove-NoteProvisionedAPPX { }
+        Mock Write-NoteLog { }
         Mock Write-Warning { }
     }
 
@@ -102,49 +102,49 @@ Describe "Invoke-WinUtilTweaks" {
     }
 
     It "dispatches apply actions to service, registry, script, and AppX helpers" {
-        Invoke-WinUtilTweaks -CheckBox "WPFTweaksExample"
+        Invoke-NoteTweaks -CheckBox "WPFTweaksExample"
 
         Should -Invoke -CommandName Get-Service -Times 1 -Exactly -ParameterFilter {
             $Name -eq "DiagTrack" -and $ErrorAction -eq "Stop"
         }
-        Should -Invoke -CommandName Set-WinUtilService -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Set-NoteService -Times 1 -Exactly -ParameterFilter {
             $Name -eq "DiagTrack" -and $StartupType -eq "Disabled"
         }
-        Should -Invoke -CommandName Set-WinUtilRegistry -Times 1 -Exactly -ParameterFilter {
-            $Path -eq "HKLM:\Software\WinUtilTest" -and
+        Should -Invoke -CommandName Set-NoteRegistry -Times 1 -Exactly -ParameterFilter {
+            $Path -eq "HKLM:\Software\NoteTest" -and
                 $Name -eq "AllowTelemetry" -and
                 $Type -eq "DWord" -and
                 $Value -eq "0"
         }
-        Should -Invoke -CommandName Invoke-WinUtilScript -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Invoke-NoteScript -Times 1 -Exactly -ParameterFilter {
             $Name -eq "WPFTweaksExample" -and $ScriptBlock.ToString() -eq "Write-Output 'apply tweak'"
         }
-        Should -Invoke -CommandName Remove-WinUtilAPPX -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Remove-NoteAPPX -Times 1 -Exactly -ParameterFilter {
             $Name -eq "Microsoft.ExampleApp"
         }
-        Should -Invoke -CommandName Remove-WinUtilProvisionedAPPX -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Remove-NoteProvisionedAPPX -Times 1 -Exactly -ParameterFilter {
             $PackageList.Count -eq 1 -and $PackageList[0] -eq "Microsoft.ExampleApp"
         }
     }
 
     It "uses original registry values and service startup types in undo mode" {
-        Invoke-WinUtilTweaks -CheckBox "WPFTweaksExample" -undo $true
+        Invoke-NoteTweaks -CheckBox "WPFTweaksExample" -undo $true
 
         Should -Invoke -CommandName Get-Service -Times 0 -Exactly
-        Should -Invoke -CommandName Set-WinUtilService -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Set-NoteService -Times 1 -Exactly -ParameterFilter {
             $Name -eq "DiagTrack" -and $StartupType -eq "Automatic"
         }
-        Should -Invoke -CommandName Set-WinUtilRegistry -Times 1 -Exactly -ParameterFilter {
-            $Path -eq "HKLM:\Software\WinUtilTest" -and
+        Should -Invoke -CommandName Set-NoteRegistry -Times 1 -Exactly -ParameterFilter {
+            $Path -eq "HKLM:\Software\NoteTest" -and
                 $Name -eq "AllowTelemetry" -and
                 $Type -eq "DWord" -and
                 $Value -eq "1"
         }
-        Should -Invoke -CommandName Invoke-WinUtilScript -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Invoke-NoteScript -Times 1 -Exactly -ParameterFilter {
             $Name -eq "WPFTweaksExample" -and $ScriptBlock.ToString() -eq "Write-Output 'undo tweak'"
         }
-        Should -Invoke -CommandName Remove-WinUtilAPPX -Times 0 -Exactly
-        Should -Invoke -CommandName Remove-WinUtilProvisionedAPPX -Times 0 -Exactly
+        Should -Invoke -CommandName Remove-NoteAPPX -Times 0 -Exactly
+        Should -Invoke -CommandName Remove-NoteProvisionedAPPX -Times 0 -Exactly
     }
 
     It "keeps a user-changed service startup type by default" {
@@ -155,17 +155,17 @@ Describe "Invoke-WinUtilTweaks" {
             }
         } -ParameterFilter { $Name -eq "DiagTrack" }
 
-        Invoke-WinUtilTweaks -CheckBox "WPFTweaksServiceOnly"
+        Invoke-NoteTweaks -CheckBox "WPFTweaksServiceOnly"
 
         Should -Invoke -CommandName Get-Service -Times 1 -Exactly
-        Should -Invoke -CommandName Set-WinUtilService -Times 0 -Exactly
+        Should -Invoke -CommandName Set-NoteService -Times 0 -Exactly
     }
 
     It "forces a service startup type when KeepServiceStartup is disabled" {
-        Invoke-WinUtilTweaks -CheckBox "WPFTweaksServiceOnly" -KeepServiceStartup $false
+        Invoke-NoteTweaks -CheckBox "WPFTweaksServiceOnly" -KeepServiceStartup $false
 
         Should -Invoke -CommandName Get-Service -Times 0 -Exactly
-        Should -Invoke -CommandName Set-WinUtilService -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Set-NoteService -Times 1 -Exactly -ParameterFilter {
             $Name -eq "DiagTrack" -and $StartupType -eq "Disabled"
         }
     }
@@ -187,10 +187,10 @@ Describe "Invoke-WPFtweaksbutton" {
             $script:capturedTweaksScriptBlock = $ScriptBlock
             [pscustomobject]@{ MockHandle = $true }
         }
-        Mock Invoke-WinUtilTweaks { }
-        Mock Set-WinUtilTweaksProgressIndicator { }
+        Mock Invoke-NoteTweaks { }
+        Mock Set-NoteTweaksProgressIndicator { }
         Mock Invoke-WPFUIThread { }
-        Mock Write-WinUtilLog { }
+        Mock Write-NoteLog { }
         Mock Write-Host { }
     }
 
@@ -226,7 +226,7 @@ Describe "Invoke-WPFtweaksbutton" {
 
         Invoke-WPFtweaksbutton
 
-        Should -Invoke -CommandName Invoke-WinUtilTweaks -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Invoke-NoteTweaks -Times 1 -Exactly -ParameterFilter {
             $CheckBox -eq "WPFTweaksRestorePoint"
         }
         Should -Invoke -CommandName Invoke-WPFRunspace -Times 1 -Exactly -ParameterFilter {
@@ -245,19 +245,19 @@ Describe "Invoke-WPFtweaksbutton" {
 
     It "stops the tweak workflow when the DNS change fails" {
         $script:sync.selectedTweaks.Add("WPFTweaksTelemetry")
-        Mock Set-WinUtilDNS { return $false }
+        Mock Set-NoteDNS { return $false }
 
         Invoke-WPFtweaksbutton
         & $script:capturedTweaksScriptBlock -tweaks @("WPFTweaksTelemetry") -dnsProvider "Mullvad" -completedSteps 0 -totalSteps 1
 
-        Should -Invoke -CommandName Invoke-WinUtilTweaks -Times 0 -Exactly
-        Should -Invoke -CommandName Set-WinUtilTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Invoke-NoteTweaks -Times 0 -Exactly
+        Should -Invoke -CommandName Set-NoteTweaksProgressIndicator -Times 1 -Exactly -ParameterFilter {
             $Visible -eq $true -and $Label -eq "DNS change failed" -and $Percent -eq 100
         }
         Should -Invoke -CommandName Invoke-WPFUIThread -Times 1 -Exactly -ParameterFilter {
-            $ScriptBlock.ToString() -like '*Set-WinUtilTaskbaritem -state "Error" -overlay "warning"*'
+            $ScriptBlock.ToString() -like '*Set-NoteTaskbaritem -state "Error" -overlay "warning"*'
         }
-        Should -Invoke -CommandName Write-WinUtilLog -Times 1 -Exactly -ParameterFilter {
+        Should -Invoke -CommandName Write-NoteLog -Times 1 -Exactly -ParameterFilter {
             $Level -eq "ERROR" -and
                 $Component -eq "Tweaks" -and
                 $Message -eq "Tweaks workflow stopped because the DNS change failed."

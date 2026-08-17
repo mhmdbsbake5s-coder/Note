@@ -13,14 +13,14 @@ function Invoke-WPFUpdatessecurity {
     #>
 
     Write-Host "Disabling driver offering through Windows Update..."
-    Write-WinUtilLog -Component "Updates" -Message "Applying recommended Windows Update settings."
-    Write-WinUtilLog -Component "Updates" -Message "Disabling driver offering through Windows Update."
+    Write-NoteLog -Component "Updates" -Message "Applying recommended Windows Update settings."
+    Write-NoteLog -Component "Updates" -Message "Disabling driver offering through Windows Update."
 
     $windowsUpdatePolicyPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate"
     $automaticUpdatePolicyPath = Join-Path $windowsUpdatePolicyPath "AU"
 
     Write-Host "Restoring Windows Update availability..."
-    Write-WinUtilLog -Component "Updates" -Message "Restoring Windows Update services and scheduled tasks before applying recommended settings."
+    Write-NoteLog -Component "Updates" -Message "Restoring Windows Update services and scheduled tasks before applying recommended settings."
 
     Remove-ItemProperty -Path $automaticUpdatePolicyPath -Name "NoAutoUpdate" -ErrorAction SilentlyContinue
     Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" -Name "DODownloadMode" -ErrorAction SilentlyContinue
@@ -55,7 +55,7 @@ function Invoke-WPFUpdatessecurity {
     Set-ItemProperty -Path $windowsUpdatePolicyPath -Name "ExcludeWUDriversInQualityUpdate" -Type DWord -Value 1
 
     Write-Host "Deferring feature updates by 365 days and quality updates by 4 days..."
-    Write-WinUtilLog -Component "Updates" -Message "Deferring feature updates by 365 days and quality updates by 4 days."
+    Write-NoteLog -Component "Updates" -Message "Deferring feature updates by 365 days and quality updates by 4 days."
 
     Set-ItemProperty -Path $windowsUpdatePolicyPath -Name "DeferFeatureUpdates" -Type DWord -Value 1
     Set-ItemProperty -Path $windowsUpdatePolicyPath -Name "DeferFeatureUpdatesPeriodInDays" -Type DWord -Value 365
@@ -68,7 +68,7 @@ function Invoke-WPFUpdatessecurity {
     }
 
     Write-Host "Preventing automatic restarts while users are signed in..."
-    Write-WinUtilLog -Component "Updates" -Message "Configuring scheduled automatic updates without restarting while users are signed in."
+    Write-NoteLog -Component "Updates" -Message "Configuring scheduled automatic updates without restarting while users are signed in."
 
     New-Item -Path $automaticUpdatePolicyPath -Force
     # NoAutoRebootWithLoggedOnUsers only applies when automatic updates use option 4.
@@ -79,5 +79,5 @@ function Invoke-WPFUpdatessecurity {
     Write-Host "================================="
     Write-Host "-- Updates Set to Recommended ---"
     Write-Host "================================="
-    Write-WinUtilLog -Component "Updates" -Message "Recommended Windows Update settings workflow completed."
+    Write-NoteLog -Component "Updates" -Message "Recommended Windows Update settings workflow completed."
 }

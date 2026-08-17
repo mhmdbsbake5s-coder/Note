@@ -11,15 +11,15 @@ Describe "Install app rendering startup contract" {
         $categoryScript = Get-Content -Path (Join-Path $script:repoRoot "functions\private\Initialize-InstallCategoryAppList.ps1") -Raw
 
         $categoryScript | Should -Match '\$sync\.InstallAppRenderQueue = \[System\.Collections\.Queue\]::new\(\)'
-        $categoryScript | Should -Match 'Start-WinUtilInstallAppRendering'
+        $categoryScript | Should -Match 'Start-NoteInstallAppRendering'
         $categoryScript | Should -Match 'Pre-group apps by category before creating WPF controls'
     }
 
     It "renders queued apps through dispatcher callbacks when a form dispatcher exists" {
-        $renderScript = Get-Content -Path (Join-Path $script:repoRoot "functions\private\Start-WinUtilInstallAppRendering.ps1") -Raw
+        $renderScript = Get-Content -Path (Join-Path $script:repoRoot "functions\private\Start-NoteInstallAppRendering.ps1") -Raw
 
         $renderScript | Should -Match 'Dispatcher\.BeginInvoke'
-        $renderScript | Should -Match 'Invoke-WinUtilInstallAppRenderNextBatch'
+        $renderScript | Should -Match 'Invoke-NoteInstallAppRenderNextBatch'
         $renderScript | Should -Match 'Initialize-InstallAppEntry'
         $renderScript | Should -Match 'Find-AppsByNameOrDescription -SearchString \$sync\.SearchBar\.Text -Categories \$selectedCategories'
         # A batch has to be filtered when either filter is on, not only when there is search text
@@ -28,7 +28,7 @@ Describe "Install app rendering startup contract" {
     }
 
     It "does not use dispatcher timers for deferred install rendering" {
-        $renderScript = Get-Content -Path (Join-Path $script:repoRoot "functions\private\Start-WinUtilInstallAppRendering.ps1") -Raw
+        $renderScript = Get-Content -Path (Join-Path $script:repoRoot "functions\private\Start-NoteInstallAppRendering.ps1") -Raw
 
         $renderScript | Should -Not -Match 'DispatcherTimer'
         $renderScript | Should -Not -Match '\$timer'
@@ -39,7 +39,7 @@ Describe "Install app rendering startup contract" {
 
     It "drains queued app batches on the WPF dispatcher without timer scope errors" {
         Add-Type -AssemblyName WindowsBase
-        . (Join-Path $script:repoRoot "functions\private\Start-WinUtilInstallAppRendering.ps1")
+        . (Join-Path $script:repoRoot "functions\private\Start-NoteInstallAppRendering.ps1")
 
         $previousSync = Get-Variable -Name sync -Scope Global -ErrorAction SilentlyContinue
         $previousInitializeAppEntry = Get-Item -Path Function:\Initialize-InstallAppEntry -ErrorAction SilentlyContinue
@@ -71,7 +71,7 @@ Describe "Install app rendering startup contract" {
 
             $frame = New-Object System.Windows.Threading.DispatcherFrame
             $timeout = [System.Diagnostics.Stopwatch]::StartNew()
-            Start-WinUtilInstallAppRendering
+            Start-NoteInstallAppRendering
 
             $closeTimer = New-Object System.Windows.Threading.DispatcherTimer
             $closeTimer.Interval = [TimeSpan]::FromMilliseconds(25)

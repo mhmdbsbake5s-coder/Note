@@ -1,4 +1,4 @@
-function Set-WinUtilTaskbaritem {
+function Set-NoteTaskbaritem {
     <#
 
     .SYNOPSIS
@@ -7,34 +7,34 @@ function Set-WinUtilTaskbaritem {
     .PARAMETER value
         Value can be between 0 and 1, 0 being no progress done yet and 1 being fully completed
         Value does not affect item without setting the state to 'Normal', 'Error' or 'Paused'
-        Set-WinUtilTaskbaritem -value 0.5
+        Set-NoteTaskbaritem -value 0.5
 
     .PARAMETER state
         State can be 'None' > No progress, 'Indeterminate' > inf. loading gray, 'Normal' > Gray, 'Error' > Red, 'Paused' > Yellow
         no value needed:
-        - Set-WinUtilTaskbaritem -state "None"
-        - Set-WinUtilTaskbaritem -state "Indeterminate"
+        - Set-NoteTaskbaritem -state "None"
+        - Set-NoteTaskbaritem -state "Indeterminate"
         value needed:
-        - Set-WinUtilTaskbaritem -state "Error"
-        - Set-WinUtilTaskbaritem -state "Normal"
-        - Set-WinUtilTaskbaritem -state "Paused"
+        - Set-NoteTaskbaritem -state "Error"
+        - Set-NoteTaskbaritem -state "Normal"
+        - Set-NoteTaskbaritem -state "Paused"
 
     .PARAMETER overlay
         Overlay icon to display on the taskbar item, there are the presets 'None', 'logo' and 'checkmark' or you can specify a path/link to an image file.
         CTT logo preset:
-        - Set-WinUtilTaskbaritem -overlay "logo"
+        - Set-NoteTaskbaritem -overlay "logo"
         Checkmark preset:
-        - Set-WinUtilTaskbaritem -overlay "checkmark"
+        - Set-NoteTaskbaritem -overlay "checkmark"
         Warning preset:
-        - Set-WinUtilTaskbaritem -overlay "warning"
+        - Set-NoteTaskbaritem -overlay "warning"
         No overlay:
-        - Set-WinUtilTaskbaritem -overlay "None"
+        - Set-NoteTaskbaritem -overlay "None"
         Custom icon (needs to be supported by WPF):
-        - Set-WinUtilTaskbaritem -overlay "C:\path\to\icon.png"
+        - Set-NoteTaskbaritem -overlay "C:\path\to\icon.png"
 
     .PARAMETER description
         Description to display on the taskbar item preview
-        Set-WinUtilTaskbaritem -description "This is a description"
+        Set-NoteTaskbaritem -description "This is a description"
     #>
     param (
         [string]$state,
@@ -54,7 +54,7 @@ function Set-WinUtilTaskbaritem {
             'Normal' { $sync["Form"].taskbarItemInfo.ProgressState = "Normal" }
             'Error' { $sync["Form"].taskbarItemInfo.ProgressState = "Error" }
             'Paused' { $sync["Form"].taskbarItemInfo.ProgressState = "Paused" }
-            default { throw "[Set-WinUtilTaskbarItem] Invalid state" }
+            default { throw "[Set-NoteTaskbarItem] Invalid state" }
         }
     }
 
@@ -62,19 +62,19 @@ function Set-WinUtilTaskbaritem {
         switch ($overlay) {
             'logo' {
                 if (-not $sync["logorender"]) {
-                    Initialize-WinUtilTaskbarOverlayAssets -IncludeLogo $true -IncludeStatusAssets $false
+                    Initialize-NoteTaskbarOverlayAssets -IncludeLogo $true -IncludeStatusAssets $false
                 }
                 $sync["Form"].taskbarItemInfo.Overlay = $sync["logorender"]
             }
             'checkmark' {
                 if (-not $sync["checkmarkrender"]) {
-                    Initialize-WinUtilTaskbarOverlayAssets -IncludeLogo $false -IncludeStatusAssets $true
+                    Initialize-NoteTaskbarOverlayAssets -IncludeLogo $false -IncludeStatusAssets $true
                 }
                 $sync["Form"].taskbarItemInfo.Overlay = $sync["checkmarkrender"]
             }
             'warning' {
                 if (-not $sync["warningrender"]) {
-                    Initialize-WinUtilTaskbarOverlayAssets -IncludeLogo $false -IncludeStatusAssets $true
+                    Initialize-NoteTaskbarOverlayAssets -IncludeLogo $false -IncludeStatusAssets $true
                 }
                 $sync["Form"].taskbarItemInfo.Overlay = $sync["warningrender"]
             }

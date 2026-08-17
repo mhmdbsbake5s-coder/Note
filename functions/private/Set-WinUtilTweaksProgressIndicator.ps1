@@ -1,4 +1,4 @@
-function Set-WinUtilTweaksProgressIndicator {
+function Set-NoteTweaksProgressIndicator {
     <#
     .SYNOPSIS
         Shows, updates, or hides the window-level progress indicator used by long-running

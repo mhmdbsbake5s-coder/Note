@@ -5,10 +5,10 @@ function Invoke-WPFUpdatesdefault {
         Resets Windows Update settings to default
 
     #>
-    Write-WinUtilLog -Component "Updates" -Message "Resetting Windows Update settings to default."
+    Write-NoteLog -Component "Updates" -Message "Resetting Windows Update settings to default."
 
-    Write-Host "Removing Windows Update settings managed by WinUtil..." -ForegroundColor Green
-    Write-WinUtilLog -Component "Updates" -Message "Removing Windows Update registry values managed by WinUtil."
+    Write-Host "Removing Windows Update settings managed by Note..." -ForegroundColor Green
+    Write-NoteLog -Component "Updates" -Message "Removing Windows Update registry values managed by Note."
 
     $registryValues = @(
         @{
@@ -46,29 +46,29 @@ function Invoke-WPFUpdatesdefault {
     $explorerPolicyPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer"
     $settingsPageVisibility = (Get-ItemProperty -Path $explorerPolicyPath -Name "SettingsPageVisibility" -ErrorAction SilentlyContinue).SettingsPageVisibility
     if ($settingsPageVisibility -eq "hide:windowsupdate") {
-        Write-Host "Removing WinUtil's legacy Windows Update page restriction..."
-        Write-WinUtilLog -Component "Updates" -Message "Removing the legacy Windows Update settings page restriction."
+        Write-Host "Removing Note's legacy Windows Update page restriction..."
+        Write-NoteLog -Component "Updates" -Message "Removing the legacy Windows Update settings page restriction."
         Remove-ItemProperty -Path $explorerPolicyPath -Name "SettingsPageVisibility" -ErrorAction SilentlyContinue
     }
 
     Write-Host "Reenabling Windows Update Services..." -ForegroundColor Green
-    Write-WinUtilLog -Component "Updates" -Message "Restoring Windows Update service startup types."
+    Write-NoteLog -Component "Updates" -Message "Restoring Windows Update service startup types."
 
     Write-Host "Restored BITS to Manual."
-    Write-WinUtilLog -Component "Updates" -Message "Restoring BITS service to Manual."
+    Write-NoteLog -Component "Updates" -Message "Restoring BITS service to Manual."
     Set-Service -Name BITS -StartupType Manual
 
     Write-Host "Restored wuauserv to Manual."
-    Write-WinUtilLog -Component "Updates" -Message "Restoring wuauserv service to Manual."
+    Write-NoteLog -Component "Updates" -Message "Restoring wuauserv service to Manual."
     Set-Service -Name wuauserv -StartupType Manual
 
     Write-Host "Restored UsoSvc to Automatic."
-    Write-WinUtilLog -Component "Updates" -Message "Starting UsoSvc service and restoring startup type to Automatic."
+    Write-NoteLog -Component "Updates" -Message "Starting UsoSvc service and restoring startup type to Automatic."
     Set-Service -Name UsoSvc -StartupType Automatic
     Start-Service -Name UsoSvc
 
     Write-Host "Enabling update related scheduled tasks..." -ForegroundColor Green
-    Write-WinUtilLog -Component "Updates" -Message "Enabling update related scheduled tasks."
+    Write-NoteLog -Component "Updates" -Message "Enabling update related scheduled tasks."
 
     $Tasks =
         '\Microsoft\Windows\InstallService\*',
@@ -87,5 +87,5 @@ function Invoke-WPFUpdatesdefault {
     Write-Host "===================================================" -ForegroundColor Green
 
     Write-Host "Note: You must restart your system in order for all changes to take effect." -ForegroundColor Yellow
-    Write-WinUtilLog -Component "Updates" -Message "Windows Update default workflow completed. Restart required."
+    Write-NoteLog -Component "Updates" -Message "Windows Update default workflow completed. Restart required."
 }

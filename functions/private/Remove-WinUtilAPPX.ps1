@@ -1,4 +1,4 @@
-function Remove-WinUtilAPPX {
+function Remove-NoteAPPX {
     <#
 
     .SYNOPSIS
@@ -8,7 +8,7 @@ function Remove-WinUtilAPPX {
         The name of the APPX package to remove
 
     .EXAMPLE
-        Remove-WinUtilAPPX -Name "Microsoft.Microsoft3DViewer"
+        Remove-NoteAPPX -Name "Microsoft.Microsoft3DViewer"
 
     #>
     param (
@@ -16,7 +16,7 @@ function Remove-WinUtilAPPX {
     )
 
     Write-Host "Removing $Name"
-    Write-WinUtilLog -Component "AppX" -Message "Removing AppX package pattern: $Name"
+    Write-NoteLog -Component "AppX" -Message "Removing AppX package pattern: $Name"
 
     # We explicitly loop through packages instead of using the pipeline because PowerShell 7 pipeline binding
     # for Remove-AppxPackage fails silently, and Get-AppxPackage -AllUsers returns duplicate objects for each user profile.
@@ -27,10 +27,10 @@ function Remove-WinUtilAPPX {
                 Remove-AppxPackage -Package $pkg.PackageFullName -AllUsers -ErrorAction Stop
             }
             catch {
-                Write-WinUtilLog -Level "ERROR" -Component "AppX" -Message "Failed to remove AppX package $($pkg.PackageFullName): $($_.Exception.Message)"
+                Write-NoteLog -Level "ERROR" -Component "AppX" -Message "Failed to remove AppX package $($pkg.PackageFullName): $($_.Exception.Message)"
             }
         }
     }
 
-    Write-WinUtilLog -Component "AppX" -Message "AppX removal completed for package pattern: $Name"
+    Write-NoteLog -Component "AppX" -Message "AppX removal completed for package pattern: $Name"
 }

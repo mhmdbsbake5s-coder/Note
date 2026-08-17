@@ -1,4 +1,4 @@
-function Get-WinUtilVariables {
+function Get-NoteVariables {
 
     <#
     .SYNOPSIS

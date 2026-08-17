@@ -1,4 +1,4 @@
-function Update-WinUtilSelections ($flatJson) {
+function Update-NoteSelections ($flatJson) {
     foreach ($cbkey in $flatJson) {
 
         $listName = switch -Regex ($cbkey) {

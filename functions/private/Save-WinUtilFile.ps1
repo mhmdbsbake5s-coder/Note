@@ -1,4 +1,4 @@
-function Save-WinUtilFile {
+function Save-NoteFile {
     <#
     .SYNOPSIS
         Downloads a file and reports transfer progress.

@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   build:
-    if: github.repository == 'ChrisTitusTech/winutil'
+    if: github.repository == 'ChrisTitusTech/Note'
     runs-on: ubuntu-latest
     env:
       TZ: America/Chicago
@@ -36,7 +36,7 @@ jobs:
           path: docs
 
   deploy:
-    if: github.repository == 'ChrisTitusTech/winutil'
+    if: github.repository == 'ChrisTitusTech/Note'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

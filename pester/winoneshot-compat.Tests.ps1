@@ -1,7 +1,7 @@
 #===========================================================================
 # Tests - WinOneShot Catalog Compatibility
 #===========================================================================
-# WinOneShot downloads these files from WinUtil's main/config raw GitHub URLs.
+# WinOneShot downloads these files from Note's main/config raw GitHub URLs.
 # Keep the known field types aligned with WinOneShot Models.cs; extra fields are allowed.
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path

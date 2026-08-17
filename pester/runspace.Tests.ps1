@@ -4,14 +4,14 @@
 
 BeforeAll {
     $script:repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-    . (Join-Path $script:repoRoot "functions\private\Close-WinUtilRunspacePool.ps1")
-    . (Join-Path $script:repoRoot "functions\private\Initialize-WinUtilRunspacePool.ps1")
+    . (Join-Path $script:repoRoot "functions\private\Close-NoteRunspacePool.ps1")
+    . (Join-Path $script:repoRoot "functions\private\Initialize-NoteRunspacePool.ps1")
     . (Join-Path $script:repoRoot "functions\public\Invoke-WPFRunspace.ps1")
     . (Join-Path $script:repoRoot "functions\public\Invoke-WPFFeatureInstall.ps1")
     . (Join-Path $script:repoRoot "functions\public\Invoke-WPFAppxRemoval.ps1")
     . (Join-Path $script:repoRoot "functions\public\Invoke-WPFundoall.ps1")
 
-    function script:New-WinUtilRunspaceTestContext {
+    function script:New-NoteRunspaceTestContext {
         param([hashtable]$InitialSync = @{})
 
         $script:sync = [Hashtable]::Synchronized($InitialSync)
@@ -22,7 +22,7 @@ BeforeAll {
         $script:sync.runspace.Open()
     }
 
-    function script:Clear-WinUtilRunspaceTestContext {
+    function script:Clear-NoteRunspaceTestContext {
         if ($script:sync -and $script:sync.runspace) {
             $script:sync.runspace.Close()
             $script:sync.runspace.Dispose()
@@ -31,7 +31,7 @@ BeforeAll {
         Remove-Variable -Name sync -Scope Script -ErrorAction SilentlyContinue
     }
 
-    function script:Assert-WinUtilAsyncHandle {
+    function script:Assert-NoteAsyncHandle {
         param($Handle)
 
         ($Handle -is [System.IAsyncResult]) | Should -BeTrue
@@ -42,11 +42,11 @@ BeforeAll {
 
 Describe "Invoke-WPFRunspace behavior" {
     BeforeEach {
-        New-WinUtilRunspaceTestContext -InitialSync @{ Marker = "shared" }
+        New-NoteRunspaceTestContext -InitialSync @{ Marker = "shared" }
     }
 
     AfterEach {
-        Clear-WinUtilRunspaceTestContext
+        Clear-NoteRunspaceTestContext
     }
 
     It "returns a single async handle with no argument list" {
@@ -57,7 +57,7 @@ Describe "Invoke-WPFRunspace behavior" {
             $sync.Result = "no-args|$($sync.Marker)"
         }
 
-        Assert-WinUtilAsyncHandle -Handle $handle
+        Assert-NoteAsyncHandle -Handle $handle
         $script:sync.Result | Should -Be "no-args|shared"
     }
 
@@ -71,7 +71,7 @@ Describe "Invoke-WPFRunspace behavior" {
             $sync.Result = "Name=$Name"
         }
 
-        Assert-WinUtilAsyncHandle -Handle $handle
+        Assert-NoteAsyncHandle -Handle $handle
         $script:sync.Result | Should -Be "Name=value"
     }
 
@@ -91,7 +91,7 @@ Describe "Invoke-WPFRunspace behavior" {
             $sync.Result = "$First|$Second|$($sync.Marker)"
         }
 
-        Assert-WinUtilAsyncHandle -Handle $handle
+        Assert-NoteAsyncHandle -Handle $handle
         $script:sync.Result | Should -Be "alpha|beta|shared"
     }
 
@@ -101,14 +101,14 @@ Describe "Invoke-WPFRunspace behavior" {
             throw "runspace failure"
         }
 
-        Assert-WinUtilAsyncHandle -Handle $handle
+        Assert-NoteAsyncHandle -Handle $handle
 
         $script:sync.Result = $null
         $secondHandle = Invoke-WPFRunspace -ScriptBlock {
             $sync.Result = "after-failure"
         }
 
-        Assert-WinUtilAsyncHandle -Handle $secondHandle
+        Assert-NoteAsyncHandle -Handle $secondHandle
         $script:sync.Result | Should -Be "after-failure"
     }
 
@@ -128,8 +128,8 @@ Describe "Invoke-WPFRunspace behavior" {
             $sync.SecondResult = $Value
         }
 
-        Assert-WinUtilAsyncHandle -Handle $firstHandle
-        Assert-WinUtilAsyncHandle -Handle $secondHandle
+        Assert-NoteAsyncHandle -Handle $firstHandle
+        Assert-NoteAsyncHandle -Handle $secondHandle
         $script:sync.FirstResult | Should -Be "first"
         $script:sync.SecondResult | Should -Be "second"
     }
@@ -142,7 +142,7 @@ Describe "Invoke-WPFRunspace behavior" {
     }
 
     It "exposes a strongly typed cleanup callback" {
-        ([WinUtilRunspaceCleanup]::Callback -is [System.Threading.WaitOrTimerCallback]) | Should -BeTrue
+        ([NoteRunspaceCleanup]::Callback -is [System.Threading.WaitOrTimerCallback]) | Should -BeTrue
     }
 }
 

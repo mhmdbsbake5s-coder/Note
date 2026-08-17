@@ -103,5 +103,5 @@ function Initialize-InstallCategoryAppList {
             })
         }
 
-        Start-WinUtilInstallAppRendering
+        Start-NoteInstallAppRendering
     }

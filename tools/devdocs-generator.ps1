@@ -98,7 +98,7 @@ function Get-GeneratedFromNote {
         [string]$SourceRelativePath
     )
 
-    $githubUrl = "https://github.com/ChrisTitusTech/winutil/blob/main/$SourceRelativePath"
+    $githubUrl = "https://github.com/ChrisTitusTech/Note/blob/main/$SourceRelativePath"
     $note  = ":::note`r`n"
     $note += "This page is generated from [``$SourceRelativePath``]($githubUrl). Do not edit this page directly.`r`n"
     $note += ":::`r`n`r`n"
@@ -260,8 +260,8 @@ $featuresOutputDir   = "$repoRoot/docs/src/content/docs/code-reference/features"
 $publicFunctionsDir  = "$repoRoot/functions/public"
 $privateFunctionsDir = "$repoRoot/functions/private"
 
-$itemnametocut = 'WPF(WinUtil|Toggle|Features?|Tweaks?|Panel|Fix(es)?)?'
-$baseUrl       = "https://winutil.christitus.com"
+$itemnametocut = 'WPF(Note|Toggle|Features?|Tweaks?|Panel|Fix(es)?)?'
+$baseUrl       = "https://Note.christitus.com"
 
 # Categories with generated docs
 $documentedCategories = @(

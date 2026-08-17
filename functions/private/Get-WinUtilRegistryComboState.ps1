@@ -1,4 +1,4 @@
-function Get-WinUtilRegistryComboState {
+function Get-NoteRegistryComboState {
     <#
     .SYNOPSIS
         Finds the configured combo-box state matching the current registry values.
@@ -17,7 +17,7 @@ function Get-WinUtilRegistryComboState {
     foreach ($state in $Registry[0].Values.PSObject.Properties) {
         $stateMatches = $true
         foreach ($setting in @($Registry)) {
-            $currentValue = Get-WinUtilRegistryComboValue -Setting $setting
+            $currentValue = Get-NoteRegistryComboValue -Setting $setting
             $actualValue = if ($currentValue.Exists -and $null -ne $currentValue.Value) { $currentValue.Value } else { $setting.DefaultValue }
             $configuredValue = $setting.Values.PSObject.Properties[$state.Name].Value
             # Removal represents the effective Windows default when matching the current state.

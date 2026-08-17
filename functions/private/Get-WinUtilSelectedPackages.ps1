@@ -1,4 +1,4 @@
-function Get-WinUtilSelectedPackages {
+function Get-NoteSelectedPackages {
 
      param(
          [Parameter(Mandatory = $true)]
@@ -9,9 +9,9 @@ function Get-WinUtilSelectedPackages {
      )
 
     if ($PackageList.count -eq 1) {
-        Invoke-WPFUIThread -ScriptBlock { Set-WinUtilTaskbaritem -state "Indeterminate" -value 0.01 -overlay "logo" }
+        Invoke-WPFUIThread -ScriptBlock { Set-NoteTaskbaritem -state "Indeterminate" -value 0.01 -overlay "logo" }
     } else {
-        Invoke-WPFUIThread -ScriptBlock { Set-WinUtilTaskbaritem -state "Normal" -value 0.01 -overlay "logo" }
+        Invoke-WPFUIThread -ScriptBlock { Set-NoteTaskbaritem -state "Normal" -value 0.01 -overlay "logo" }
     }
 
     $packagesWinget = [System.Collections.ArrayList]::new()

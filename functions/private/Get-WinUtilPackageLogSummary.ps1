@@ -1,4 +1,4 @@
-function Get-WinUtilPackageLogSummary {
+function Get-NotePackageLogSummary {
     param(
         [Parameter(Mandatory = $true)]
         [object[]]$Packages,

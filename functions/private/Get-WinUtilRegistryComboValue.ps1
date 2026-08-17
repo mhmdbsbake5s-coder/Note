@@ -1,4 +1,4 @@
-function Get-WinUtilRegistryComboValue {
+function Get-NoteRegistryComboValue {
     <#
     .SYNOPSIS
         Reads one registry value for a registry-backed combo-box state.

@@ -31,24 +31,24 @@ function Invoke-WPFRunspace {
         $ParameterList
     )
 
-    if (-not ("WinUtilRunspaceCleanup" -as [type])) {
+    if (-not ("NoteRunspaceCleanup" -as [type])) {
         Add-Type @"
 using System;
 using System.Management.Automation;
 
-public sealed class WinUtilRunspaceCleanupState
+public sealed class NoteRunspaceCleanupState
 {
     public PowerShell PowerShell { get; set; }
     public IAsyncResult Handle { get; set; }
 }
 
-public static class WinUtilRunspaceCleanup
+public static class NoteRunspaceCleanup
 {
     public static readonly System.Threading.WaitOrTimerCallback Callback = Cleanup;
 
     public static void Cleanup(object state, bool timedOut)
     {
-        var cleanupState = state as WinUtilRunspaceCleanupState;
+        var cleanupState = state as NoteRunspaceCleanupState;
         if (cleanupState == null || cleanupState.PowerShell == null || cleanupState.Handle == null)
         {
             return;
@@ -70,7 +70,7 @@ public static class WinUtilRunspaceCleanup
 "@
     }
 
-    Initialize-WinUtilRunspacePool | Out-Null
+    Initialize-NoteRunspacePool | Out-Null
 
     # Create a PowerShell instance
     $powershell = [powershell]::Create()
@@ -88,10 +88,10 @@ public static class WinUtilRunspaceCleanup
     # Execute the RunspacePool
     $handle = $powershell.BeginInvoke()
 
-    $cleanupState = [WinUtilRunspaceCleanupState]::new()
+    $cleanupState = [NoteRunspaceCleanupState]::new()
     $cleanupState.PowerShell = $powershell
     $cleanupState.Handle = $handle
-    [System.Threading.ThreadPool]::RegisterWaitForSingleObject($handle.AsyncWaitHandle, [WinUtilRunspaceCleanup]::Callback, $cleanupState, -1, $true) | Out-Null
+    [System.Threading.ThreadPool]::RegisterWaitForSingleObject($handle.AsyncWaitHandle, [NoteRunspaceCleanup]::Callback, $cleanupState, -1, $true) | Out-Null
 
     # Return the handle
     return $handle

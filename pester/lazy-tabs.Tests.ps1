@@ -11,13 +11,13 @@ BeforeAll {
     function Initialize-WPFUI {
         param([string]$TargetGridName)
     }
-    function Invoke-WinUtilISOCheckExistingWork { }
+    function Invoke-NoteISOCheckExistingWork { }
     function Reset-WPFCheckBoxes { param([bool]$doToggles) }
 
-    . (Join-Path $script:repoRoot "functions\private\Initialize-WinUtilTabContent.ps1")
+    . (Join-Path $script:repoRoot "functions\private\Initialize-NoteTabContent.ps1")
 }
 
-Describe "Initialize-WinUtilTabContent" {
+Describe "Initialize-NoteTabContent" {
     BeforeEach {
         $script:sync = [Hashtable]::Synchronized(@{
             configs = @{
@@ -38,8 +38,8 @@ Describe "Initialize-WinUtilTabContent" {
     }
 
     It "initializes the install tab once" {
-        Initialize-WinUtilTabContent -TabName "Install"
-        Initialize-WinUtilTabContent -TabName "Install"
+        Initialize-NoteTabContent -TabName "Install"
+        Initialize-NoteTabContent -TabName "Install"
 
         Should -Invoke -CommandName Invoke-WPFUIElements -Times 1 -Exactly -ParameterFilter {
             $targetGridName -eq "appscategory" -and $columncount -eq 1
@@ -54,7 +54,7 @@ Describe "Initialize-WinUtilTabContent" {
     }
 
     It "re-applies checkbox selections after building a tab's controls" {
-        Initialize-WinUtilTabContent -TabName "Tweaks"
+        Initialize-NoteTabContent -TabName "Tweaks"
 
         Should -Invoke -CommandName Reset-WPFCheckBoxes -Times 1 -Exactly -ParameterFilter {
             $doToggles -eq $true
@@ -62,19 +62,19 @@ Describe "Initialize-WinUtilTabContent" {
     }
 
     It "does not re-apply checkbox selections on a tab that's already built" {
-        Initialize-WinUtilTabContent -TabName "Tweaks"
-        Initialize-WinUtilTabContent -TabName "Tweaks"
+        Initialize-NoteTabContent -TabName "Tweaks"
+        Initialize-NoteTabContent -TabName "Tweaks"
 
         Should -Invoke -CommandName Reset-WPFCheckBoxes -Times 1 -Exactly
     }
 
     It "initializes deferred config-backed tabs once" {
-        Initialize-WinUtilTabContent -TabName "Tweaks"
-        Initialize-WinUtilTabContent -TabName "Config"
-        Initialize-WinUtilTabContent -TabName "AppX"
-        Initialize-WinUtilTabContent -TabName "Tweaks"
-        Initialize-WinUtilTabContent -TabName "Config"
-        Initialize-WinUtilTabContent -TabName "AppX"
+        Initialize-NoteTabContent -TabName "Tweaks"
+        Initialize-NoteTabContent -TabName "Config"
+        Initialize-NoteTabContent -TabName "AppX"
+        Initialize-NoteTabContent -TabName "Tweaks"
+        Initialize-NoteTabContent -TabName "Config"
+        Initialize-NoteTabContent -TabName "AppX"
 
         Should -Invoke -CommandName Invoke-WPFUIElements -Times 1 -Exactly -ParameterFilter {
             $targetGridName -eq "tweakspanel" -and $columncount -eq 2
@@ -95,12 +95,12 @@ Describe "Initialize-WinUtilTabContent" {
             $action.Invoke()
         }
         $script:sync.Form = [pscustomobject]@{ Dispatcher = $dispatcher }
-        Mock Invoke-WinUtilISOCheckExistingWork { }
+        Mock Invoke-NoteISOCheckExistingWork { }
 
-        Initialize-WinUtilTabContent -TabName "Win11ISO"
-        Initialize-WinUtilTabContent -TabName "Win11ISO"
+        Initialize-NoteTabContent -TabName "Win11ISO"
+        Initialize-NoteTabContent -TabName "Win11ISO"
 
-        Should -Invoke -CommandName Invoke-WinUtilISOCheckExistingWork -Times 1 -Exactly
+        Should -Invoke -CommandName Invoke-NoteISOCheckExistingWork -Times 1 -Exactly
         $script:sync.InitializedTabs["Win11ISO"] | Should -BeTrue
     }
 }
@@ -110,7 +110,7 @@ Describe "Startup lazy tab wiring" {
         $mainScript = Get-Content -Path (Join-Path $script:repoRoot "scripts\main.ps1") -Raw
         $startupRegion = $mainScript.Substring(0, $mainScript.IndexOf("# Store Form Objects In PowerShell"))
 
-        $startupRegion | Should -Match 'Initialize-WinUtilTabContent -TabName "Install"'
+        $startupRegion | Should -Match 'Initialize-NoteTabContent -TabName "Install"'
         $startupRegion | Should -Not -Match 'targetGridName "tweakspanel"'
         $startupRegion | Should -Not -Match 'targetGridName "featurespanel"'
         $startupRegion | Should -Not -Match 'targetGridName "appxpanel"'
@@ -119,7 +119,7 @@ Describe "Startup lazy tab wiring" {
     It "initializes tab content when a tab is selected" {
         $tabScript = Get-Content -Path (Join-Path $script:repoRoot "functions\public\Invoke-WPFTab.ps1") -Raw
 
-        $tabScript | Should -Match 'Initialize-WinUtilTabContent -TabName \$sync\.currentTab'
+        $tabScript | Should -Match 'Initialize-NoteTabContent -TabName \$sync\.currentTab'
     }
 
     It "binds generated button clicks when lazy panels are rendered" {

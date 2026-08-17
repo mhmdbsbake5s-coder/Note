@@ -4,34 +4,34 @@
 
 BeforeAll {
     $script:repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-    . (Join-Path $script:repoRoot "functions\private\Close-WinUtilRunspacePool.ps1")
-    . (Join-Path $script:repoRoot "functions\private\Initialize-WinUtilRunspacePool.ps1")
+    . (Join-Path $script:repoRoot "functions\private\Close-NoteRunspacePool.ps1")
+    . (Join-Path $script:repoRoot "functions\private\Initialize-NoteRunspacePool.ps1")
 }
 
-Describe "Initialize-WinUtilRunspacePool" {
+Describe "Initialize-NoteRunspacePool" {
     BeforeEach {
         $script:sync = [Hashtable]::Synchronized(@{})
         $script:PARAM_OFFLINE = $false
     }
 
     AfterEach {
-        Close-WinUtilRunspacePool
+        Close-NoteRunspacePool
         Remove-Variable -Name sync -Scope Script -ErrorAction SilentlyContinue
         Remove-Variable -Name PARAM_OFFLINE -Scope Script -ErrorAction SilentlyContinue
     }
 
     It "creates and reuses one open runspace pool" {
-        $firstPool = Initialize-WinUtilRunspacePool
-        $secondPool = Initialize-WinUtilRunspacePool
+        $firstPool = Initialize-NoteRunspacePool
+        $secondPool = Initialize-NoteRunspacePool
 
         $firstPool.RunspacePoolStateInfo.State | Should -Be ([System.Management.Automation.Runspaces.RunspacePoolState]::Opened)
         [object]::ReferenceEquals($firstPool, $secondPool) | Should -BeTrue
     }
 
     It "closes and removes the active runspace pool" {
-        $pool = Initialize-WinUtilRunspacePool
+        $pool = Initialize-NoteRunspacePool
 
-        Close-WinUtilRunspacePool
+        Close-NoteRunspacePool
 
         $pool.RunspacePoolStateInfo.State | Should -Be ([System.Management.Automation.Runspaces.RunspacePoolState]::Closed)
         $script:sync.ContainsKey("runspace") | Should -BeFalse
@@ -50,15 +50,15 @@ Describe "Runspace startup wiring" {
     It "initializes runspaces synchronously for automation paths and after first render for GUI" {
         $mainScript = Get-Content -Path (Join-Path $script:repoRoot "scripts\main.ps1") -Raw
 
-        $mainScript | Should -Match 'if \(\$Preset\) \{\s+Initialize-WinUtilRunspacePool'
-        $mainScript | Should -Match 'if \(\$Config\) \{\s+Initialize-WinUtilRunspacePool'
-        $mainScript | Should -Match 'Dispatcher\.BeginInvoke\(\[System\.Windows\.Threading\.DispatcherPriority\]::Background, \[action\]\{ Initialize-WinUtilRunspacePool'
-        $mainScript | Should -Match 'Close-WinUtilRunspacePool'
+        $mainScript | Should -Match 'if \(\$Preset\) \{\s+Initialize-NoteRunspacePool'
+        $mainScript | Should -Match 'if \(\$Config\) \{\s+Initialize-NoteRunspacePool'
+        $mainScript | Should -Match 'Dispatcher\.BeginInvoke\(\[System\.Windows\.Threading\.DispatcherPriority\]::Background, \[action\]\{ Initialize-NoteRunspacePool'
+        $mainScript | Should -Match 'Close-NoteRunspacePool'
     }
 
     It "creates runspaces on demand before queueing background work" {
         $runspaceScript = Get-Content -Path (Join-Path $script:repoRoot "functions\public\Invoke-WPFRunspace.ps1") -Raw
 
-        $runspaceScript | Should -Match 'Initialize-WinUtilRunspacePool \| Out-Null'
+        $runspaceScript | Should -Match 'Initialize-NoteRunspacePool \| Out-Null'
     }
 }
