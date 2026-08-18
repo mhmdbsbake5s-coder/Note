@@ -1052,65 +1052,60 @@
             <TextBlock Text="&#x26A0; Offline Mode - No Internet Connection" Foreground="White" FontWeight="Bold"
                 HorizontalAlignment="Center" FontSize="13" Background="Transparent"/>
         </Border>
-        <Border Grid.Row="1" Grid.RowSpan="3" Grid.Column="0" Width="190"
+        <Border Grid.Row="1" Grid.RowSpan="3" Grid.Column="0" Width="230"
                 Background="{DynamicResource MainBackgroundColor}"
                 BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,1,0">
-            <StackPanel Name="NavDockPanel" Orientation="Vertical" Margin="10,14,10,10">
-                <StackPanel Name="NavLogoPanel" Orientation="Horizontal" HorizontalAlignment="Left" Margin="8,0,0,18" SnapsToDevicePixels="True">
+            <StackPanel Name="NavDockPanel" Orientation="Vertical" Margin="16,20,16,16">
+                <StackPanel Name="NavLogoPanel" Orientation="Horizontal" HorizontalAlignment="Left" Margin="4,0,0,28" SnapsToDevicePixels="True">
                 </StackPanel>
-                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,4" Height="36" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="12,0,0,0"
-                    Background="{DynamicResource ButtonInstallBackgroundColor}" FontWeight="Bold" Name="WPFTab1BT">
+                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,16" Height="44"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="16,0,0,0"
+                    BorderThickness="0" BorderBrush="Transparent"
+                    Background="{DynamicResource ButtonInstallBackgroundColor}" FontWeight="Normal" Name="WPFTab1BT">
                     <ToggleButton.Content>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="15" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource ButtonInstallForegroundColor}" Text="&#xE896;"/>
-                            <TextBlock FontSize="{DynamicResource TabButtonFontSize}" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource ButtonInstallForegroundColor}">
-                                <Underline>I</Underline>nstall
-                            </TextBlock>
-                        </StackPanel>
+                        <TextBlock FontSize="14" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource ButtonInstallForegroundColor}">
+                            <Underline>I</Underline>nstall
+                        </TextBlock>
                     </ToggleButton.Content>
                 </ToggleButton>
-                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,4" Height="36" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="12,0,0,0"
-                    Background="{DynamicResource ButtonTweaksBackgroundColor}" FontWeight="Bold" Name="WPFTab2BT">
+                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,16" Height="44"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="16,0,0,0"
+                    BorderThickness="0" BorderBrush="Transparent"
+                    Background="{DynamicResource ButtonTweaksBackgroundColor}" FontWeight="Normal" Name="WPFTab2BT">
                     <ToggleButton.Content>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="15" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource ButtonTweaksForegroundColor}" Text="&#xE713;"/>
-                            <TextBlock FontSize="{DynamicResource TabButtonFontSize}" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource ButtonTweaksForegroundColor}">
-                                <Underline>T</Underline>weaks
-                            </TextBlock>
-                        </StackPanel>
+                        <TextBlock FontSize="14" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource ButtonTweaksForegroundColor}">
+                            <Underline>T</Underline>weaks
+                        </TextBlock>
                     </ToggleButton.Content>
                 </ToggleButton>
-                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,4" Height="36" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="12,0,0,0"
-                    Background="{DynamicResource ButtonConfigBackgroundColor}" FontWeight="Bold" Name="WPFTab3BT">
+                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,16" Height="44"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="16,0,0,0"
+                    BorderThickness="0" BorderBrush="Transparent"
+                    Background="{DynamicResource ButtonConfigBackgroundColor}" FontWeight="Normal" Name="WPFTab3BT">
                     <ToggleButton.Content>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="15" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource ButtonConfigForegroundColor}" Text="&#xE8B7;"/>
-                            <TextBlock FontSize="{DynamicResource TabButtonFontSize}" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource ButtonConfigForegroundColor}">
-                                <Underline>C</Underline>onfig
-                            </TextBlock>
-                        </StackPanel>
+                        <TextBlock FontSize="14" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource ButtonConfigForegroundColor}">
+                            <Underline>C</Underline>onfig
+                        </TextBlock>
                     </ToggleButton.Content>
                 </ToggleButton>
-                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,4" Height="36" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="12,0,0,0"
-                    Background="{DynamicResource ButtonUpdatesBackgroundColor}" FontWeight="Bold" Name="WPFTab4BT">
+                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,16" Height="44"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="16,0,0,0"
+                    BorderThickness="0" BorderBrush="Transparent"
+                    Background="{DynamicResource ButtonUpdatesBackgroundColor}" FontWeight="Normal" Name="WPFTab4BT">
                     <ToggleButton.Content>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="15" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource ButtonUpdatesForegroundColor}" Text="&#xE895;"/>
-                            <TextBlock FontSize="{DynamicResource TabButtonFontSize}" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource ButtonUpdatesForegroundColor}">
-                                <Underline>U</Underline>pdates
-                            </TextBlock>
-                        </StackPanel>
+                        <TextBlock FontSize="14" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource ButtonUpdatesForegroundColor}">
+                            <Underline>U</Underline>pdates
+                        </TextBlock>
                     </ToggleButton.Content>
                 </ToggleButton>
-                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,4" Height="36" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="12,0,0,0"
-                    Background="{DynamicResource ButtonWin11ISOBackgroundColor}" FontWeight="Bold" Name="WPFTab5BT">
+                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,16" Height="44"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="16,0,0,0"
+                    BorderThickness="0" BorderBrush="Transparent"
+                    Background="{DynamicResource ButtonWin11ISOBackgroundColor}" FontWeight="Normal" Name="WPFTab5BT">
                     <ToggleButton.Content>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="15" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource ButtonWin11ISOForegroundColor}" Text="&#xE8A5;"/>
-                            <TextBlock FontSize="{DynamicResource TabButtonFontSize}" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource ButtonWin11ISOForegroundColor}">
-                                <Underline>W</Underline>in11 Creator
-                            </TextBlock>
-                        </StackPanel>
+                        <TextBlock FontSize="14" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource ButtonWin11ISOForegroundColor}">
+                            <Underline>W</Underline>in11 Creator
+                        </TextBlock>
                     </ToggleButton.Content>
                 </ToggleButton>
             </StackPanel>

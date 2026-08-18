@@ -12496,7 +12496,108 @@ $sync.configs.tweaks = @'
                              "Type":  "Button",
                              "ButtonWidth":  "300",
                              "link":  "https://noteshopp.mysellauth.com/code-reference/tweaks/performance-plans---not-for-laptops/removeultperf"
-                         }
+                         },
+    "WPFTweaksHAGS":  {
+                          "Content":  "GPU Scheduling (HAGS) - Enable",
+                          "Description":  "Lets the GPU manage its own command queue instead of the CPU doing it. MEASURABLE on RTX 30-series / RX 6000-series and newer with current drivers. Inconsistent on older cards. Reserves up to 1GB VRAM - if you have 8GB or less, test your 1% lows and turn it off if they get worse. Requires a reboot.",
+                          "category":  "Performance Tweaks",
+                          "panel":  "1",
+                          "registry":  [
+                                           {
+                                               "Path":  "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers",
+                                               "Name":  "HwSchMode",
+                                               "Value":  "2",
+                                               "Type":  "DWord",
+                                               "OriginalValue":  "1"
+                                           }
+                                       ],
+                          "link":  "https://noteshopp.mysellauth.com"
+                      },
+    "WPFTweaksGameDVR":  {
+                             "Content":  "Background Game Recording - Disable",
+                             "Description":  "Xbox Game Bar records gameplay in the background continuously by default, costing CPU and disk activity even when you never use it. MEASURABLE - this is free performance if you do not use the recording feature.",
+                             "category":  "Performance Tweaks",
+                             "panel":  "1",
+                             "registry":  [
+                                              {
+                                                  "Path":  "HKCU:\\System\\GameConfigStore",
+                                                  "Name":  "GameDVR_Enabled",
+                                                  "Value":  "0",
+                                                  "Type":  "DWord",
+                                                  "OriginalValue":  "1"
+                                              },
+                                              {
+                                                  "Path":  "HKCU:\\System\\GameConfigStore",
+                                                  "Name":  "GameDVR_FSEBehaviorMode",
+                                                  "Value":  "2",
+                                                  "Type":  "DWord",
+                                                  "OriginalValue":  "0"
+                                              },
+                                              {
+                                                  "Path":  "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR",
+                                                  "Name":  "AllowGameDVR",
+                                                  "Value":  "0",
+                                                  "Type":  "DWord",
+                                                  "OriginalValue":  "\u003cRemoveEntry\u003e"
+                                              }
+                                          ],
+                             "link":  "https://noteshopp.mysellauth.com"
+                         },
+    "WPFTweaksUSBSuspend":  {
+                                "Content":  "USB Selective Suspend - Disable",
+                                "Description":  "Stops Windows putting USB devices to sleep to save power. SITUATIONAL - fixes mouse, keyboard and controller micro-disconnects and first-input delay. No benefit if you have never noticed those. Increases idle power draw slightly, so not ideal on a laptop running on battery.",
+                                "category":  "Performance Tweaks",
+                                "panel":  "1",
+                                "registry":  [
+                                                 {
+                                                     "Path":  "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\USB",
+                                                     "Name":  "DisableSelectiveSuspend",
+                                                     "Value":  "1",
+                                                     "Type":  "DWord",
+                                                     "OriginalValue":  "\u003cRemoveEntry\u003e"
+                                                 }
+                                             ],
+                                "link":  "https://noteshopp.mysellauth.com"
+                            },
+    "WPFTweaksMMCSS":  {
+                           "Content":  "Multimedia Scheduler - Prioritise Foreground",
+                           "Description":  "By default Windows reserves 20 percent of CPU for background tasks and throttles network throughput while multimedia is playing. This releases both to the foreground app. SITUATIONAL - helps most on lower core-count CPUs and on machines with heavy background activity. Little effect on a modern high-core system that was never starved.",
+                           "category":  "Performance Tweaks",
+                           "panel":  "1",
+                           "registry":  [
+                                            {
+                                                "Path":  "HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile",
+                                                "Name":  "SystemResponsiveness",
+                                                "Value":  "0",
+                                                "Type":  "DWord",
+                                                "OriginalValue":  "20"
+                                            },
+                                            {
+                                                "Path":  "HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile",
+                                                "Name":  "NetworkThrottlingIndex",
+                                                "Value":  "4294967295",
+                                                "Type":  "DWord",
+                                                "OriginalValue":  "10"
+                                            }
+                                        ],
+                           "link":  "https://noteshopp.mysellauth.com"
+                       },
+    "WPFTweaksPriority":  {
+                              "Content":  "CPU Scheduler - Favour Foreground",
+                              "Description":  "Changes how the scheduler divides CPU time between the window you are using and everything else, using short variable time slices with a 3:1 bias to the foreground. SITUATIONAL - can improve responsiveness under load, but may slow background work such as encoding or compiling. Revert if you run long background jobs.",
+                              "category":  "Performance Tweaks",
+                              "panel":  "1",
+                              "registry":  [
+                                               {
+                                                   "Path":  "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\PriorityControl",
+                                                   "Name":  "Win32PrioritySeparation",
+                                                   "Value":  "38",
+                                                   "Type":  "DWord",
+                                                   "OriginalValue":  "2"
+                                               }
+                                           ],
+                              "link":  "https://noteshopp.mysellauth.com"
+                          }
 }
 '@ | ConvertFrom-Json
 $inputXML = @'
@@ -13554,65 +13655,60 @@ $inputXML = @'
             <TextBlock Text="&#x26A0; Offline Mode - No Internet Connection" Foreground="White" FontWeight="Bold"
                 HorizontalAlignment="Center" FontSize="13" Background="Transparent"/>
         </Border>
-        <Border Grid.Row="1" Grid.RowSpan="3" Grid.Column="0" Width="190"
+        <Border Grid.Row="1" Grid.RowSpan="3" Grid.Column="0" Width="230"
                 Background="{DynamicResource MainBackgroundColor}"
                 BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,1,0">
-            <StackPanel Name="NavDockPanel" Orientation="Vertical" Margin="10,14,10,10">
-                <StackPanel Name="NavLogoPanel" Orientation="Horizontal" HorizontalAlignment="Left" Margin="8,0,0,18" SnapsToDevicePixels="True">
+            <StackPanel Name="NavDockPanel" Orientation="Vertical" Margin="16,20,16,16">
+                <StackPanel Name="NavLogoPanel" Orientation="Horizontal" HorizontalAlignment="Left" Margin="4,0,0,28" SnapsToDevicePixels="True">
                 </StackPanel>
-                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,4" Height="36" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="12,0,0,0"
-                    Background="{DynamicResource ButtonInstallBackgroundColor}" FontWeight="Bold" Name="WPFTab1BT">
+                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,16" Height="44"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="16,0,0,0"
+                    BorderThickness="0" BorderBrush="Transparent"
+                    Background="{DynamicResource ButtonInstallBackgroundColor}" FontWeight="Normal" Name="WPFTab1BT">
                     <ToggleButton.Content>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="15" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource ButtonInstallForegroundColor}" Text="&#xE896;"/>
-                            <TextBlock FontSize="{DynamicResource TabButtonFontSize}" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource ButtonInstallForegroundColor}">
-                                <Underline>I</Underline>nstall
-                            </TextBlock>
-                        </StackPanel>
+                        <TextBlock FontSize="14" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource ButtonInstallForegroundColor}">
+                            <Underline>I</Underline>nstall
+                        </TextBlock>
                     </ToggleButton.Content>
                 </ToggleButton>
-                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,4" Height="36" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="12,0,0,0"
-                    Background="{DynamicResource ButtonTweaksBackgroundColor}" FontWeight="Bold" Name="WPFTab2BT">
+                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,16" Height="44"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="16,0,0,0"
+                    BorderThickness="0" BorderBrush="Transparent"
+                    Background="{DynamicResource ButtonTweaksBackgroundColor}" FontWeight="Normal" Name="WPFTab2BT">
                     <ToggleButton.Content>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="15" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource ButtonTweaksForegroundColor}" Text="&#xE713;"/>
-                            <TextBlock FontSize="{DynamicResource TabButtonFontSize}" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource ButtonTweaksForegroundColor}">
-                                <Underline>T</Underline>weaks
-                            </TextBlock>
-                        </StackPanel>
+                        <TextBlock FontSize="14" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource ButtonTweaksForegroundColor}">
+                            <Underline>T</Underline>weaks
+                        </TextBlock>
                     </ToggleButton.Content>
                 </ToggleButton>
-                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,4" Height="36" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="12,0,0,0"
-                    Background="{DynamicResource ButtonConfigBackgroundColor}" FontWeight="Bold" Name="WPFTab3BT">
+                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,16" Height="44"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="16,0,0,0"
+                    BorderThickness="0" BorderBrush="Transparent"
+                    Background="{DynamicResource ButtonConfigBackgroundColor}" FontWeight="Normal" Name="WPFTab3BT">
                     <ToggleButton.Content>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="15" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource ButtonConfigForegroundColor}" Text="&#xE8B7;"/>
-                            <TextBlock FontSize="{DynamicResource TabButtonFontSize}" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource ButtonConfigForegroundColor}">
-                                <Underline>C</Underline>onfig
-                            </TextBlock>
-                        </StackPanel>
+                        <TextBlock FontSize="14" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource ButtonConfigForegroundColor}">
+                            <Underline>C</Underline>onfig
+                        </TextBlock>
                     </ToggleButton.Content>
                 </ToggleButton>
-                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,4" Height="36" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="12,0,0,0"
-                    Background="{DynamicResource ButtonUpdatesBackgroundColor}" FontWeight="Bold" Name="WPFTab4BT">
+                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,16" Height="44"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="16,0,0,0"
+                    BorderThickness="0" BorderBrush="Transparent"
+                    Background="{DynamicResource ButtonUpdatesBackgroundColor}" FontWeight="Normal" Name="WPFTab4BT">
                     <ToggleButton.Content>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="15" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource ButtonUpdatesForegroundColor}" Text="&#xE895;"/>
-                            <TextBlock FontSize="{DynamicResource TabButtonFontSize}" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource ButtonUpdatesForegroundColor}">
-                                <Underline>U</Underline>pdates
-                            </TextBlock>
-                        </StackPanel>
+                        <TextBlock FontSize="14" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource ButtonUpdatesForegroundColor}">
+                            <Underline>U</Underline>pdates
+                        </TextBlock>
                     </ToggleButton.Content>
                 </ToggleButton>
-                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,4" Height="36" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="12,0,0,0"
-                    Background="{DynamicResource ButtonWin11ISOBackgroundColor}" FontWeight="Bold" Name="WPFTab5BT">
+                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,16" Height="44"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="16,0,0,0"
+                    BorderThickness="0" BorderBrush="Transparent"
+                    Background="{DynamicResource ButtonWin11ISOBackgroundColor}" FontWeight="Normal" Name="WPFTab5BT">
                     <ToggleButton.Content>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="15" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="{DynamicResource ButtonWin11ISOForegroundColor}" Text="&#xE8A5;"/>
-                            <TextBlock FontSize="{DynamicResource TabButtonFontSize}" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource ButtonWin11ISOForegroundColor}">
-                                <Underline>W</Underline>in11 Creator
-                            </TextBlock>
-                        </StackPanel>
+                        <TextBlock FontSize="14" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource ButtonWin11ISOForegroundColor}">
+                            <Underline>W</Underline>in11 Creator
+                        </TextBlock>
                     </ToggleButton.Content>
                 </ToggleButton>
             </StackPanel>
