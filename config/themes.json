@@ -1,10 +1,10 @@
 ﻿{
     "shared":  {
-                   "AppEntryWidth":  "220",
+                   "AppEntryWidth":  "980",
                    "AppEntryFontSize":  "14",
-                   "AppEntryIconSize":  "30",
-                   "AppEntryMargin":  "5",
-                   "AppEntryBorderThickness":  "1",
+                   "AppEntryIconSize":  "24",
+                   "AppEntryMargin":  "0,0,0,4",
+                   "AppEntryBorderThickness":  "0",
                    "CustomDialogFontSize":  "12",
                    "CustomDialogFontSizeHeader":  "14",
                    "CustomDialogLogoSize":  "25",

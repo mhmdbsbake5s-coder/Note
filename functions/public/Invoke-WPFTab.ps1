@@ -1,4 +1,4 @@
-function Invoke-WPFTab {
+﻿function Invoke-WPFTab {
 
     <#
 
@@ -28,7 +28,11 @@ function Invoke-WPFTab {
         }
     }
     $sync.currentTab = $sync.$tabNav.Items[$tabNumber].Header
-    Initialize-NoteTabContent -TabName $sync.currentTab
+    if ($sync.currentTab -eq "Home") {
+        Invoke-WPFHomeDashboard
+    } else {
+        Initialize-NoteTabContent -TabName $sync.currentTab
+    }
 
     # Always reset the filter for the current tab
     if ($sync.currentTab -eq "Install") {

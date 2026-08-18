@@ -1055,56 +1055,72 @@
         <Border Grid.Row="1" Grid.RowSpan="3" Grid.Column="0" Width="230"
                 Background="{DynamicResource MainBackgroundColor}"
                 BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,1,0">
-            <StackPanel Name="NavDockPanel" Orientation="Vertical" Margin="16,20,16,16">
-                <StackPanel Name="NavLogoPanel" Orientation="Horizontal" HorizontalAlignment="Left" Margin="4,0,0,28" SnapsToDevicePixels="True">
+            <StackPanel Name="NavDockPanel" Orientation="Vertical" Margin="14,20,14,16">
+                <StackPanel Name="NavLogoPanel" Orientation="Horizontal" HorizontalAlignment="Left" Margin="6,0,0,22" SnapsToDevicePixels="True">
                 </StackPanel>
-                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,16" Height="44"
-                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="16,0,0,0"
+                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,3" Height="40"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="18,0,0,0"
                     BorderThickness="0" BorderBrush="Transparent"
-                    Background="{DynamicResource ButtonInstallBackgroundColor}" FontWeight="Normal" Name="WPFTab1BT">
+                    Background="Transparent" FontWeight="Normal" Name="WPFTab7BT">
                     <ToggleButton.Content>
-                        <TextBlock FontSize="14" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource ButtonInstallForegroundColor}">
-                            <Underline>I</Underline>nstall
+                        <TextBlock FontSize="14" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource MainForegroundColor}">
+                            <Underline>H</Underline>ome
                         </TextBlock>
                     </ToggleButton.Content>
                 </ToggleButton>
-                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,16" Height="44"
-                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="16,0,0,0"
+                <TextBlock Text="SET UP" Foreground="#00E676" FontFamily="Cascadia Mono, Consolas"
+                           FontSize="10" Margin="18,20,0,8"/>
+                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,3" Height="40"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="18,0,0,0"
                     BorderThickness="0" BorderBrush="Transparent"
-                    Background="{DynamicResource ButtonTweaksBackgroundColor}" FontWeight="Normal" Name="WPFTab2BT">
+                    Background="Transparent" FontWeight="Normal" Name="WPFTab1BT">
                     <ToggleButton.Content>
-                        <TextBlock FontSize="14" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource ButtonTweaksForegroundColor}">
-                            <Underline>T</Underline>weaks
+                        <TextBlock FontSize="14" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource MainForegroundColor}">
+                            <Underline>A</Underline>pps
                         </TextBlock>
                     </ToggleButton.Content>
                 </ToggleButton>
-                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,16" Height="44"
-                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="16,0,0,0"
+                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,3" Height="40"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="18,0,0,0"
                     BorderThickness="0" BorderBrush="Transparent"
-                    Background="{DynamicResource ButtonConfigBackgroundColor}" FontWeight="Normal" Name="WPFTab3BT">
+                    Background="Transparent" FontWeight="Normal" Name="WPFTab5BT">
                     <ToggleButton.Content>
-                        <TextBlock FontSize="14" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource ButtonConfigForegroundColor}">
-                            <Underline>C</Underline>onfig
+                        <TextBlock FontSize="14" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource MainForegroundColor}">
+                            <Underline>W</Underline>indows Image
                         </TextBlock>
                     </ToggleButton.Content>
                 </ToggleButton>
-                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,16" Height="44"
-                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="16,0,0,0"
+                <TextBlock Text="OPTIMISE" Foreground="#00E676" FontFamily="Cascadia Mono, Consolas"
+                           FontSize="10" Margin="18,20,0,8"/>
+                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,3" Height="40"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="18,0,0,0"
                     BorderThickness="0" BorderBrush="Transparent"
-                    Background="{DynamicResource ButtonUpdatesBackgroundColor}" FontWeight="Normal" Name="WPFTab4BT">
+                    Background="Transparent" FontWeight="Normal" Name="WPFTab2BT">
                     <ToggleButton.Content>
-                        <TextBlock FontSize="14" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource ButtonUpdatesForegroundColor}">
+                        <TextBlock FontSize="14" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource MainForegroundColor}">
+                            <Underline>T</Underline>uning
+                        </TextBlock>
+                    </ToggleButton.Content>
+                </ToggleButton>
+                <TextBlock Text="MAINTAIN" Foreground="#00E676" FontFamily="Cascadia Mono, Consolas"
+                           FontSize="10" Margin="18,20,0,8"/>
+                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,3" Height="40"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="18,0,0,0"
+                    BorderThickness="0" BorderBrush="Transparent"
+                    Background="Transparent" FontWeight="Normal" Name="WPFTab3BT">
+                    <ToggleButton.Content>
+                        <TextBlock FontSize="14" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource MainForegroundColor}">
+                            <Underline>T</Underline>ools
+                        </TextBlock>
+                    </ToggleButton.Content>
+                </ToggleButton>
+                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,3" Height="40"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="18,0,0,0"
+                    BorderThickness="0" BorderBrush="Transparent"
+                    Background="Transparent" FontWeight="Normal" Name="WPFTab4BT">
+                    <ToggleButton.Content>
+                        <TextBlock FontSize="14" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource MainForegroundColor}">
                             <Underline>U</Underline>pdates
-                        </TextBlock>
-                    </ToggleButton.Content>
-                </ToggleButton>
-                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,16" Height="44"
-                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="16,0,0,0"
-                    BorderThickness="0" BorderBrush="Transparent"
-                    Background="{DynamicResource ButtonWin11ISOBackgroundColor}" FontWeight="Normal" Name="WPFTab5BT">
-                    <ToggleButton.Content>
-                        <TextBlock FontSize="14" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource ButtonWin11ISOForegroundColor}">
-                            <Underline>W</Underline>in11 Creator
                         </TextBlock>
                     </ToggleButton.Content>
                 </ToggleButton>
@@ -1965,6 +1981,15 @@
                         </WrapPanel>
                     </Border>
                 </Grid>
+            </TabItem>
+            <TabItem Header="Home" Visibility="Collapsed" Name="WPFTab7">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0">
+                    <StackPanel Margin="24,20,24,24">
+                        <TextBlock Text="Note" Foreground="#EAEAEA" FontSize="26" FontFamily="Cascadia Mono, Consolas"/>
+                        <TextBlock Text="Windows toolbox" Foreground="#9A9A9A" FontSize="13" Margin="0,4,0,0"/>
+                        <StackPanel Name="HomePanel" Margin="0,6,0,0"/>
+                    </StackPanel>
+                </ScrollViewer>
             </TabItem>
         </TabControl>
 
