@@ -11,6 +11,12 @@
 =====Windows Toolbox=====
 "@
 
+# ---- licence check ----
+if (-not (Test-NoteLicense)) {
+    Write-Host "No valid licence. Exiting." -ForegroundColor Yellow
+    return
+}
+
 # Load the configuration files
 
 $sync.configs.applicationsHashtable = @{}
