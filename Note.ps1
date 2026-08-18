@@ -14375,17 +14375,7 @@ $inputXML = @'
                 </ToggleButton>
                 <TextBlock Text="SET UP" Foreground="#00E676" FontFamily="Cascadia Mono, Consolas"
                            FontSize="10" Margin="18,20,0,8"/>
-                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,3" Height="40"
-                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="18,0,0,0"
-                    BorderThickness="0" BorderBrush="Transparent"
-                    Background="Transparent" FontWeight="Normal" Name="WPFTab1BT">
-                    <ToggleButton.Content>
-                        <TextBlock FontSize="14" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource MainForegroundColor}">
-                            <Underline>A</Underline>pps
-                        </TextBlock>
-                    </ToggleButton.Content>
-                </ToggleButton>
-                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,3" Height="40"
+                                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,3" Height="40"
                     HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="18,0,0,0"
                     BorderThickness="0" BorderBrush="Transparent"
                     Background="Transparent" FontWeight="Normal" Name="WPFTab5BT">
@@ -16047,7 +16037,7 @@ $commonKeyEvents = {
     if ($_.KeyboardDevice.Modifiers -eq "Alt") {
         $keyEventArgs = $_
         switch ($_.SystemKey) {
-            "I" { Invoke-WPFButton "WPFTab1BT"; $keyEventArgs.Handled = $true } # Navigate to Install tab and suppress Windows Warning Sound
+            "I" { Invoke-WPFButton "WPFTab7BT"; $keyEventArgs.Handled = $true } # Navigate to Install tab and suppress Windows Warning Sound
             "T" { Invoke-WPFButton "WPFTab2BT"; $keyEventArgs.Handled = $true } # Navigate to Tweaks tab
             "C" { Invoke-WPFButton "WPFTab3BT"; $keyEventArgs.Handled = $true } # Navigate to Config tab
             "U" { Invoke-WPFButton "WPFTab4BT"; $keyEventArgs.Handled = $true } # Navigate to Updates tab
@@ -16143,7 +16133,7 @@ $sync["Form"].Add_ContentRendered({
         $sync.WPFTab1BT.IsEnabled = $true
         $sync.WPFTab1BT.Opacity = 1.0
         $sync.WPFTab1BT.ToolTip = $null
-        Invoke-WPFTab "WPFTab1BT"  # Default to install tab
+        Invoke-WPFTab "WPFTab7BT"  # Default to install tab
     }
 
     $sync["Form"].Focus()

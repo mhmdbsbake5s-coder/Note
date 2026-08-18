@@ -1070,17 +1070,7 @@
                 </ToggleButton>
                 <TextBlock Text="SET UP" Foreground="#00E676" FontFamily="Cascadia Mono, Consolas"
                            FontSize="10" Margin="18,20,0,8"/>
-                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,3" Height="40"
-                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="18,0,0,0"
-                    BorderThickness="0" BorderBrush="Transparent"
-                    Background="Transparent" FontWeight="Normal" Name="WPFTab1BT">
-                    <ToggleButton.Content>
-                        <TextBlock FontSize="14" VerticalAlignment="Center" Background="Transparent" Foreground="{DynamicResource MainForegroundColor}">
-                            <Underline>A</Underline>pps
-                        </TextBlock>
-                    </ToggleButton.Content>
-                </ToggleButton>
-                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,3" Height="40"
+                                <ToggleButton Style="{StaticResource TabToggleButton}" Margin="0,0,0,3" Height="40"
                     HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="18,0,0,0"
                     BorderThickness="0" BorderBrush="Transparent"
                     Background="Transparent" FontWeight="Normal" Name="WPFTab5BT">

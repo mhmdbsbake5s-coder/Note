@@ -211,7 +211,7 @@ $commonKeyEvents = {
     if ($_.KeyboardDevice.Modifiers -eq "Alt") {
         $keyEventArgs = $_
         switch ($_.SystemKey) {
-            "I" { Invoke-WPFButton "WPFTab1BT"; $keyEventArgs.Handled = $true } # Navigate to Install tab and suppress Windows Warning Sound
+            "I" { Invoke-WPFButton "WPFTab7BT"; $keyEventArgs.Handled = $true } # Navigate to Install tab and suppress Windows Warning Sound
             "T" { Invoke-WPFButton "WPFTab2BT"; $keyEventArgs.Handled = $true } # Navigate to Tweaks tab
             "C" { Invoke-WPFButton "WPFTab3BT"; $keyEventArgs.Handled = $true } # Navigate to Config tab
             "U" { Invoke-WPFButton "WPFTab4BT"; $keyEventArgs.Handled = $true } # Navigate to Updates tab
@@ -307,7 +307,7 @@ $sync["Form"].Add_ContentRendered({
         $sync.WPFTab1BT.IsEnabled = $true
         $sync.WPFTab1BT.Opacity = 1.0
         $sync.WPFTab1BT.ToolTip = $null
-        Invoke-WPFTab "WPFTab1BT"  # Default to install tab
+        Invoke-WPFTab "WPFTab7BT"  # Default to install tab
     }
 
     $sync["Form"].Focus()
