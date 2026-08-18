@@ -1774,5 +1774,60 @@
                                                }
                                            ],
                               "link":  "https://noteshopp.mysellauth.com"
-                          }
+                          },
+    "WPFTweaksNagle":  {
+                           "Content":  "Nagle\u0027s Algorithm - Disable",
+                           "Description":  "Windows batches small network packets together before sending, which adds a few milliseconds of delay. Disabling sends them immediately. SITUATIONAL - the classic latency tweak, and it genuinely helps some connections while doing nothing at all on others. Costs slightly more bandwidth overhead. Applies to all network adapters.",
+                           "category":  "Performance Tweaks",
+                           "panel":  "1",
+                           "InvokeScript":  [
+                                                "Get-ChildItem \"HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces\" | ForEach-Object { Set-ItemProperty -Path $_.PSPath -Name \"TcpAckFrequency\" -Value 1 -Type DWord -Force -ErrorAction SilentlyContinue; Set-ItemProperty -Path $_.PSPath -Name \"TCPNoDelay\" -Value 1 -Type DWord -Force -ErrorAction SilentlyContinue }"
+                                            ],
+                           "UndoScript":  [
+                                              "Get-ChildItem \"HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\Interfaces\" | ForEach-Object { Remove-ItemProperty -Path $_.PSPath -Name \"TcpAckFrequency\" -Force -ErrorAction SilentlyContinue; Remove-ItemProperty -Path $_.PSPath -Name \"TCPNoDelay\" -Force -ErrorAction SilentlyContinue }"
+                                          ],
+                           "link":  "https://noteshopp.mysellauth.com"
+                       },
+    "WPFTweaksPCIeASPM":  {
+                              "Content":  "PCIe Power Saving - Disable",
+                              "Description":  "Stops the PCIe bus dropping into low-power states, which can add wake-up latency for your GPU and NVMe drive. SITUATIONAL - helps with occasional micro-stutter on desktops. Increases idle power draw, so do not use this on a laptop running on battery. Undo restores moderate power saving, not necessarily your exact original setting.",
+                              "category":  "Performance Tweaks",
+                              "panel":  "1",
+                              "InvokeScript":  [
+                                                   "powercfg /setacvalueindex SCHEME_CURRENT 501a4d13-42af-4429-9fd1-a8218c268e20 ee12f906-d277-404b-b6da-e5fa1a576df5 0; powercfg /setactive SCHEME_CURRENT"
+                                               ],
+                              "UndoScript":  [
+                                                 "powercfg /setacvalueindex SCHEME_CURRENT 501a4d13-42af-4429-9fd1-a8218c268e20 ee12f906-d277-404b-b6da-e5fa1a576df5 1; powercfg /setactive SCHEME_CURRENT"
+                                             ],
+                              "link":  "https://noteshopp.mysellauth.com"
+                          },
+    "WPFTweaksMemComp":  {
+                             "Content":  "Memory Compression - Disable",
+                             "Description":  "Windows compresses RAM pages to fit more in memory, trading CPU time for RAM. SITUATIONAL and depends entirely on your hardware. If you have 32GB or more, disabling saves CPU cycles you do not need to spend. If you have 8GB or 16GB, LEAVE THIS ALONE - disabling it will push you into paging to disk and make things markedly worse.",
+                             "category":  "Performance Tweaks",
+                             "panel":  "1",
+                             "InvokeScript":  [
+                                                  "Disable-MMAgent -MemoryCompression -ErrorAction SilentlyContinue"
+                                              ],
+                             "UndoScript":  [
+                                                "Enable-MMAgent -MemoryCompression -ErrorAction SilentlyContinue"
+                                            ],
+                             "link":  "https://noteshopp.mysellauth.com"
+                         },
+    "WPFTweaksPowerThrottle":  {
+                                   "Content":  "CPU Power Throttling - Disable",
+                                   "Description":  "Windows throttles apps it decides are running in the background to save power. It sometimes misjudges which app is which, throttling something you are actively waiting on. MEASURABLE on laptops and efficiency-core CPUs. Increases power draw and heat, so it is a desktop or plugged-in tweak.",
+                                   "category":  "Performance Tweaks",
+                                   "panel":  "1",
+                                   "registry":  [
+                                                    {
+                                                        "Path":  "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling",
+                                                        "Name":  "PowerThrottlingOff",
+                                                        "Value":  "1",
+                                                        "Type":  "DWord",
+                                                        "OriginalValue":  "\u003cRemoveEntry\u003e"
+                                                    }
+                                                ],
+                                   "link":  "https://noteshopp.mysellauth.com"
+                               }
 }

@@ -347,5 +347,17 @@
                              "ButtonWidth":  "300",
                              "function":  "Invoke-WPFSSHServer",
                              "link":  "https://noteshopp.mysellauth.com/code-reference/features/remote-access/sshserver"
-                         }
+                         },
+    "WPFStartupManager":  {
+                              "Content":  "Startup Manager",
+                              "category":  "Note Tools",
+                              "panel":  "2",
+                              "Type":  "Button",
+                              "ButtonWidth":  "300",
+                              "Description":  "See every program that launches when Windows starts, and turn any of them off. Nothing is uninstalled - disabling is reversible.",
+                              "InvokeScript":  [
+                                                   "Invoke-WPFStartupManager"
+                                               ],
+                              "link":  "https://noteshopp.mysellauth.com"
+                          }
 }
