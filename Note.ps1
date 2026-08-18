@@ -5537,6 +5537,10 @@ function Invoke-WPFButton {
         "WPFAdvanced" {Invoke-WPFPresets "Advanced" -checkboxfilterpattern "WPFTweak*"}
         "WPFClearTweaksSelection" {Invoke-WPFPresets -imported $true -checkboxfilterpattern "WPFTweak*"}
         "WPFClearInstallSelection" {Invoke-WPFPresets -imported $true -checkboxfilterpattern "WPFInstall*"}
+        "WPFBundleEssentials" {Invoke-WPFPresets "Essentials" -checkboxfilterpattern "WPFInstall*"}
+        "WPFBundleGaming" {Invoke-WPFPresets "Gaming" -checkboxfilterpattern "WPFInstall*"}
+        "WPFBundleDevelopment" {Invoke-WPFPresets "Development" -checkboxfilterpattern "WPFInstall*"}
+        "WPFBundleMedia" {Invoke-WPFPresets "Media" -checkboxfilterpattern "WPFInstall*"}
         "WPFtweaksbutton" {Invoke-WPFtweaksbutton}
         "WPFOOSUbutton" {Invoke-WPFOOSU}
         "WPFAddUltPerf" {Invoke-WPFUltimatePerformance -Enable}
@@ -10276,7 +10280,39 @@ $sync.configs.appnavigation = @'
                                   "Type":  "Button",
                                   "Order":  "5",
                                   "Description":  "Show the selected applications"
-                              }
+                              },
+    "WPFBundleEssentials":  {
+                                "Content":  "Essentials",
+                                "Category":  "__Selection",
+                                "panel":  "1",
+                                "Type":  "Button",
+                                "Order":  "20",
+                                "Description":  "Select the Essentials bundle (9 apps)"
+                            },
+    "WPFBundleGaming":  {
+                            "Content":  "Gaming",
+                            "Category":  "__Selection",
+                            "panel":  "1",
+                            "Type":  "Button",
+                            "Order":  "21",
+                            "Description":  "Select the Gaming bundle (5 apps)"
+                        },
+    "WPFBundleDevelopment":  {
+                                 "Content":  "Development",
+                                 "Category":  "__Selection",
+                                 "panel":  "1",
+                                 "Type":  "Button",
+                                 "Order":  "22",
+                                 "Description":  "Select the Development bundle (4 apps)"
+                             },
+    "WPFBundleMedia":  {
+                           "Content":  "Media",
+                           "Category":  "__Selection",
+                           "panel":  "1",
+                           "Type":  "Button",
+                           "Order":  "23",
+                           "Description":  "Select the Media bundle (6 apps)"
+                       }
 }
 '@ | ConvertFrom-Json
 $sync.configs.appx = @'
@@ -11083,7 +11119,39 @@ $sync.configs.preset = @'
                         "WPFAppxMicrosoft_BingNews",
                         "WPFAppxMicrosoft_Copilot",
                         "WPFAppxMicrosoft_BingSearch"
-                    ]
+                    ],
+    "Essentials":  [
+                       "WPFInstall7zip",
+                       "WPFInstallfirefox",
+                       "WPFInstallvlc",
+                       "WPFInstallnotepadplus",
+                       "WPFInstallpowertoys",
+                       "WPFInstalleverything",
+                       "WPFInstallsharex",
+                       "WPFInstallqbittorrent",
+                       "WPFInstalladobe"
+                   ],
+    "Gaming":  [
+                   "WPFInstallsteam",
+                   "WPFInstalldiscord",
+                   "WPFInstallepicgames",
+                   "WPFInstallobs",
+                   "WPFInstallmsiafterburner"
+               ],
+    "Development":  [
+                        "WPFInstallgit",
+                        "WPFInstallterminal",
+                        "WPFInstallpython3",
+                        "WPFInstallnodejs"
+                    ],
+    "Media":  [
+                  "WPFInstallvlc",
+                  "WPFInstallobs",
+                  "WPFInstallaudacity",
+                  "WPFInstallgimp",
+                  "WPFInstallhandbrake",
+                  "WPFInstallmpv"
+              ]
 }
 '@ | ConvertFrom-Json
 $sync.configs.themes = @'

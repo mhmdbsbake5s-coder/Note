@@ -1,4 +1,4 @@
-function Invoke-WPFButton {
+﻿function Invoke-WPFButton {
 
     <#
 
@@ -55,6 +55,10 @@ function Invoke-WPFButton {
         "WPFAdvanced" {Invoke-WPFPresets "Advanced" -checkboxfilterpattern "WPFTweak*"}
         "WPFClearTweaksSelection" {Invoke-WPFPresets -imported $true -checkboxfilterpattern "WPFTweak*"}
         "WPFClearInstallSelection" {Invoke-WPFPresets -imported $true -checkboxfilterpattern "WPFInstall*"}
+        "WPFBundleEssentials" {Invoke-WPFPresets "Essentials" -checkboxfilterpattern "WPFInstall*"}
+        "WPFBundleGaming" {Invoke-WPFPresets "Gaming" -checkboxfilterpattern "WPFInstall*"}
+        "WPFBundleDevelopment" {Invoke-WPFPresets "Development" -checkboxfilterpattern "WPFInstall*"}
+        "WPFBundleMedia" {Invoke-WPFPresets "Media" -checkboxfilterpattern "WPFInstall*"}
         "WPFtweaksbutton" {Invoke-WPFtweaksbutton}
         "WPFOOSUbutton" {Invoke-WPFOOSU}
         "WPFAddUltPerf" {Invoke-WPFUltimatePerformance -Enable}
