@@ -1,4 +1,4 @@
-name: Generate Sponsors README
+﻿name: Generate Sponsors README
 on:
   workflow_dispatch:
   schedule:
@@ -9,20 +9,20 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    if: (github.event_name == 'schedule' && github.repository == 'ChrisTitusTech/Note') || (github.event_name != 'schedule')
+    if: (github.event_name == 'schedule' && github.repository == 'mhmdbsbake5s-coder/note') || (github.event_name != 'schedule')
     steps:
-      - name: Checkout 🛎️
+      - name: Checkout ðŸ›Žï¸
         uses: actions/checkout@v7
         with:
           persist-credentials: false
 
-      - name: Generate Sponsors 💖
+      - name: Generate Sponsors ðŸ’–
         uses: JamesIves/github-sponsors-readme-action@v1
         with:
           token: ${{ secrets.PAT }}
           file: 'README.md'
 
-      - name: Create Pull Request 🚀
+      - name: Create Pull Request ðŸš€
         id: cpr
         uses: peter-evans/create-pull-request@v8
         with:

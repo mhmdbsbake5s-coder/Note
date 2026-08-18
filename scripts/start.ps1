@@ -1,8 +1,8 @@
-<#
+﻿<#
 .NOTES
-    Author         : Chris Titus @christitustech
+    Author         : Note
     Runspace Author: @DeveloperDurp
-    GitHub         : https://github.com/ChrisTitusTech
+    GitHub         : https://github.com/mhmdbsbake5s-coder
     Version        : #{replaceme}
 #>
 
@@ -40,7 +40,7 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
     $script = if ($PSCommandPath) {
         "& { & `'$($PSCommandPath)`' $($argList -join ' ') }"
     } else {
-        "&([ScriptBlock]::Create((irm https://github.com/ChrisTitusTech/Note/releases/latest/download/Note.ps1))) $($argList -join ' ')"
+        "&([ScriptBlock]::Create((irm https://github.com/mhmdbsbake5s-coder/note/releases/latest/download/Note.ps1))) $($argList -join ' ')"
     }
 
     $powershellCmd = if (Get-Command pwsh -ErrorAction SilentlyContinue) { "pwsh" } else { "powershell" }

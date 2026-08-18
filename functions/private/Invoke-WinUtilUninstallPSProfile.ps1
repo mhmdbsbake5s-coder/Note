@@ -1,4 +1,4 @@
-function Invoke-NoteUninstallPSProfile {
+﻿function Invoke-NoteUninstallPSProfile {
 
     if (Test-Path ($Profile + ".bak")) {
         Move-Item -Path ($Profile + ".bak") -Destination $Profile
@@ -6,5 +6,5 @@ function Invoke-NoteUninstallPSProfile {
         Remove-Item -Path $Profile
     }
 
-    Write-Host "Successfully uninstalled CTT PowerShell Profile." -ForegroundColor Green
+    Write-Host "Successfully uninstalled PowerShell Profile." -ForegroundColor Green
 }

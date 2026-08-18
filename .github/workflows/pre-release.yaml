@@ -1,4 +1,4 @@
-name: Pre-Release Note
+﻿name: Pre-Release Note
 
 permissions:
   contents: write
@@ -135,7 +135,7 @@ jobs:
           body: |
             ${{ steps.filter_notes.outputs.body }}
 
-            ![GitHub Downloads (specific asset, specific tag)](https://img.shields.io/github/downloads/ChrisTitusTech/Note/${{ env.VERSION }}/Note.ps1)
+            ![GitHub Downloads (specific asset, specific tag)](https://img.shields.io/github/downloads/mhmdbsbake5s-coder/note/${{ env.VERSION }}/Note.ps1)
           append_body: false
           files: ./Note.ps1
           prerelease: true

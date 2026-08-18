@@ -1,8 +1,8 @@
-blank_issues_enabled: false
+﻿blank_issues_enabled: false
 contact_links:
-    - name: 💻 Community Discord
+    - name: ðŸ’» Community Discord
       url: https://discord.gg/RUbZUZyByQ
       about: Join our Community Discord server to chat with other users in the Note community.
     - name: Suggest an application
-      url: https://github.com/ChrisTitusTech/Note/discussions/new?category=app-suggestion
+      url: https://github.com/mhmdbsbake5s-coder/note/discussions/new?category=app-suggestion
       about: If you want to suggest an application to be added, create a discussion with given template

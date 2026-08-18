@@ -1,7 +1,7 @@
-# Note
+﻿# Note
 
-[![Version](https://img.shields.io/github/v/release/ChrisTitusTech/Note?color=%230567ff&label=Latest%20Release&style=for-the-badge)](https://github.com/ChrisTitusTech/Note/releases/latest)
-![Downloads](https://img.shields.io/github/downloads/ChrisTitusTech/Note/Note.ps1?label=Total%20Downloads&style=for-the-badge)
+[![Version](https://img.shields.io/github/v/release/mhmdbsbake5s-coder/note?color=%230567ff&label=Latest%20Release&style=for-the-badge)](https://github.com/mhmdbsbake5s-coder/note/releases/latest)
+![Downloads](https://img.shields.io/github/downloads/mhmdbsbake5s-coder/note/Note.ps1?label=Total%20Downloads&style=for-the-badge)
 [![Discord](https://dcbadge.limes.pink/api/server/https://discord.gg/RUbZUZyByQ?theme=default-inverted&style=for-the-badge)](https://discord.gg/RUbZUZyByQ)
 
 A curated compilation of Windows system tasks streamline **installs**, debloat with **tweaks**, troubleshoot with **config**, and configure **Windows updates**. Run it fresh on every new Windows install.
@@ -29,7 +29,7 @@ irm https://yourdomain.example/notedev | iex
 
 ### How to open an admin terminal
 
-- **Start menu:** Right-click Start → *Windows PowerShell (Admin)* or *Terminal (Admin)*
+- **Start menu:** Right-click Start â†’ *Windows PowerShell (Admin)* or *Terminal (Admin)*
 - **Search:** Press the `Windows key`, and type `PowerShell` or `Terminal`, then `Ctrl + Shift + Enter`
 
 ---
@@ -49,30 +49,30 @@ Apply a predefined configuration without manual selection:
 | `Advanced` | Deep tweaks for power users |
 
 To view exactly what each preset does, see:
-https://github.com/ChrisTitusTech/Note/blob/main/config/preset.json
+https://github.com/mhmdbsbake5s-coder/note/blob/main/config/preset.json
 
 ---
 
 ## Build & Develop
 
-See https://github.com/ChrisTitusTech/Note/blob/main/.github/CONTRIBUTING.md
+See https://github.com/mhmdbsbake5s-coder/note/blob/main/.github/CONTRIBUTING.md
 
 ---
 
 ## Resources
 
-- [Official Documentation](https://Note.christitus.com/)
+- [Official Documentation](https://noteshopp.mysellauth.com/)
 - [YouTube Tutorial](https://www.youtube.com/watch?v=6UQZ5oQg8XA)
 - [ChrisTitus.com Article](https://yourdomain.example/notedows-tool/)
-- [Known Issues](https://Note.christitus.com/knownissues/)
-- [Report an Issue](https://github.com/ChrisTitusTech/Note/issues)
+- [Known Issues](https://noteshopp.mysellauth.com/knownissues/)
+- [Report an Issue](https://github.com/mhmdbsbake5s-coder/note/issues)
 
 ---
 
 ## Support
 
-- Leave a ⭐ to show support!
-- Faster Dotnet Implementation for sale here: https://www.cttstore.com/windows-toolbox
+- Leave a â­ to show support!
+- Faster Dotnet Implementation for sale here: https://noteshopp.mysellauth.com
 
 ## Sponsors
 
@@ -84,6 +84,6 @@ These are the sponsors that help keep this project alive with monthly contributi
 
 ## Contributors
 
-[![Contributors](https://contrib.rocks/image?repo=ChrisTitusTech/Note)](https://github.com/ChrisTitusTech/Note/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=mhmdbsbake5s-coder/note)](https://github.com/mhmdbsbake5s-coder/note/graphs/contributors)
 
-Thanks to everyone who has contributed time and effort to this project. Keep rocking 🍻
+Thanks to everyone who has contributed time and effort to this project. Keep rocking ðŸ»

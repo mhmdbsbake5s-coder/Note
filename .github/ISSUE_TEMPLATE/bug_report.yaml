@@ -1,4 +1,4 @@
-name: "Bug report"
+﻿name: "Bug report"
 description: "Report a bug to help us identify and fix issues in the project."
 title: "[Bug Report] - <your summary here>"
 labels: ["bug"]
@@ -14,7 +14,7 @@ body:
     id: read_issues
     attributes:
       label: "I have read the known issues"
-      description: "You [better do](https://Note.christitus.com/knownissues/), cause your issue can be already there"
+      description: "You [better do](https://noteshopp.mysellauth.com/knownissues/), cause your issue can be already there"
       options:
         - label: Yes, I did
           required: true

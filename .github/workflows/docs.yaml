@@ -1,4 +1,4 @@
-name: Deploy Astro site to Pages
+﻿name: Deploy Astro site to Pages
 
 on:
   push:
@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   build:
-    if: github.repository == 'ChrisTitusTech/Note'
+    if: github.repository == 'mhmdbsbake5s-coder/note'
     runs-on: ubuntu-latest
     env:
       TZ: America/Chicago
@@ -36,7 +36,7 @@ jobs:
           path: docs
 
   deploy:
-    if: github.repository == 'ChrisTitusTech/Note'
+    if: github.repository == 'mhmdbsbake5s-coder/note'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

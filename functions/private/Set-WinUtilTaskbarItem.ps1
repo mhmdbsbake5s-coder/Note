@@ -1,4 +1,4 @@
-function Set-NoteTaskbaritem {
+﻿function Set-NoteTaskbaritem {
     <#
 
     .SYNOPSIS
@@ -21,7 +21,7 @@ function Set-NoteTaskbaritem {
 
     .PARAMETER overlay
         Overlay icon to display on the taskbar item, there are the presets 'None', 'logo' and 'checkmark' or you can specify a path/link to an image file.
-        CTT logo preset:
+        logo preset:
         - Set-NoteTaskbaritem -overlay "logo"
         Checkmark preset:
         - Set-NoteTaskbaritem -overlay "checkmark"

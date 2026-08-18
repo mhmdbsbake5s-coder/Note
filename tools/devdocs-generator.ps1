@@ -1,4 +1,4 @@
-<#
+﻿<#
     .DESCRIPTION
     Generates Astro/Starlight markdown docs from config/tweaks.json and config/feature.json.
     Run by the GitHub Actions docs workflow before the Astro build.
@@ -98,7 +98,7 @@ function Get-GeneratedFromNote {
         [string]$SourceRelativePath
     )
 
-    $githubUrl = "https://github.com/ChrisTitusTech/Note/blob/main/$SourceRelativePath"
+    $githubUrl = "https://github.com/mhmdbsbake5s-coder/note/blob/main/$SourceRelativePath"
     $note  = ":::note`r`n"
     $note += "This page is generated from [``$SourceRelativePath``]($githubUrl). Do not edit this page directly.`r`n"
     $note += ":::`r`n`r`n"
@@ -261,7 +261,7 @@ $publicFunctionsDir  = "$repoRoot/functions/public"
 $privateFunctionsDir = "$repoRoot/functions/private"
 
 $itemnametocut = 'WPF(Note|Toggle|Features?|Tweaks?|Panel|Fix(es)?)?'
-$baseUrl       = "https://Note.christitus.com"
+$baseUrl       = "https://noteshopp.mysellauth.com"
 
 # Categories with generated docs
 $documentedCategories = @(

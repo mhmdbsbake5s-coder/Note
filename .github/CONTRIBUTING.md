@@ -1,4 +1,4 @@
-# How to Contribute?
+﻿# How to Contribute?
 
 ## Testing
 
@@ -66,7 +66,7 @@ graph TD
 > This is a diagram to guide you through the process. It may vary depending on the type of change you're making.
 
 ### Fork the Repo
-* Fork the Note Repository [here](https://github.com/ChrisTitusTech/Note) to create a copy that will be available in your repository list.
+* Fork the Note Repository [here](https://github.com/mhmdbsbake5s-coder/note) to create a copy that will be available in your repository list.
 
 ![Fork Image](/docs/src/assets/contributing/Fork-Button-Dark.png)
 
